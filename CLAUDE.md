@@ -87,3 +87,20 @@ living here. No CI in one repo can catch that.
 - TDD is mandatory for engine logic: failing scenario tests first, pure JVM.
 - Never mention closed-source predecessor projects in this repo, its docs, or commits.
 - Commits happen when the user asks; suggest messages, don't auto-commit.
+- **Merge a pull request with a merge commit — `gh pr merge --merge`, never `--squash`.**
+  Squashing is not a history preference here. GitHub *re-authors* a squash commit to the
+  account that pressed the button, so a commit made locally under the wrong `user.email`
+  lands on the default branch looking correct. That is not hypothetical: it was found in
+  `robertblust.github.io`, where the local commit was authored `rob@likemagic.tech` and the
+  commit that reached `main` read `robert.blust@flatland.ch`, with nothing anywhere saying
+  so. A merge commit preserves the author it was given, which is the point — a wrong
+  identity surfaces instead of being laundered.
+- **The author is `robert.blust@flatland.ch`, and nothing on GitHub enforces it.** The
+  ruleset rule that would — `commit_author_email_pattern`, a metadata restriction — is
+  rejected on this plan. Tested, not assumed: an otherwise identical ruleset carrying a
+  `deletion` rule was accepted in the same breath. So the identity comes from
+  `~/.gitconfig`, where three `includeIf` blocks key it to `~/git/robertblust/`,
+  `~/git/guestgraph/` and `~/git/companygraph/` and point at `~/.gitconfig-flatland`. The
+  global default stays `rob@likemagic.tech`, which is right for `~/git/likemagic-tech` and
+  `~/git/3ap-ag`. A clone made outside those three directories gets the global default and
+  no warning, so check `git config user.email` before the first commit in a fresh clone.
