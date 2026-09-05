@@ -5,7 +5,7 @@ candidate is scored, and what happens to the score. It is written for stewards r
 review entry, operators tuning thresholds, and contributors adding a matcher.
 
 **Keyed by matcher version.** Every merge event permanently records the `matcherName` that
-decided it, and merge events are never deleted. So this document is organised by matcher
+decided it, and merge events are never deleted. So this document is organized by matcher
 version and is append-only: when `fuzzy-rules-v2` lands, it gets its own section and the
 `fuzzy-rules-v1` section stays, because events from 2026 must remain interpretable in 2030.
 
@@ -122,7 +122,7 @@ score         = min(score, 0.999)                       # never certain
 
 Four rules are doing real work here, and each exists to prevent a specific wrong merge:
 
-- **Renormalisation over present signals.** Two records that agree on name and birthdate and
+- **Renormalization over present signals.** Two records that agree on name and birthdate and
   have nothing else are not punished for the fields nobody supplied.
 - **The coverage damper.** But they are not treated as *certain* either. Agreement on two
   signals out of five is good evidence, not proof, so the score is scaled by how much of the
@@ -201,7 +201,7 @@ the five signals were unobserved.
 
 Not built. The intent is three-tier stewardship: rules decide the clear cases, an agent decides
 high-confidence reviews over MCP tools mapping 1:1 to the REST surface, and ambiguous ones
-escalate to a human with a summarised recommendation.
+escalate to a human with a summarized recommendation.
 
 Structurally an agent is just another imperfect matcher, gated by the same machinery. Its
 prerequisites are tracked in [roadmap-notes.md](roadmap-notes.md) under R5-1; actor identity
@@ -222,7 +222,7 @@ unchanged. The constitution pre-authorises a sidecar (e.g. Python/ONNX) behind t
 
 The more interesting part: **every decision already persists its full feature vector**, and every
 review carries a `CONFIRMED`/`REJECTED` outcome. So stewards doing ordinary work are emitting
-labelled training data — feature vector plus human verdict — on the tenant's own data. Nobody
+labeled training data — feature vector plus human verdict — on the tenant's own data. Nobody
 has built that pipeline, but the data is accruing in the right shape.
 
 ---
@@ -238,6 +238,6 @@ A change to any of the first three is a **new matcher version**, not an edit: bu
 add a section here, and leave the old one. Existing merge events name the matcher that decided
 them, and they must stay readable.
 
-Scenario tests are the specification of this behaviour — `FuzzyScenarioTest` and
+Scenario tests are the specification of this behavior — `FuzzyScenarioTest` and
 `ResolutionScenarioTest` run pure-JVM against an in-memory graph. Per the constitution,
 resolution-engine changes are test-first: the failing scenario comes before the rule.

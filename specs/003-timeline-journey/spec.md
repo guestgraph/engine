@@ -71,7 +71,7 @@ With business-object associations, the newest version's roster is the answer: ve
 
 ### User Story 3 - Every Decision Names Who Made It (Priority: P3)
 
-The audit trail records what was decided, which matcher decided it, and how confident it was — but not *who*. The credential identifies a tenant, not a person. A steward reviewing last month's merges cannot tell an automated decision from a colleague's judgement call, and the planned three-tier stewardship model (rules → agent → human) has nowhere to record that an agent, rather than a human, confirmed a match.
+The audit trail records what was decided, which matcher decided it, and how confident it was — but not *who*. The credential identifies a tenant, not a person. A steward reviewing last month's merges cannot tell an automated decision from a colleague's judgment call, and the planned three-tier stewardship model (rules → agent → human) has nowhere to record that an agent, rather than a human, confirmed a match.
 
 Every decision this slice touches — automatic resolution, review confirm and reject, unmerge, and do-not-merge rule creation and lifting — records an actor: whether it was the system acting on its rules, a named human steward, or a named agent, and which one. Explain surfaces it alongside the matcher and confidence already there.
 
@@ -126,7 +126,7 @@ Roster-complete emission amends the roadmap's per-person emit-on-change rule, wh
 - Two observations of the same object, role, and position carry the same version but different persons: one of them is a duplicate by the ingest key and is absorbed; the stored one stands.
 - Two persons on the same version resolve to the same guest (the same human entered twice): that guest holds the booking once for that role, not twice.
 - A business object whose persons all resolve to the same guest (a booker who is also the primary guest): the guest sees two entries for the same object, one per role, not one merged entry.
-- A reservation is cancelled at the source: the status travels in the payload and is visible on the entry; the resolution engine attaches no meaning to it in this slice.
+- A reservation is canceled at the source: the status travels in the payload and is visible on the entry; the resolution engine attaches no meaning to it in this slice.
 - An observation is ingested with object identity for an object whose earlier observations had none: the earlier records stay outside the timeline; only observations carrying object identity form associations.
 - A booking whose primary guest moves from Anna to Bruno and back again: Anna's timeline shows it current again, and Bruno's shows it as no longer on the booking — the marker describes the association's present state, not a permanent scar.
 - A guest leaves a booking with nobody taking their role, or leaves a role that several people share (a booking that drops one of two additional guests): their entry is marked as no longer on the booking and names no successor. Naming whoever else holds the role would fabricate a handover that never happened — the very failure positional slots produce.
@@ -195,12 +195,12 @@ Roster-complete emission amends the roadmap's per-person emit-on-change rule, wh
 - **SC-005**: Every decision recorded after this slice ships names its actor; the share of decisions recorded with an unknown actor is zero.
 - **SC-006**: The first page of the timeline returns in under 1 second for a guest holding 500 associations.
 - **SC-007**: Replaying a full backfill of an unchanged period produces zero new observations, zero timeline changes, and zero new merge events.
-- **SC-008**: Submitters that send no business-object identity observe no change in resolution behaviour: every slice-1 and slice-2 resolution, matching, and ingest test passes unmodified. The single deliberate exception is paging — the review-queue and do-not-merge-rule listings move from offsets to cursors so the API has one paging idiom, so those two API tests change with them.
+- **SC-008**: Submitters that send no business-object identity observe no change in resolution behavior: every slice-1 and slice-2 resolution, matching, and ingest test passes unmodified. The single deliberate exception is paging — the review-queue and do-not-merge-rule listings move from offsets to cursors so the API has one paging idiom, so those two API tests change with them.
 
 ## Assumptions
 
 - Reservations are the only business-object type this slice must support end to end; the model treats the type as data rather than a fixed list, so further types need no redesign.
-- Object-level status such as cancelled or checked out travels in the payload and is displayed, but the resolution engine attaches no meaning to it in this slice.
+- Object-level status such as canceled or checked out travels in the payload and is displayed, but the resolution engine attaches no meaning to it in this slice.
 - Applying the emission rule is the submitter's responsibility — slice 4 builds the connectors that do it. This slice defines the contract and the duplicate absorption that makes retries safe regardless.
 - Roadmap note R4-1 is amended by this slice: its per-person emit-on-change rule becomes roster-complete emission, because the version-roster model requires each emitted version to be a complete statement of who is on the object. The roadmap note must be updated to say so when it is marked consumed.
 - Existing endpoints keep their contracts; the timeline is an addition, and business-object identity on ingest is optional. A submitter upgraded to send it sees new capability, not new obligations.

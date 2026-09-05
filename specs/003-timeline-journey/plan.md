@@ -211,7 +211,7 @@ Three choices worth naming even though none is a violation:
 - **Two queries plus in-memory derivation, rather than one SQL statement.** Slightly more code
   than a correlated-subquery query would be, chosen because it keeps the derivation rules in one
   unit-testable place instead of splitting them between SQL and Java, where they would drift.
-- **`source_system_id` denormalised onto `record_object`.** A deliberate duplication so the roster
+- **`source_system_id` denormalized onto `record_object`.** A deliberate duplication so the roster
   lookup is a single-table index scan; the value is copied from the parent record at insert and,
   like the rest of the row, never updated.
 - **Replacing `negative_match_rule`'s unique constraint with a partial index** (research R8). The

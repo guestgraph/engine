@@ -1,0 +1,8 @@
+name: conventions
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  conventions:
+    uses: robertblust/conventions/.github/workflows/check.yml@v1.3.2

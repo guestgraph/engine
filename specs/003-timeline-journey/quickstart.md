@@ -28,7 +28,7 @@ Expected green, including the new suites:
   unattributed rendering of pre-slice-3 events, rule lift preserving both actors (SC-005)
 - `integration/SourceObjectApiTest` — roster + full observation history across a reassignment (SC-004)
 - slice-1 and slice-2 suites unchanged and green — submitters sending no `sourceObject` see no
-  behavioural change (SC-008)
+  behavioral change (SC-008)
 - `contract/OpenApiConformanceTest` — now unions three feature contracts with no test change
 
 ## End-to-end smoke walk (maps to the spec's user stories)
