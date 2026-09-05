@@ -134,7 +134,7 @@ removing one of two additional guests does not report the other as their replace
 ```
 
 Code conventions (imports over inline FQNs, guardrail layout, known pitfalls) are
-documented in [`CLAUDE.md`](CLAUDE.md) and enforced by PMD (`config/pmd-ruleset.xml`),
+documented in [`AGENTS.md`](AGENTS.md) and enforced by PMD (`config/pmd-ruleset.xml`),
 Spotless, and ArchUnit in `verify`.
 
 Note for Eclipse/Spring Tools users: point the IDE build output away from `target/classes`

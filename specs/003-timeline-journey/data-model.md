@@ -18,7 +18,7 @@ lawful erasure.
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL — Constitution I |
 | source_record_id | uuid | NOT NULL, UNIQUE, FK → `source_record` (1:1 optional) |
-| source_system_id | uuid | NOT NULL, FK → `source_system` — denormalised from the parent so the roster lookup is a single-table index scan; the object namespace includes it |
+| source_system_id | uuid | NOT NULL, FK → `source_system` — denormalized from the parent so the roster lookup is a single-table index scan; the object namespace includes it |
 | object_type | text | NOT NULL — `reservation` first; a value, not an enum, so further types need no migration |
 | object_id | text | NOT NULL — the source's own id for the object |
 | object_role | text | NOT NULL CHECK IN (`PRIMARY_GUEST`, `ADDITIONAL_GUEST`, `BOOKER`) |

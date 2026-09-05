@@ -1,0 +1,141 @@
+#!/bin/sh
+# conventions-sync — vendor the family's shared conventions at a pinned release, and say
+# whether the copy still matches it.
+#
+#   sh conventions/conventions-sync sync    write conventions/ and the AGENTS.md block from the pin
+#   sh conventions/conventions-sync check   exit 1 with one ✗ line per thing that differs
+#
+# The pin is conventions.json in the member's root: {"repo": "robertblust/conventions", "tag": "v1.0.0"}.
+# Files come from https://raw.githubusercontent.com/<repo>/<tag>; CONVENTIONS_SOURCE overrides
+# that with another base URL or a local directory, which is how the tests run offline.
+# Needs sh, curl, awk, sed, and shasum or sha256sum. Nothing else.
+set -eu
+
+usage() { echo "usage: sh conventions/conventions-sync sync|check" >&2; exit 2; }
+[ $# -eq 1 ] || usage
+cmd=$1
+case $cmd in sync|check) ;; *) usage ;; esac
+
+PIN=conventions.json
+DIR=conventions
+FILES="WRITING.md WORKING.md REPOSITORIES.md AGENTS.md conventions-sync conventions-check"
+OPEN_RE='^<!-- conventions · v[^ ]* -->$'
+CLOSE='<!-- end conventions -->'
+
+[ -f "$PIN" ] || { echo "✗ conventions: no $PIN here — a member names the release it follows" >&2; exit 1; }
+pin() { sed -n "s/.*\"$1\" *: *\"\([^\"]*\)\".*/\1/p" "$PIN" | head -1; }
+REPO=$(pin repo)
+TAG=$(pin tag)
+if [ -z "$REPO" ] || [ -z "$TAG" ]; then echo "✗ conventions: $PIN needs \"repo\" and \"tag\"" >&2; exit 1; fi
+SOURCE=${CONVENTIONS_SOURCE:-https://raw.githubusercontent.com/$REPO/$TAG}
+
+sha() {
+  if command -v sha256sum > /dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
+  else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+
+# fetch <path in source> <destination>
+fetch() {
+  case "$SOURCE" in
+    http://*|https://*) curl -fsSL "$SOURCE/$1" -o "$2" || { echo "✗ conventions: could not fetch $SOURCE/$1" >&2; exit 1; } ;;
+    *) cp "$SOURCE/$1" "$2" ;;
+  esac
+}
+
+# block_of <file>: the fenced block, markers included, with its version rewritten to the pin.
+# Comparing two blocks through this makes the version line irrelevant, which is what lets
+# the source carry whatever release number it was last tagged at.
+block_of() {
+  awk -v tag="$TAG" -v open_re="$OPEN_RE" -v endm="$CLOSE" '
+    !inblock && $0 ~ open_re { inblock = 1; print "<!-- conventions · " tag " -->"; next }
+    inblock && $0 == endm  { print; exit }
+    inblock                 { print }' "$1"
+}
+
+# write_block: replace the block in AGENTS.md, or put one at the top of a file that has none.
+write_block() {
+  new=$(block_of "$DIR/AGENTS.md")
+  [ -n "$new" ] || { echo "✗ conventions: $DIR/AGENTS.md carries no conventions block" >&2; exit 1; }
+  if [ -f AGENTS.md ] && grep -q "$OPEN_RE" AGENTS.md; then
+    # Line numbers rather than an awk variable: a multi-line -v value is rejected by the awk
+    # macOS ships, and the block is many lines.
+    start=$(grep -n "$OPEN_RE" AGENTS.md | head -1 | cut -d: -f1)
+    end=$(awk -v s="$start" -v endm="$CLOSE" 'NR > s && $0 == endm { print NR; exit }' AGENTS.md)
+    [ -n "$end" ] || { echo "✗ conventions: AGENTS.md opens a conventions block and never closes it" >&2; exit 1; }
+    { [ "$start" -gt 1 ] && head -n "$((start - 1))" AGENTS.md; printf '%s\n' "$new"; tail -n "+$((end + 1))" AGENTS.md; } > AGENTS.md.tmp
+  else
+    { printf '%s\n\n' "$new"; if [ -f AGENTS.md ]; then cat AGENTS.md; fi; } > AGENTS.md.tmp
+  fi
+  mv AGENTS.md.tmp AGENTS.md
+}
+
+sync() {
+  mkdir -p "$DIR"
+  # A member running an older conventions-sync has an older FILES list, missing whatever file
+  # a later release added; that stale list would fetch this script over itself and stop, never
+  # picking up the new file. So the current release of conventions-sync is fetched first; when
+  # it differs from what is on disk, it is moved into place and re-run once, guarded against a
+  # second re-exec, so the rest of the sync happens under the release's own FILES list.
+  if [ "${CONVENTIONS_REEXEC:-}" != "1" ]; then
+    fetch "$DIR/conventions-sync" "$DIR/conventions-sync.new"
+    if cmp -s "$DIR/conventions-sync.new" "$DIR/conventions-sync" 2> /dev/null; then
+      rm -f "$DIR/conventions-sync.new"
+    else
+      mv "$DIR/conventions-sync.new" "$DIR/conventions-sync"
+      chmod +x "$DIR/conventions-sync"
+      CONVENTIONS_REEXEC=1 exec sh "$DIR/conventions-sync" sync
+    fi
+  fi
+  for f in $FILES; do
+    case $f in
+      AGENTS.md) fetch "AGENTS.md" "$DIR/$f.new" ;;
+      *)         fetch "$DIR/$f"   "$DIR/$f.new" ;;
+    esac
+    mv "$DIR/$f.new" "$DIR/$f"
+  done
+  chmod +x "$DIR/conventions-sync"
+  chmod +x "$DIR/conventions-check"
+  write_block
+  {
+    printf '{\n  "repo": "%s",\n  "tag": "%s",\n  "files": {\n' "$REPO" "$TAG"
+    first=1
+    for f in $FILES; do
+      [ "$first" -eq 1 ] || printf ',\n'
+      first=0
+      printf '    "%s/%s": "sha256:%s"' "$DIR" "$f" "$(sha "$DIR/$f")"
+    done
+    printf '\n  }\n}\n'
+  } > "$DIR/manifest.json"
+  echo "✓ conventions: $DIR/ and the AGENTS.md block are at $REPO@$TAG"
+}
+
+check() {
+  fail=0
+  [ -f "$DIR/manifest.json" ] || { echo "✗ conventions: no $DIR/manifest.json — run sync" >&2; exit 1; }
+  mtag=$(sed -n 's/.*"tag" *: *"\([^"]*\)".*/\1/p' "$DIR/manifest.json" | head -1)
+  if [ "$mtag" != "$TAG" ]; then
+    echo "✗ conventions: $PIN names $TAG, the copy is $mtag — run sync"; fail=1
+  fi
+  for f in $FILES; do
+    want=$(sed -n "s|.*\"$DIR/$f\" *: *\"sha256:\([0-9a-f]*\)\".*|\1|p" "$DIR/manifest.json")
+    if [ ! -f "$DIR/$f" ]; then
+      echo "✗ conventions: $DIR/$f is missing — run sync"; fail=1
+    elif [ "$(sha "$DIR/$f")" != "$want" ]; then
+      echo "✗ conventions: $DIR/$f differs from $REPO@$TAG — edit it there, not here, or run sync"; fail=1
+    fi
+  done
+  have=""
+  [ -f AGENTS.md ] && have=$(block_of AGENTS.md)
+  want=$(block_of "$DIR/AGENTS.md")
+  if [ "$have" != "$want" ]; then
+    echo "✗ conventions: the block in AGENTS.md is not the release's — run sync"; fail=1
+  fi
+  [ "$fail" -eq 0 ] && echo "✓ conventions: $DIR/ and the AGENTS.md block match $REPO@$TAG"
+  exit "$fail"
+}
+
+case $cmd in
+  sync)  sync ;;
+  check) check ;;
+  *)     usage ;;
+esac
