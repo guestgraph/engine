@@ -27,7 +27,7 @@ Probabilistic matching works in two stages, because they need different kinds of
 **Blocking** finds candidates that share no identifier at all — a database index can only answer
 *equal*, so name phonetics collapse spelling variants onto one key. **Scoring** then grades each
 candidate on a weighted feature vector — name, birthdate, phone, email, address — damped when
-few signals were observed and heavily penalised when birthdates conflict, because different
+few signals were observed and heavily penalized when birthdates conflict, because different
 birthdates are evidence of *different people* and that outweighs a strong name match.
 
 **Automatic fuzzy merging ships off.** Out of the box no fuzzy score can reach the auto-merge

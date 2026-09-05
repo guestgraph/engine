@@ -218,7 +218,7 @@ implementation: there is no model, no training pipeline, and no ML dependency in
 What makes it feasible later is that it needs no redesign. `ResolutionStrategy` is a single
 method — *candidates in, scored decisions out* — and `fuzzy-rules-v1` is already its second
 implementation; a model would be the third, with bands, review queue, explain, and unmerge
-unchanged. The constitution pre-authorises a sidecar (e.g. Python/ONNX) behind that contract.
+unchanged. The constitution pre-authorizes a sidecar (e.g. Python/ONNX) behind that contract.
 
 The more interesting part: **every decision already persists its full feature vector**, and every
 review carries a `CONFIRMED`/`REJECTED` outcome. So stewards doing ordinary work are emitting

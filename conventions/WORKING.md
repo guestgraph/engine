@@ -40,9 +40,11 @@ and the merge commit carries that address to the default branch unchanged. That 
 rule, and it holds for a contributor from outside exactly as it holds for the owner; nothing
 here asks a contributor to be anyone but themselves.
 
-Nothing on GitHub enforces an address, and nothing should: the ruleset rule that could, an
-author-email pattern, would shut out every outside contributor. So each person's identity is
-their own `git config` to keep. The owner's is `robert.blust@flatland.ch` in all three
+Nothing on GitHub enforces an address, and nothing should. The ruleset rule that could,
+`commit_author_email_pattern`, is not available on this plan — a ruleset carrying it is
+rejected while an otherwise identical one carrying a `deletion` rule is accepted, tested rather
+than assumed — and it would shut out every outside contributor if it were. So each person's
+identity is their own `git config` to keep. The owner's is `robert.blust@flatland.ch` in all three
 organizations, keyed by `includeIf` blocks in `~/.gitconfig` to the directories
 `~/git/robertblust/`, `~/git/guestgraph/` and `~/git/companygraph/`; a clone made anywhere
 else takes the global default and gives no warning. Before the first commit in a fresh clone,

@@ -7,28 +7,28 @@ Clarifications section. This document resolves the *technical* unknowns those an
 
 ---
 
-## R1 — Derived on read, or materialised at ingest?
+## R1 — Derived on read, or materialized at ingest?
 
 **Decision**: Associations are derived on read. Nothing about an association is persisted.
 
 **Rationale**: FR-010 requires association state to be recomputable from the immutable observations
 and their resolution links, and the cheapest way to guarantee that is to have no other state at
-all. A materialised table would need maintaining on four separate triggers — ingest, merge,
+all. A materialized table would need maintaining on four separate triggers — ingest, merge,
 unmerge, and review decisions — each an opportunity for the stored view to drift from the records
 it claims to summarize. Derivation also makes FR-010a (partial roster during delivery) free: a
 roster read mid-delivery simply reflects the observations that have landed, and self-heals with no
 convergence logic, because nothing was written down to be wrong.
 
 SC-006 (first page under 1 s at 500 associations) is the constraint that could have forced
-materialisation. Sizing: 500 associations over objects averaging ~5 versions each is ~2,500
+materialization. Sizing: 500 associations over objects averaging ~5 versions each is ~2,500
 observation rows, fetched by two indexed queries. That is comfortably inside the budget.
 
 **Alternatives considered**:
 
-- *Materialised `guest_association` table maintained at ingest and on every graph mutation.*
+- *Materialized `guest_association` table maintained at ingest and on every graph mutation.*
   Rejected: four maintenance points, drift risk against Constitution II's "derived and
   recomputable" stance, and unnecessary at this scale. Recorded as a scale lever below.
-- *Materialised `object_current_version` pointer only (a much smaller table).* Rejected for now
+- *Materialized `object_current_version` pointer only (a much smaller table).* Rejected for now
   for the same reason — it is the natural first step if profiling ever demands one, and it can be
   added without changing the API.
 
@@ -133,7 +133,7 @@ ambient state in the engine. The credential supplies the type; the request may n
 directly; a `ThreadLocal` actor would either leak request scope into that purity or default
 silently to something wrong under test. An explicit parameter makes the attribution visible at
 every call site and impossible to forget. Binding type to the credential rather than the request
-is the trust boundary the spec settled on: the header names a person, it authorises nothing.
+is the trust boundary the spec settled on: the header names a person, it authorizes nothing.
 
 **Alternatives considered**:
 
@@ -217,7 +217,7 @@ depends on it; it would not be acceptable after tagging.
   split, the precise action the actor data exists to gate later. Recording the creator but not the
   lifter would hollow out the feature's purpose.
 - *Record lifts as a new `merge_event` kind.* Rejected: `merge_event.guest_id` is NOT NULL while a
-  rule spans a record *pair*, so the event would need a synthesised guest id and would surface in
+  rule spans a record *pair*, so the event would need a synthesized guest id and would surface in
   one arbitrary guest's explain chain.
 - *A separate `negative_rule_lift` audit table.* Rejected: a second table for one row's lifecycle,
   and the gate would still need to consult it on every decision.
