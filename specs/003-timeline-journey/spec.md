@@ -130,7 +130,7 @@ Roster-complete emission amends the roadmap's per-person emit-on-change rule, wh
 - An observation is ingested with object identity for an object whose earlier observations had none: the earlier records stay outside the timeline; only observations carrying object identity form associations.
 - A booking whose primary guest moves from Anna to Bruno and back again: Anna's timeline shows it current again, and Bruno's shows it as no longer on the booking — the marker describes the association's present state, not a permanent scar.
 - A guest leaves a booking with nobody taking their role, or leaves a role that several people share (a booking that drops one of two additional guests): their entry is marked as no longer on the booking and names no successor. Naming whoever else holds the role would fabricate a handover that never happened — the very failure positional slots produce.
-- The per-request individual identifier is caller-asserted and unverified: it attributes a decision to a named person, it never authorises anything. Only the credential-bound actor type carries trust.
+- The per-request individual identifier is caller-asserted and unverified: it attributes a decision to a named person, it never authorizes anything. Only the credential-bound actor type carries trust.
 - The same pair is split, lifted, and split again: the lifted rule stays as it is and a second rule is created — rules are a record of decisions taken, so a lift is a stamp on the old one rather than room reclaimed for a new one.
 - A decision arrives from a credential whose actor registration was changed after earlier decisions: past events keep the actor recorded at decision time — the audit trail is append-only.
 

@@ -192,7 +192,7 @@ the ArchUnit rules (`@Query`-only repositories, tenant-scoped methods, JPA confi
 
 | # | Decision | Where |
 |---|---|---|
-| R1 | Associations derived on read, never materialised | [research.md](research.md) |
+| R1 | Associations derived on read, never materialized | [research.md](research.md) |
 | R2 | `record_object` companion table, not columns on `source_record` | [research.md](research.md) |
 | R3 | Two tenant-scoped queries + pure-JVM `AssociationDeriver` | [research.md](research.md) |
 | R4 | Actor as explicit parameter; credential type is the ceiling | [research.md](research.md) |
