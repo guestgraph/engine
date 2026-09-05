@@ -1,0 +1,88 @@
+#!/bin/sh
+# conventions-check — hold a member's own Markdown to WRITING.md: American English and the
+# spaced em-dash. Fenced code and inline code are not prose and are dropped before the scan;
+# folders under "exclude" in conventions.json are someone else's prose and are not read.
+#
+#   sh conventions/conventions-check     exit 1 with one ✗ line per hit, file:line: word
+#
+# Needs sh, awk, sed, grep and find. Nothing else. CONVENTIONS_ROOT overrides the directory
+# scanned, which is how the tests point it at a fixture.
+set -eu
+
+ROOT=${CONVENTIONS_ROOT:-.}
+PIN=$ROOT/conventions.json
+
+# Stems, not words, so derived forms are caught; a stem is anchored wherever an American word
+# contains it, and the list is edited when one is found. This is the list: WRITING.md forbids
+# British spelling without quoting one. A stem that is also the start of an American word —
+# fulfil in fulfill, enrol in enroll, grey in greyhound, analyse in analyses — ends with
+# ([^a-z]|$) instead of \b, which BSD and GNU awk read alike; \b does not travel. organism,
+# optimist, de minimis and initialism are American, so those four stems are anchored the same
+# way but on the letter that follows, since British and American diverge right there. Case is
+# folded by lowering the line before matching, not by the pattern, since IGNORECASE is a GNU
+# extension awk on macOS does not have.
+STEMS='organis(e|a|i)|colour|behaviour|centre|licence|recognis|modelling|catalogue|grey([^a-z]|$)|judgement|artefact|whilst|amongst|favour|honour|analys(e|ed|ing)([^a-z]|$)|optimis(e|a|i)|normalis|serialis|initialis(e|a|i)|visualis|minimis(e|a|i)|prioritis|customis|summaris|categoris|parameteris|rasteris|unrecognis|cancelled|travelled|labelled|aluminium|instalment|neighbour|totalled|defence|offence|programmes?([^a-z]|$)|fulfil([^a-z]|$)|enrol([^a-z]|$)|skilful|ageing|cosy([^a-z]|$)|focuss|cheque([^a-z]|$)|tyre([^a-z]|$)|kerb([^a-z]|$)|storey|mould|plough|draught|sceptic'
+DASH='[^ ]—|—[^ ]'
+
+# The exclude list: every quoted string inside the "exclude": [ ... ] array, one per line, so
+# an entry that carries a space stays one entry through the sed and the loop below.
+excludes=""
+if [ -f "$PIN" ]; then
+  excludes=$(tr -d '\n' < "$PIN" | sed -n 's/.*"exclude" *: *\[\([^]]*\)\].*/\1/p' | tr ',' '\n' | sed -n 's/^[^"]*"\([^"]*\)".*/\1/p')
+fi
+
+# find, with .git and every excluded prefix pruned. The prune list is built as arguments; IFS
+# is newline-only for the loop, so an entry with a space in it is one word, not two.
+set -- "$ROOT" -path "$ROOT/.git" -prune -o
+oldifs=$IFS
+IFS='
+'
+for e in $excludes; do
+  set -- "$@" -path "$ROOT/${e%/}" -prune -o
+done
+IFS=$oldifs
+set -- "$@" -name '*.md' -type f -print
+
+# The files the walk visits. Listed once so an empty result — a root that does not exist
+# included, since find then errors and prints nothing on stdout — is caught before the scan
+# reports a bare ✓ for a tree it never opened.
+files=$(find "$@" 2> /dev/null | LC_ALL=C sort || true)
+if [ -z "$files" ]; then
+  echo "✗ conventions: no Markdown file was scanned under $ROOT" >&2
+  exit 1
+fi
+
+hits=$(printf '%s\n' "$files" | while IFS= read -r f; do
+  # Drop fenced code and inline code, then scan what is left of each line for a stem or a
+  # closed dash; the match is against the line's own content, never the path awk read it from.
+  # A fence left open at end of file is a hit of its own, not a silent skip of the rest.
+  awk -v stems="$STEMS" -v dash="$DASH" -v root="$ROOT" '
+    function relpath(  p, prefix) {
+      p = FILENAME
+      prefix = root "/"
+      if (index(p, prefix) == 1) p = substr(p, length(prefix) + 1)
+      return p
+    }
+    /^```/ { fence = !fence; next }
+    fence  { next }
+    {
+      line = $0
+      sub(/\r$/, "", line)
+      gsub(/`[^`]*`/, "", line)
+      low = tolower(line)
+      if (match(low, stems)) {
+        w = substr(low, RSTART, RLENGTH)
+        sub(/[^a-z]$/, "", w)
+        printf "✗ %s:%d: %s\n", relpath(), FNR, w
+      }
+      if (match(line, dash)) printf "✗ %s:%d: closed em-dash\n", relpath(), FNR
+    }
+    END { if (fence) printf "✗ %s:%d: unclosed code fence\n", relpath(), FNR }
+  ' "$f"
+done)
+
+if [ -n "$hits" ]; then
+  echo "$hits"
+  exit 1
+fi
+echo "✓ every Markdown file follows WRITING.md"

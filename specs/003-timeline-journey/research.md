@@ -15,7 +15,7 @@ Clarifications section. This document resolves the *technical* unknowns those an
 and their resolution links, and the cheapest way to guarantee that is to have no other state at
 all. A materialised table would need maintaining on four separate triggers — ingest, merge,
 unmerge, and review decisions — each an opportunity for the stored view to drift from the records
-it claims to summarise. Derivation also makes FR-010a (partial roster during delivery) free: a
+it claims to summarize. Derivation also makes FR-010a (partial roster during delivery) free: a
 roster read mid-delivery simply reflects the observations that have landed, and self-heals with no
 convergence logic, because nothing was written down to be wrong.
 
@@ -61,7 +61,7 @@ ingest facts about a record that not every record has. Following the precedent k
 nullable columns there would mean extending that trigger's explicit column list, where an omission
 silently makes a field mutable and violates Constitution II without any test noticing.
 
-The table denormalises `source_system_id` from its parent record. That is deliberate: the object
+The table denormalizes `source_system_id` from its parent record. That is deliberate: the object
 namespace is (tenant, source system, object type, object id), so carrying the source system makes
 the current-roster lookup a single-table index scan instead of a join back to `source_record`.
 
@@ -230,7 +230,7 @@ depends on it; it would not be acceptable after tagging.
 keyset cursor the timeline uses, sharing one encoder (`api/Cursor.java`). Done in this slice, not
 deferred.
 
-**Rationale**: Introducing the timeline with a cursor while two neighbouring endpoints expose
+**Rationale**: Introducing the timeline with a cursor while two neighboring endpoints expose
 offsets would leave one versioned API with two paging idioms, and the longer that stands the more
 expensive it is to undo — offsets are a contract commitment, and a released consumer paging by
 offset cannot be migrated without a version bump. Nothing is released, so the change is free now
@@ -244,7 +244,7 @@ decided during a traversal shift the remaining rows and the client silently skip
 paging does not.
 
 **Cost**: this modifies two earlier slices' endpoints, contracts, and API test suites, so SC-008's
-"slice-1 and slice-2 suites pass unmodified" is narrowed to resolution behaviour with paging named
+"slice-1 and slice-2 suites pass unmodified" is narrowed to resolution behavior with paging named
 as the deliberate exception. `specs/001-.../contracts/openapi.yaml` and
 `specs/002-.../contracts/openapi.yaml` are edited by the migration tasks in lockstep with the
 controllers, not in advance — the conformance gate checks operations rather than parameters, so
