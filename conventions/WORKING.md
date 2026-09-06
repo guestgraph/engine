@@ -12,11 +12,13 @@ suite, and a ruleset that forbids a push is the only kind that survives a hurrie
 A branch is deleted once its pull request is merged. The merge commit is its record; a branch
 left standing is a question every reader of the branch list has to answer again.
 
-An agent commits when the owner asks, and not on its own initiative. It proposes the message
-in the git register of `WRITING.md`. The author of the commit is the person. A tool that
+An agent commits when the owner asks, and not on its own initiative. It proposes the message in
+the git register of `WRITING.md`. The author of the commit is the person. A tool that
 co-authored the change is named in a `Co-Authored-By` trailer, whichever tool it was, so the
 history says who and what wrote it. “Commit and open the pull request” is a request to do
-exactly that; it is not approval to merge.
+exactly that; it is not approval to merge. A role invoked as a subagent, the writer of
+`WRITER.md` or the translator of `TRANSLATOR.md`, edits files and reports; it never commits,
+and the session that invoked it proposes the message.
 
 ## Pull requests
 

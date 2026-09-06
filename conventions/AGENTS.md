@@ -1,4 +1,4 @@
-<!-- conventions · v1.4.0 -->
+<!-- conventions · v1.5.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in
 `conventions/`, vendored from robertblust/conventions at the release `conventions.json`
 names. Read them before writing or committing anything here.
@@ -6,6 +6,8 @@ names. Read them before writing or committing anything here.
 - `conventions/WRITING.md` — how we write: one voice, three registers, English and German.
 - `conventions/WORKING.md` — how we work with git and GitHub.
 - `conventions/REPOSITORIES.md` — the family: what each repository is and what pins what.
+- `conventions/WRITER.md`, `conventions/TRANSLATOR.md`, `conventions/GLOSSARY.md` — the two roles that
+  make a text, and the terms they keep.
 
 Everything below this block is this repository's own. `sh conventions/conventions-sync check`
 says whether the copy matches the release, `sync` brings it to the release the pin names, and
@@ -15,14 +17,15 @@ a shared file in robertblust/conventions, never here.
 
 # robertblust/conventions — working conventions
 
-This repository is the source of the block above. It mirrors the layout it vendors: the
-shared files live under `conventions/` here exactly as they do in every member, so the block
-reads the same in both. The block is plain words and names no agent vendor; `CLAUDE.md` is the
-one vendor adapter, four lines that import the entry file and the three shared files in that
-vendor's syntax, and a member carries the same four lines. The one file members receive that
-does not sit under `conventions/` in the source is this `AGENTS.md`, which the script fetches
-from the root and vendors as `conventions/AGENTS.md` so that `check` can compare a member's
-block against the release without a network.
+This repository is the source of the block above. It mirrors the layout it vendors: the shared
+files live under `conventions/` here exactly as they do in every member, so the block reads the
+same in both. The block is plain words and names no agent vendor; `CLAUDE.md` is the one vendor
+adapter, four lines that import the entry file and `WRITING.md`, `WORKING.md` and
+`REPOSITORIES.md` in that vendor's syntax, and a member carries the same four lines; the two
+briefs and the glossary are read by the agent adapters the README names, not by every session.
+The one file members receive that does not sit under `conventions/` in the source is this
+`AGENTS.md`, which the script fetches from the root and vendors as `conventions/AGENTS.md` so
+that `check` can compare a member's block against the release without a network.
 
 Releasing is a tag and a GitHub Release with notes. Before tagging, set the version in the
 first line of this file to the new tag: the script rewrites it to the pin on sync, so a stale

@@ -12,12 +12,35 @@ commit messages, pull requests, release notes and what an agent says. English he
 the section on English below says what that means in spelling and marks.
 
 The pages carry a second language, Swiss German, de-CH. It is there because the person behind
-the family is Swiss, and a reader in Zürich or Bern is a reader the pages are written for; it
-is a second original, not a translation made for a market. So the German is written as
-German, in the forms Switzerland uses, by someone who reads it, and it is never generated and
-left unread. It appears only where a page carries it, in the value of an attribute whose name
-ends in `-de`, and nowhere else: not in code, not in git, not in a reply. A third language is
-not planned; adding one would mean writing this paragraph again with its own reason.
+the family is Swiss, and a reader in Zürich or Bern is a reader the pages are written for. The
+German is a translation of the English, made after the owner has reviewed the English and never
+before, by the translator role of `TRANSLATOR.md`, in the forms Switzerland uses. It is
+reviewed by reading the translator's back-translation, an English rendering of what the German
+says, because that takes a minute where reading German prose takes an evening and the family
+has one reader for it. It appears only where a page carries it, in the value of an attribute
+whose name ends in `-de` and in the few other places a page's own agent file names, and nowhere
+else: not in git, not in a reply. A third language is not planned; adding one would mean
+writing this paragraph again with its own reason.
+
+## How a text is made
+
+A text starts from a brief that names the audience, the one point, the facts it may claim and
+where each is shown, and the file and place it lands. A draft without a brief is a draft the
+reviewer has to reverse-engineer, and the reviewer is the person whose time is shortest.
+
+The writer of `WRITER.md` drafts the English on the branch, in the register the place calls
+for, and reports what it wrote and which claims it could not trace to the brief or the
+repository. The owner reviews on the branch, in the diff and on the rendered page, because that
+is the review a pull request gets anyway and a second channel would be a second place to lose a
+correction.
+
+The translator of `TRANSLATOR.md` makes the German from the reviewed English only, one element
+at a time, with `GLOSSARY.md` open, and hands back a back-translation beside each element.
+German made from a draft is German that has to be made again. An English edit to an element
+re-runs the translator on that element alone; nothing marks an element stale, so the rule is
+kept by whoever edits the English.
+
+Both roles edit files and neither commits. `WORKING.md` says who does.
 
 ## What every register shares
 
@@ -60,6 +83,12 @@ a section carries the point; the rest is its support.
 
 Release notes are this register aimed at a consumer: what changed for them, what breaks and
 how to take it, in that order.
+
+A page is this register aimed at a visitor who has not decided to stay. The first line is the
+one point, in the words the visitor would use for it, and every later screen earns its place or
+goes. Sentences run shorter than in a README because a page is read on a phone. A claim the
+page opens with is a claim the page then shows. Nothing else changes: cause before mechanism
+holds wherever a page explains, and no adjective sells.
 
 ## The git register
 
