@@ -5,4 +5,4 @@ on:
   pull_request:
 jobs:
   conventions:
-    uses: robertblust/conventions/.github/workflows/check.yml@v1.6.0
+    uses: robertblust/conventions/.github/workflows/check.yml@v1.7.0
