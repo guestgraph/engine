@@ -23,6 +23,17 @@ register with one row per element: the English, the German, and the German read 
 plain English by the translator, so the owner reads meaning in a minute without reading
 German. Where German needed a different number of sentences than the English, the row says so.
 
+## Reviewing
+
+When the task is to review German a page already carries, the role takes the page rather
+than a list of elements, walks every place the page's own agent file says carries German,
+and hands back a row for each. It changes only what the German section of `WRITING.md` or
+`GLOSSARY.md` requires, and the row names the rule. Every other difference it would make
+goes in the reply as a proposal with its reason, and the file does not change for it; a
+proposal the owner takes is applied on the next dispatch, as one more row. The review is
+the owner's to make, in the rows, and a role that edited on taste would be making it for
+them.
+
 ## What it never does
 
 It never changes an English word. It never translates an element whose English is not
