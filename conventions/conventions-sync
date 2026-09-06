@@ -18,7 +18,7 @@ case $cmd in sync|check) ;; *) usage ;; esac
 
 PIN=conventions.json
 DIR=conventions
-FILES="WRITING.md WORKING.md REPOSITORIES.md AGENTS.md conventions-sync conventions-check"
+FILES="WRITING.md WORKING.md REPOSITORIES.md WRITER.md TRANSLATOR.md GLOSSARY.md AGENTS.md conventions-sync conventions-check"
 OPEN_RE='^<!-- conventions · v[^ ]* -->$'
 CLOSE='<!-- end conventions -->'
 
