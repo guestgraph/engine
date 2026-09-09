@@ -145,6 +145,16 @@ The original sketch:
 - The full observation history stays reachable (Constitution II — nothing is lost,
   supersession is a view, not a deletion).
 
+### R3-2: A canceled booking on a guest's timeline — surfaced by specs/005-apaleo-connector
+
+An association carries business dates but no status, so a canceled or no-show reservation looks
+on the timeline exactly like one the guest will arrive for. The connector cannot express it: a
+cancellation changes no person, so under the roster rule it submits nothing, and if it did submit,
+the status would sit inside the payload where nothing reads it. If a consumer needs "does this
+guest currently hold a booking" to exclude cancellations, the answer is an optional status on the
+source-object block of the ingest contract and on the association, with a connector emitting a
+version when it changes — an engine slice, not a connector one.
+
 ## Slice 4 — Connectors
 
 **R-X5 is built** ([specs/004-retired-guest-ids](../specs/004-retired-guest-ids/spec.md)), so
