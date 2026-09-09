@@ -101,7 +101,7 @@ Stated once here; the resolver implements them and the scenario tests pin them.
 |---|---|---|
 | `guestExists(tenantId, guestId)` | boolean | `GuestRepo.findGuest` — the timeline already uses the same query through `GuestQueryService` |
 | `eventsAbsorbing(tenantId, guestId)` | events whose absorbed list contains the guest, oldest first | native containment query, `merge_event_absorbed_gin` |
-| `eventsSince(tenantId, after, afterId, limit)` | the tenant's events later than `(after, afterId)`, oldest first, one page | JPQL keyset range, `merge_event_tenant_time_idx` |
+| `eventsSince(tenantId, from, afterId, limit)` | one page of the tenant's events in `(createdAt, id)` order: with a null `afterId` every event at or after `from`, because the replay events an unmerge writes share its transaction and may share its timestamp while a random id can sort before the unmerge's own; with one, strictly after `(from, afterId)` | two native queries, `findFrom` and `findAfter`, over `merge_event_tenant_time_idx` |
 
 `UNMERGE` candidates come from the existing `eventsForGuests`, filtered by kind. `InMemoryGraph`
 implements all three over its event list with the same ordering.

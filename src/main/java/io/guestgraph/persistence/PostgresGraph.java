@@ -203,9 +203,11 @@ public class PostgresGraph implements GraphPort {
 
   @Override
   public List<MergeEvent> eventsSince(UUID tenantId, Instant from, UUID afterId, int limit) {
-    return mergeEventRepo.findSince(tenantId, from, afterId, limit).stream()
-        .map(mappers::toDomain)
-        .toList();
+    List<MergeEventEntity> page =
+        afterId == null
+            ? mergeEventRepo.findFrom(tenantId, from, limit)
+            : mergeEventRepo.findAfter(tenantId, from, afterId, limit);
+    return page.stream().map(mappers::toDomain).toList();
   }
 
   @Override

@@ -179,10 +179,7 @@ public class GuestController {
   public Map<String, Object> getGuestRecords(@PathVariable UUID guestId) {
     UUID tenantId = TenantContext.tenantId();
     gate.require(tenantId, guestId);
-    List<SourceRecord> records =
-        queryService
-            .findRecords(tenantId, guestId)
-            .orElseThrow(() -> new NotFoundException("No guest " + guestId + " in this tenant"));
+    List<SourceRecord> records = queryService.recordsOf(tenantId, guestId);
     return Map.of("records", records.stream().map(this::toResponse).toList());
   }
 

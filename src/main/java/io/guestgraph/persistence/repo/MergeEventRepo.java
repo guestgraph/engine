@@ -40,25 +40,39 @@ public interface MergeEventRepo extends Repository<MergeEventEntity, UUID> {
       @Param("tenantId") UUID tenantId, @Param("needle") String needle);
 
   /**
-   * The tenant's events from an instant forward, keyset-paged on {@code (created_at, id)} over
-   * {@code merge_event_tenant_time_idx}. A null {@code afterId} starts at {@code from} inclusive
-   * (the replay events an unmerge writes may share its timestamp); otherwise strictly after the
-   * keyset, the same shape {@code MatchReviewRepo.list} uses.
+   * The tenant's events from an instant forward, inclusive, over {@code
+   * merge_event_tenant_time_idx}: the first page of the split hop's scan. Inclusive because the
+   * replay events an unmerge writes share its transaction and may share its timestamp, and a random
+   * id can sort before the unmerge's own. Two queries rather than one with an OR on a nullable
+   * cursor: under a generic plan the OR degrades to a filter over the tenant's whole history,
+   * measured, while each plain predicate stays an index seek.
    */
   @Query(
       nativeQuery = true,
       value =
           """
             SELECT * FROM merge_event
-            WHERE tenant_id = :tenantId
-              AND ((CAST(:afterId AS uuid) IS NULL AND created_at >= CAST(:from AS timestamptz))
-                   OR (created_at, id) > (CAST(:from AS timestamptz), CAST(:afterId AS uuid)))
+            WHERE tenant_id = :tenantId AND created_at >= CAST(:from AS timestamptz)
             ORDER BY created_at, id
             LIMIT :limit
             """)
-  List<MergeEventEntity> findSince(
+  List<MergeEventEntity> findFrom(
+      @Param("tenantId") UUID tenantId, @Param("from") Instant from, @Param("limit") int limit);
+
+  /** The pages after the first: strictly after the keyset {@code (created_at, id)}. */
+  @Query(
+      nativeQuery = true,
+      value =
+          """
+            SELECT * FROM merge_event
+            WHERE tenant_id = :tenantId
+              AND (created_at, id) > (CAST(:after AS timestamptz), CAST(:afterId AS uuid))
+            ORDER BY created_at, id
+            LIMIT :limit
+            """)
+  List<MergeEventEntity> findAfter(
       @Param("tenantId") UUID tenantId,
-      @Param("from") Instant from,
+      @Param("after") Instant after,
       @Param("afterId") UUID afterId,
       @Param("limit") int limit);
 }

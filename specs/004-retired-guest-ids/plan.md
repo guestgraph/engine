@@ -116,7 +116,7 @@ src/main/java/io/guestgraph/
 │   └── GraphMutationService.java     # + resolve(tenantId, guestId), read-only transaction
 ├── persistence/
 │   ├── PostgresGraph.java            # implements the three port methods
-│   └── repo/MergeEventRepo.java      # + one native containment query, one JPQL keyset range (research R3)
+│   └── repo/MergeEventRepo.java      # + native: one containment query, two keyset range queries (research R3)
 └── api/
     ├── GuestGate.java                # NEW — active | not found | retired, for every guest-rooted endpoint (R6)
     ├── RetiredGuestException.java    # NEW — carries the resolution

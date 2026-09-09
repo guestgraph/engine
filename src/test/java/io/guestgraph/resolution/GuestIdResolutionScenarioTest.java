@@ -2,11 +2,15 @@ package io.guestgraph.resolution;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.guestgraph.domain.Actor;
 import io.guestgraph.domain.IngestStatus;
 import io.guestgraph.domain.MergeEvent;
 import io.guestgraph.domain.MergeEventKind;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -275,21 +279,7 @@ class GuestIdResolutionScenarioTest {
     UUID x = fx.record("x").email("x@example.com").resolve().guestId();
     UUID ghost = UUID.randomUUID();
     // An inconsistent trail, built by hand: X absorbed into a survivor that was never created.
-    MergeEvent bogus =
-        new MergeEvent(
-            UUID.randomUUID(),
-            TENANT,
-            MergeEventKind.MERGE,
-            ghost,
-            List.of(x),
-            List.of(),
-            "hand-built",
-            java.math.BigDecimal.ONE,
-            java.util.Map.of(),
-            List.of(),
-            io.guestgraph.domain.Actor.unattributed(),
-            java.time.Instant.now());
-    fx.graph.saveEvent(bogus);
+    fx.graph.saveEvent(event(MergeEventKind.MERGE, ghost, List.of(x), List.of(), Instant.now()));
     fx.graph.deleteGuest(TENANT, x);
 
     GuestIdResolution resolution = resolve(fx, x).orElseThrow();
@@ -303,9 +293,12 @@ class GuestIdResolutionScenarioTest {
   // --- SC-004: the integrator rule holds across mixed sequences ----------------------------
 
   /**
-   * Twenty-four sequences of merges and splits, each followed by the rule an integrator is told: on
-   * MERGED replace the stored id with the current one. After every sequence the held id must
-   * resolve ACTIVE (SC-004), and every current guest named on the way must exist (SC-002).
+   * Twenty-four distinct sequences of merges and splits — chain length 2 to 5, times three endings,
+   * times the held id being the chain's first or its middle guest — each followed by the rule an
+   * integrator is told: on MERGED replace the stored id with the current one. After every sequence
+   * the held id must resolve ACTIVE (SC-004), and every current guest named on the way must exist
+   * (SC-002). On SPLIT the rule says escalate; the first branch stands in for that choice here so
+   * the walk after it is still exercised.
    */
   @Test
   @DisplayName("an integrator that replaces its stored id on MERGED always holds a valid id")
@@ -314,7 +307,7 @@ class GuestIdResolutionScenarioTest {
     for (int seed = 0; seed < 24; seed++) {
       EngineFixture fx = new EngineFixture();
       List<UUID> chain = mergeChain(fx, 2 + seed % 4);
-      UUID held = chain.getFirst();
+      UUID held = seed / 12 == 0 ? chain.getFirst() : chain.get(chain.size() / 2);
       if (seed % 3 == 1) {
         // Empty the chain's survivor by detaching every record it holds.
         UUID survivor = chain.getLast();
@@ -350,6 +343,94 @@ class GuestIdResolutionScenarioTest {
       sequences++;
     }
     assertThat(sequences).isGreaterThanOrEqualTo(20);
+  }
+
+  @Test
+  @DisplayName("a replay event sharing the unmerge's timestamp with a smaller id is still found")
+  void replayEventTiedOnTimestampIsFound() {
+    EngineFixture fx = new EngineFixture();
+    UUID emptied = fx.graph.createGuest(TENANT).id();
+    UUID landing = fx.graph.createGuest(TENANT).id();
+    UUID record = UUID.randomUUID();
+    Instant at = Instant.parse("2026-09-09T10:00:00.000001Z");
+    // Ids chosen so the replay sorts before the unmerge at the same instant, in both backends.
+    UUID unmergeId = UUID.fromString("ffffffff-ffff-4fff-8fff-ffffffffffff");
+    UUID replayId = UUID.fromString("00000000-0000-4000-8000-000000000001");
+    fx.graph.saveEvent(
+        event(unmergeId, MergeEventKind.UNMERGE, emptied, List.of(), List.of(record), at));
+    fx.graph.saveEvent(
+        event(replayId, MergeEventKind.CREATE, landing, List.of(), List.of(record), at));
+    fx.graph.deleteGuest(TENANT, emptied);
+
+    GuestIdResolution resolution = resolve(fx, emptied).orElseThrow();
+
+    assertThat(resolution.status()).isEqualTo(GuestIdStatus.MERGED);
+    assertThat(resolution.currentGuestIds()).containsExactly(landing);
+  }
+
+  @Test
+  @DisplayName("the split hop pages forward when the replay events sit beyond the first page")
+  void splitHopPagesForward() {
+    EngineFixture fx = new EngineFixture();
+    UUID emptied = fx.graph.createGuest(TENANT).id();
+    UUID landing1 = fx.graph.createGuest(TENANT).id();
+    UUID landing2 = fx.graph.createGuest(TENANT).id();
+    UUID bystander = fx.graph.createGuest(TENANT).id();
+    UUID r1 = UUID.randomUUID();
+    UUID r2 = UUID.randomUUID();
+    Instant at = Instant.parse("2026-09-09T10:00:00Z");
+    fx.graph.saveEvent(event(MergeEventKind.UNMERGE, emptied, List.of(), List.of(r1, r2), at));
+    for (int i = 1; i <= 5; i++) {
+      // Unrelated events between the unmerge and its replay, each on its own page of one.
+      fx.graph.saveEvent(
+          event(
+              MergeEventKind.ATTACH,
+              bystander,
+              List.of(),
+              List.of(UUID.randomUUID()),
+              at.plusMillis(i)));
+    }
+    fx.graph.saveEvent(
+        event(MergeEventKind.CREATE, landing1, List.of(), List.of(r1), at.plusMillis(6)));
+    fx.graph.saveEvent(
+        event(MergeEventKind.CREATE, landing2, List.of(), List.of(r2), at.plusMillis(7)));
+    fx.graph.deleteGuest(TENANT, emptied);
+
+    GuestIdResolution resolution =
+        new GuestIdResolver(fx.graph, 1).resolve(TENANT, emptied).orElseThrow();
+
+    assertThat(resolution.status()).isEqualTo(GuestIdStatus.SPLIT);
+    assertThat(resolution.currentGuestIds()).containsExactly(landing1, landing2);
+    assertThat(resolution.hops().getFirst().successorGuestIds())
+        .containsExactly(landing1, landing2);
+  }
+
+  private static MergeEvent event(
+      MergeEventKind kind, UUID guestId, List<UUID> absorbed, List<UUID> records, Instant at) {
+    return event(UUID.randomUUID(), kind, guestId, absorbed, records, at);
+  }
+
+  /** A hand-built event for histories the engine cannot produce on purpose. */
+  private static MergeEvent event(
+      UUID id,
+      MergeEventKind kind,
+      UUID guestId,
+      List<UUID> absorbed,
+      List<UUID> records,
+      Instant at) {
+    return new MergeEvent(
+        id,
+        TENANT,
+        kind,
+        guestId,
+        absorbed,
+        records,
+        "hand-built",
+        BigDecimal.ONE,
+        Map.of(),
+        List.of(),
+        Actor.unattributed(),
+        at);
   }
 
   record Split(UUID emptied, UUID w1, UUID w2, MergeEvent unmergeEvent) {}

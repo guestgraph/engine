@@ -130,7 +130,14 @@ ArchUnit rule holds unchanged.
 inside the same transaction that writes the `UNMERGE` event, so the events that placed those
 records are the next events in the tenant's timeline. The split hop therefore reads the tenant's
 events from the split's `created_at` forward, in order, and stops once every detached record has
-been seen in a `source_record_ids` list. That is a JPQL range query over a btree
+been seen in a `source_record_ids` list. The first page starts at that instant inclusive, not
+strictly after the unmerge's `(created_at, id)`: the replay events are stamped in the JVM at
+microsecond precision and can share the unmerge's timestamp, and a random id can sort before the
+unmerge's own, so a strict keyset would miss a landing and report `RETIRED`. Later pages are
+strictly after the last event seen. Two native queries carry the two shapes rather than one with
+an OR on a nullable cursor, because under a generic plan the OR degrades to a filter over the
+tenant's whole history — measured at 500,000 events — while each plain predicate stays an index
+seek over a btree
 
 ```sql
 create index merge_event_tenant_time_idx on merge_event (tenant_id, created_at, id);

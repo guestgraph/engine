@@ -109,6 +109,11 @@ paths:
                   - $ref: "#/components/schemas/GuestIdResolution"
                 discriminator:
                   propertyName: status
+                  mapping:
+                    ACTIVE: "#/components/schemas/ActiveGuest"
+                    MERGED: "#/components/schemas/GuestIdResolution"
+                    SPLIT: "#/components/schemas/GuestIdResolution"
+                    RETIRED: "#/components/schemas/GuestIdResolution"
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
 
@@ -476,6 +481,10 @@ components:
       required: [id, profile, identifiers, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [ACTIVE]
+          description: Added by feature 004; every guest document this API returns carries it.
         profile:
           type: object
           additionalProperties: true

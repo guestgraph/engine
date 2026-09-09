@@ -133,6 +133,11 @@ class RetiredGuestIdApiTest extends PostgresIntegrationTest {
         .isEqualTo("ACTIVE");
   }
 
+  /**
+   * SC-003 over a table of a few dozen rows: this pins the code path and the per-hop query count,
+   * not the indexes — their effect at scale was measured once with EXPLAIN ANALYZE (research R3),
+   * not asserted here.
+   */
   @Test
   @DisplayName("a ten-hop chain resolves in under one second (SC-003)")
   void tenHopsUnderOneSecond() {

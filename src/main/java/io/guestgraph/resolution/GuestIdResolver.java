@@ -43,9 +43,16 @@ public class GuestIdResolver {
       Comparator.comparing(MergeEvent::createdAt).thenComparing(MergeEvent::id);
 
   private final GraphPort graph;
+  private final int pageSize;
 
   public GuestIdResolver(GraphPort graph) {
+    this(graph, PAGE);
+  }
+
+  /** Tests pin the paging with a page of one; production uses {@link #PAGE}. */
+  GuestIdResolver(GraphPort graph, int pageSize) {
     this.graph = graph;
+    this.pageSize = pageSize;
   }
 
   /** Empty when the id never existed in the tenant — the caller's not-found. */
@@ -156,7 +163,7 @@ public class GuestIdResolver {
     Instant from = unmerge.createdAt();
     UUID afterId = null;
     while (missing > 0) {
-      List<MergeEvent> page = graph.eventsSince(tenantId, from, afterId, PAGE);
+      List<MergeEvent> page = graph.eventsSince(tenantId, from, afterId, pageSize);
       for (MergeEvent event : page) {
         if (event.id().equals(unmerge.id())) {
           continue;
@@ -168,7 +175,7 @@ public class GuestIdResolver {
           }
         }
       }
-      if (page.size() < PAGE) {
+      if (page.size() < pageSize) {
         break;
       }
       MergeEvent last = page.getLast();
