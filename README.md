@@ -156,8 +156,9 @@ From the first tagged release on, migrations are additive-only.
 
 1. ✅ **Core** — identity resolution engine (deterministic, probabilistic-ready), guest graph, REST API
 2. ✅ **Probabilistic matching** — fuzzy/ML resolution behind the same strategy interface, with review queue
-3. 🚧 **Timeline** — per-guest business-object associations, attributed decisions *(current)*
-4. **Connectors** — ingest from real PMS/POS/booking systems
+3. ✅ **Timeline** — per-guest business-object associations, attributed decisions
+4. 🚧 **Retired guest ids** — a stored guest id resolves to the current guest after merges and splits *(current)*
+5. **Connectors** — ingest from real PMS/POS/booking systems
 
 ## License
 
