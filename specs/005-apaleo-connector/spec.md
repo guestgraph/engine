@@ -14,13 +14,14 @@
 
 - Q: Which connector comes first? → A: Apaleo. The roadmap's R4-1 convention was written for its reservation model: entity-less persons, a modified instant per entity, webhooks plus full re-sync.
 - Q: Where does the connector live? → A: In its own repository, `guestgraph/connector-apaleo`, a standalone service that talks to the engine over its REST API, the way a third-party connector would. It is a new member of the family, so `REPOSITORIES.md` gains a row through a robertblust/conventions release before the repository is created; that step belongs to the owner, not to this slice's tasks.
+- Q: Are bookings in scope, or only reservations? → A: Both, as two source objects. In Apaleo the booker lives on the booking, with the booking's own modified instant and its own events, while the primary and additional guests live on the reservation. Keying the booker by the reservation would lose a booker correction as a duplicate, because the reservation's clock does not move. The booker is therefore an observation on the booking object; this amends roadmap note R4-1, which put the booker on the reservation.
 - Q: Does the first connector write the guest id back into Apaleo? → A: No. It reads reservations and persons, holds the guest ids the engine returns, and follows the integrator rule on them. Writing into a PMS field is a later slice once the field is known.
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - A Property's Reservations Become Observations (Priority: P1)
 
-A hotel connects its Apaleo account and every reservation the property has, past and future, reaches the guest graph as observations that resolve into guests. Each reservation carries one to several persons in named roles: the primary guest, the additional guests and the booker. The connector emits one observation per person per reservation version, keyed by the convention slice 3 published, so that the graph can tell which observations describe one booking and which version of it is current.
+A hotel connects its Apaleo account and every booking and reservation the property has, past and future, reaches the guest graph as observations that resolve into guests. Apaleo keeps persons on two objects: a reservation carries the primary guest and the additional guests, and the booking that groups one or more reservations carries the booker. Each object has its own modified instant. The connector emits one observation per person per object version, keyed by the convention slice 3 published, so that the graph can tell which observations describe one reservation or booking and which version of it is current.
 
 Nothing here invents anything about the person. The connector copies what Apaleo states, puts the documented person fields where the engine's extraction reads them, and nests everything that belongs to the booking rather than to the person where extraction never looks. A full re-run of the same account produces no new observations, because every key is derived from Apaleo's own state.
 
@@ -30,12 +31,13 @@ Nothing here invents anything about the person. The connector copies what Apaleo
 
 **Acceptance Scenarios**:
 
-1. **Given** an Apaleo account with reservations, **When** a full sync runs, **Then** every reservation the account can list is submitted, one observation per person on its current version, and each observation's key names the reservation, the person's role and position, and the reservation's own modified instant.
-2. **Given** a reservation with a primary guest, two additional guests and a booker who is a different person, **When** it is submitted, **Then** four observations reach the engine, the reservation's roster in the engine lists four entries with their roles, and the booker is not merged with the primary guest by anything the connector sent.
-3. **Given** a reservation whose booker is the same person as the primary guest, **When** it is submitted, **Then** both observations are sent and resolve to the same guest by their shared identifiers, not by any assumption the connector makes.
+1. **Given** an Apaleo account with bookings and reservations, **When** a full sync runs, **Then** every reservation and every booking the account can list is submitted, one observation per person on its current version, and each observation's key names the object, the person's role and position, and that object's own modified instant.
+2. **Given** a booking with one reservation carrying a primary guest and two additional guests, and a booker who is a different person, **When** both are submitted, **Then** three observations reach the engine for the reservation and one for the booking, the reservation's roster lists three entries with their roles and the booking's lists the booker, and the booker is not merged with the primary guest by anything the connector sent.
+3. **Given** a booking whose booker is the same person as its reservation's primary guest, **When** both are submitted, **Then** both observations are sent and resolve to the same guest by their shared identifiers, not by any assumption the connector makes.
 4. **Given** a reservation, **When** its observation is inspected in the engine, **Then** its timestamp equals the reservation's modified instant, its business start and end equal arrival and departure, and its payload carries the booking's own data — channel, status, comment, property — nested below the person fields where the engine extracts nothing from it.
 5. **Given** a completed full sync, **When** the same sync runs again with no change in Apaleo, **Then** every submission is reported as a duplicate and no guest changes.
-6. **Given** a reservation booked through a company or agency, **When** it is submitted, **Then** the booker is still submitted as a person, because Apaleo models every booker as one with at least a last name, while the reservation's company, channel and external references travel as booking-level context inside the payload and produce no guest identifier.
+6. **Given** a booking made through a company or agency, **When** it is submitted, **Then** the booker is still submitted as a person, because Apaleo models every booker as one with at least a last name, while the reservation's company, channel and external references travel as booking-level context inside the payload and produce no guest identifier. The booking's payment account and registered card never travel at all.
+9. **Given** a booking, **When** its observation is inspected in the engine, **Then** its business start and end are the earliest arrival and the latest departure of the booking's reservations, derived from Apaleo's state so the booking takes its place on the timeline among the stays it groups.
 7. **Given** an account with more reservations than one page can hold, **When** a full sync runs, **Then** every page is fetched and no reservation is skipped or submitted twice.
 8. **Given** a reservation whose modified instant cannot be read, **When** it is submitted, **Then** the observation is still sent and the engine flags it for review as the ingest contract requires; the connector never drops it.
 
@@ -55,6 +57,7 @@ The order problem is solved by the convention, not by the connector: because the
 
 1. **Given** an active subscription, **When** a reservation event arrives, **Then** the connector acknowledges it at once and processes it separately, so Apaleo never sees the connector as failed while it fetches and submits.
 2. **Given** an event for a reservation whose primary guest was corrected, **When** it is processed, **Then** the connector fetches the reservation and submits every person on the new version, so the version is a complete roster.
+2a. **Given** a booking event because the booker was corrected, **When** it is processed, **Then** the connector fetches the booking and submits the booker on the booking's new version, and the booking's reservations are not resubmitted, because no person on them changed.
 3. **Given** an event for an edit that changed no person and no roster, such as a room or rate change, **When** it is processed, **Then** nothing is submitted, because Apaleo bumps the modified instant on every edit and emitting would inflate the observation counts that feed the review threshold.
 4. **Given** the same event delivered twice, **When** both arrive, **Then** the second is recognized by its event id and causes no fetch and no submission.
 5. **Given** two events for one reservation that arrive in the wrong order, **When** both are processed, **Then** the newer version is the engine's current roster regardless of arrival order, and the older version is stored as history.
@@ -84,7 +87,7 @@ A hotel's IT contact, or a GuestGraph steward, needs to know whether the connect
 
 ### User Story 4 - The Guest Ids the Connector Holds Stay Valid (Priority: P4)
 
-Every submission answers with the guest each person resolved to. The connector keeps those ids per reservation and role, because they are what a later slice will write back into Apaleo and what an operator asks for today when a front-desk question comes in. A guest id can be retired by a merge or a split after the connector stored it. The connector applies the integrator rule slice 4 defined: it reads the id, replaces it with the current one when the answer is MERGED, and raises a split for a person to decide when the answer is SPLIT, never guessing.
+Every submission answers with the guest each person resolved to. The connector keeps those ids per object, role and position, because they are what a later slice will write back into Apaleo and what an operator asks for today when a front-desk question comes in. A guest id can be retired by a merge or a split after the connector stored it. The connector applies the integrator rule slice 4 defined: it reads the id, replaces it with the current one when the answer is MERGED, and raises a split for a person to decide when the answer is SPLIT, never guessing.
 
 **Why this priority**: It is the consumption of R-X5 that the roadmap tied to this slice, and the rehearsal for write-back. It is last because nothing is written into Apaleo yet, so a stale id costs an operator a lookup, not a wrong record.
 
@@ -117,24 +120,25 @@ Every submission answers with the guest each person resolved to. The connector k
 
 **Observations**
 
-- **FR-001**: The connector MUST emit one observation per person per reservation version, with the reservation id as the object id, `reservation` as the object type, the person's role as one of primary guest, additional guest or booker, the position for additional guests, and the reservation's own modified instant as the version.
+- **FR-001**: The connector MUST emit one observation per person per object version, for two object types: a `reservation`, whose persons are the primary guest and the additional guests with their positions, and a `booking`, whose person is the booker. The object id is Apaleo's id for that object and the version is that object's own modified instant.
 - **FR-002**: The observation key MUST be derived from the reservation id, the role with its position, and the modified instant, and from nothing that the connector itself generates, so that any repetition of the same source state produces the same key.
-- **FR-003**: The observation's timestamp MUST equal the version; business start and end MUST be the reservation's arrival and departure.
+- **FR-003**: The observation's timestamp MUST equal the version. Business start and end MUST be the reservation's arrival and departure, and for a booking the earliest arrival and the latest departure of its reservations, derived from Apaleo's state and from nothing else.
 - **FR-004**: The person fields the engine extracts — first and last name, email, phone, birthdate, address, identification document — MUST be filled only from the person's own entry in Apaleo; every booking-level field MUST be nested inside the payload where extraction does not read.
-- **FR-005**: The booker MUST be requested explicitly from Apaleo, which returns it only on request, and MUST be submitted as a person like the others; the reservation's company, channel, source and external references MUST travel as booking-level context inside every observation's payload and never in the person fields.
-- **FR-006**: The connector MUST submit every reservation it can list or fetch, including canceled and no-show ones, and MUST NOT filter on the quality or completeness of person data (Constitution III applies to the connector as to the engine).
+- **FR-005**: The booker MUST be read from the booking object, not from the copy a reservation shows on request, and MUST be submitted as a person like the others; the reservation's company, channel, source and external references MUST travel as booking-level context inside every observation's payload and never in the person fields. The booking's payment account and registered card MUST NOT travel in any form.
+- **FR-006**: The connector MUST submit every reservation and every booking it can list or fetch, including canceled and no-show reservations, and MUST NOT filter on the quality or completeness of person data (Constitution III applies to the connector as to the engine).
 
 **Keeping current**
 
-- **FR-007**: The connector MUST subscribe, for the configured properties, to the reservation event types that can carry a change of person: created, changed, amended and picked-up-from-block, which do, and checked-in, which probably does because registration data is captured then. The list MUST be configuration with that default, so an operator can widen it without a release. Event types that cannot change a person — check-out, no-show, cancellation, unit and payment events — are not subscribed, and deleted is never subscribed because the reservation can no longer be fetched. The roster comparison of FR-009 still decides whether anything is submitted; the subscription only decides what is fetched.
+- **FR-007**: The connector MUST subscribe, for the configured properties, to the event types that can carry a change of person: on the reservation, created, changed, amended and picked-up-from-block, which do, and checked-in, which probably does because registration data is captured then; on the booking, created and changed. The list MUST be configuration with that default, so an operator can widen it without a release. Event types that cannot change a person — check-out, no-show, cancellation, unit and payment events on either object — are not subscribed, and the deleted events are never subscribed because the object can no longer be fetched. The roster comparison of FR-009 still decides whether anything is submitted; the subscription only decides what is fetched.
 - **FR-007a**: Which edits fire which event type MUST be confirmed against an Apaleo sandbox before the default list is fixed: a guest edit, an added guest, and a check-in with registration data, each observed for the event it fires. The scheduled reconciliation of FR-012 is the backstop for any change the list misses.
 - **FR-007b**: The webhook endpoint MUST answer Apaleo's reachability check, which posts to the endpoint before and while a subscription exists, with success, and MUST carry a secret in its URL so that only Apaleo's deliveries are processed.
-- **FR-008**: On an event, the connector MUST fetch the reservation's current state from Apaleo and MUST NOT rely on any state carried in the event beyond the reservation id.
-- **FR-009**: The connector MUST submit a version only when a person's data or the set of persons changed since the last version it submitted for that reservation, and then MUST submit every person on it. It MUST keep the state that makes this comparison possible.
+- **FR-008**: On an event, the connector MUST fetch the object's current state from Apaleo and MUST NOT rely on any state carried in the event beyond the object's id.
+- **FR-009**: The connector MUST submit a version only when a person's data or the set of persons changed since the last version it submitted for that object, and then MUST submit every person on it. It MUST keep the state that makes this comparison possible, per object.
 - **FR-010**: Events MUST be processed once each, recognized by Apaleo's event id, and MUST be tolerated in any order.
 - **FR-011**: An event whose reservation cannot be fetched or submitted MUST be retained with its reason and retried; it MUST NOT be dropped.
-- **FR-012**: A reconciliation MUST list every reservation modified since the last successful point, with an overlap, and submit what was missed; it MUST run on a schedule and on request.
-- **FR-013**: A full sync MUST be runnable on request and MUST page through every reservation of the configured properties.
+- **FR-012**: A reconciliation MUST list every reservation modified since the last successful point, with an overlap, submit what was missed, and fetch the booking of every reservation it submits; it MUST run on a schedule and on request, and it MUST check on each run that the subscription still exists, so a lost subscription shows in the status within one interval.
+- **FR-012a**: Booking events are the channel for booker changes, delivered and retried by Apaleo for a day. Because the booking list cannot be filtered by modification, a booker-only edit missed during a gap longer than that retry window is recovered by a full sync, which the connector MUST start on its own when it finds the gap since its last successful activity longer than the window. No scheduled poll of the booking list exists.
+- **FR-013**: A full sync MUST be runnable on request and MUST page through every reservation of the configured properties and every booking of the account.
 
 **Operation**
 
@@ -145,12 +149,13 @@ Every submission answers with the guest each person resolved to. The connector k
 
 **Guest ids**
 
-- **FR-018**: The connector MUST hold, per reservation and role, the guest id the engine answered on the latest submitted version.
+- **FR-018**: The connector MUST hold, per object, role and position, the guest id the engine answered on the latest submitted version.
 - **FR-019**: A refresh MUST read every held id, replace it with the current guest when the answer is MERGED, mark it and surface it when the answer is SPLIT, and leave it when ACTIVE; it MUST NOT choose among several current guests.
 
 ### Key Entities
 
-- **Reservation version**: one state of an Apaleo reservation, identified by its id and modified instant, carrying arrival, departure, one of the five statuses Apaleo defines and a roster of persons in roles. A person carries at least a last name and may carry names, email, phone, address, nationality, birth date and place, an identification document with its type and number, a company and a preferred language.
+- **Reservation version**: one state of an Apaleo reservation, identified by its id and modified instant, carrying arrival, departure, one of the five statuses Apaleo defines and its primary and additional guests.
+- **Booking version**: one state of an Apaleo booking, identified by its id and modified instant, carrying the booker and the list of its reservations; its dates are derived from theirs. A person carries at least a last name and may carry names, email, phone, address, nationality, birth date and place, an identification document with its type and number, a company and a preferred language.
 - **Observation**: the engine's record of one person on one reservation version, keyed by the convention, with the person fields at the top of the payload and the booking's data nested below.
 - **Event**: an Apaleo webhook delivery, identified by its id, naming a reservation; processed once, retried until it can be.
 - **Sync point**: the modified instant up to which the connector has submitted every reservation of a property; the start of the next reconciliation, minus an overlap.
@@ -172,7 +177,7 @@ Every submission answers with the guest each person resolved to. The connector k
 
 - Apaleo is read with the client-credentials flow, one credential per account, which is what the simple client offers; multi-account connect clients are a later concern for the managed offering.
 - Apaleo's webhook carries only the reservation id and is delivered at least once, out of order, with retries; the connector's design follows Apaleo's stated behavior and needs no assumption beyond it. Sixteen reservation event types exist; the connector subscribes to the five that can carry a person change and confirms that set against a sandbox (FR-007, FR-007a).
-- Apaleo's reservation list pages at up to 500 items, answers an empty page with no content rather than an empty list, filters by modification date and can be sorted by update time; the reconciliation walks it in that order.
+- Apaleo's reservation list pages at up to 500 items, answers an empty page with no content rather than an empty list, filters by modification date and can be sorted by update time; the reconciliation walks it in that order. The booking list pages the same way but has no modification filter and no sort, which is why bookings are reconciled through their reservations and, after a gap longer than Apaleo's retry window, by a full sync.
 - The connector keeps state: the last submitted version and person hash per reservation, the processed event ids, the sync points and the held guest ids. That state is a cache of Apaleo's and the engine's facts; losing it costs a full sync, not correctness.
 - The engine credential the connector holds is a tenant key registered as an agent-operated credential named for the connector, so anything it does is attributed. A key scoped to ingest and reads only is roadmap R5-1 prerequisite 2 and is out of scope here.
 - The engine's ingest contract, source-object endpoint and retired-id resolution are used as published; this slice asks the engine for nothing new. If implementation finds a gap, it is recorded in the roadmap and built here in a separate change.

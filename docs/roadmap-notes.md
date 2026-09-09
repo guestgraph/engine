@@ -166,7 +166,14 @@ several, which the connector escalates rather than guesses. Every sub-resource u
 id refuses with the current ids, so a connector that skips the read still fails loudly.
 
 
-### R4-1: externalKey convention for mutable, multi-person source objects (Apaleo pattern) — contract published by specs/003-timeline-journey; connectors remain slice 4
+### R4-1: externalKey convention for mutable, multi-person source objects (Apaleo pattern) — contract published by specs/003-timeline-journey; amended by specs/005-apaleo-connector
+
+*Amended by slice 5*: the booker is a role on the **booking** object, not on the reservation. In
+Apaleo the booker lives on the booking with the booking's own modified instant and events, and a
+reservation only shows a copy of it on request; keyed by the reservation, a booker correction
+would not change the key and would be lost as a duplicate. So a connector emits two source
+objects — `reservation` with the primary and additional guests, `booking` with the booker — each
+versioned by its own clock, and derives the booking's business dates from its reservations.
 
 `externalKey` identifies an *observation*, not the source object (see slice-1 API
 contract). For PMS reservations carrying entity-less persons the convention is:
