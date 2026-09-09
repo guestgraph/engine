@@ -1,0 +1,132 @@
+openapi: 3.1.0
+info:
+  title: GuestGraph Core API — retired guest ids
+  version: "1.3.0"
+  # Feature 004 declares no new operation. It changes the responses of five existing ones, and
+  # the served document refuses a path declared twice, so those changes live in the contract
+  # files that own the paths (research R5):
+  #   specs/001-core-identity-resolution/contracts/openapi.yaml
+  #     GET  /guests/{guestId}          200 is now oneOf ActiveGuest | GuestIdResolution
+  #     GET  /guests/{guestId}/records  gains 410 Retired
+  #     GET  /guests/{guestId}/explain  gains 410 Retired
+  #     POST /guests/{guestId}/unmerge  gains 410 Retired
+  #   specs/003-timeline-journey/contracts/openapi.yaml
+  #     GET  /guests/{guestId}/timeline gains 410 Retired
+  # This file carries the schemas those responses reference.
+  description: >
+    Retired guest ids resolve. A guest id that a merge absorbed or an unmerge emptied is never
+    reused and never answers not-found: reading it names the guest or guests that hold the
+    person now, with the chain of decisions in between, so a stored guest id stays a valid
+    external reference across merges and splits.
+  license:
+    name: Apache-2.0
+servers:
+  - url: /api/v1
+security:
+  - ApiKey: []
+
+paths: {}
+
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  responses:
+    Retired:
+      description: >
+        The guest id was retired by a merge or a split. The problem details name the current
+        guest or guests; read GET /guests/{guestId} on the retired id for the full resolution.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/RetiredGuestProblem" }
+
+  schemas:
+    GuestStatus:
+      type: string
+      enum: [ACTIVE, MERGED, SPLIT, RETIRED]
+      description: >
+        ACTIVE: the id names a guest. MERGED: the id was retired and exactly one guest holds the
+        person now. SPLIT: the id was retired and several guests do. RETIRED: the id was retired
+        and the walk found no current guest, which the audit trail does not allow and is reported
+        rather than hidden.
+
+    ActiveGuest:
+      description: The guest document of feature 001 plus its status.
+      allOf:
+        - $ref: "#/components/schemas/Guest"
+        - type: object
+          required: [status]
+          properties:
+            status:
+              type: string
+              enum: [ACTIVE]
+
+    GuestIdResolution:
+      type: object
+      required: [id, status, currentGuestIds, retiredAt, hops]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The id that was read.
+        status:
+          type: string
+          enum: [MERGED, SPLIT, RETIRED]
+        currentGuestIds:
+          type: array
+          items: { type: string, format: uuid }
+          description: >
+            Every active guest the chain ends at, each once. One entry for MERGED, several for
+            SPLIT, none for RETIRED.
+        retiredAt:
+          type: string
+          format: date-time
+          description: When the read id's own retirement was recorded.
+        hops:
+          type: array
+          items: { $ref: "#/components/schemas/ResolutionHop" }
+          description: Every retirement between the read id and the current guests, oldest first.
+
+    ResolutionHop:
+      type: object
+      required: [retiredGuestId, kind, eventId, at, successorGuestIds]
+      properties:
+        retiredGuestId: { type: string, format: uuid }
+        kind:
+          type: string
+          enum: [MERGE, SPLIT]
+          description: >
+            MERGE for a merge or a confirmed review that absorbed the guest; SPLIT for an unmerge
+            that detached every record and removed it.
+        eventId:
+          type: string
+          format: uuid
+          description: The merge event that retired the guest; it appears in the current guest's explain.
+        at: { type: string, format: date-time }
+        successorGuestIds:
+          type: array
+          items: { type: string, format: uuid }
+          description: The survivor for MERGE; the guests the detached records landed on for SPLIT.
+
+    RetiredGuestProblem:
+      description: RFC 9457 problem details with extension members naming the current guests.
+      type: object
+      required: [type, title, status, guestId, currentGuestIds]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        guestId:
+          type: string
+          format: uuid
+          description: The retired id that was addressed.
+        resolutionStatus:
+          type: string
+          enum: [MERGED, SPLIT, RETIRED]
+        currentGuestIds:
+          type: array
+          items: { type: string, format: uuid }

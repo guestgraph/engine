@@ -64,6 +64,11 @@ public class GuestQueryService {
         .map(entity -> view(tenantId, mappers.toDomain(entity)));
   }
 
+  /** The guest's source records exactly as received, for a caller that has already gated the id. */
+  public List<SourceRecord> recordsOf(UUID tenantId, UUID guestId) {
+    return sourceRecordStore.findByGuestId(tenantId, guestId);
+  }
+
   /** The guest's source records exactly as received; empty only if the guest exists recordless. */
   public Optional<List<SourceRecord>> findRecords(UUID tenantId, UUID guestId) {
     if (guestRepo.findGuest(tenantId, guestId).isEmpty()) {

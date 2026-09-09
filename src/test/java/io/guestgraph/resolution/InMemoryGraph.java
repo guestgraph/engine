@@ -164,6 +164,39 @@ public class InMemoryGraph implements GraphPort {
   }
 
   @Override
+  public boolean guestExists(UUID tenantId, UUID guestId) {
+    Guest guest = guests.get(guestId);
+    return guest != null && guest.tenantId().equals(tenantId);
+  }
+
+  @Override
+  public List<MergeEvent> eventsAbsorbing(UUID tenantId, UUID guestId) {
+    return events.stream()
+        .filter(e -> e.tenantId().equals(tenantId) && e.absorbedGuestIds().contains(guestId))
+        .sorted(EVENT_ORDER)
+        .toList();
+  }
+
+  @Override
+  public List<MergeEvent> eventsSince(UUID tenantId, Instant from, UUID afterId, int limit) {
+    return events.stream()
+        .filter(e -> e.tenantId().equals(tenantId))
+        .filter(
+            e ->
+                afterId == null
+                    ? !e.createdAt().isBefore(from)
+                    : e.createdAt().isAfter(from)
+                        || (e.createdAt().equals(from) && e.id().compareTo(afterId) > 0))
+        .sorted(EVENT_ORDER)
+        .limit(limit)
+        .toList();
+  }
+
+  /** The (created_at, id) order every event query shares with the Postgres adapter. */
+  private static final Comparator<MergeEvent> EVENT_ORDER =
+      Comparator.comparing(MergeEvent::createdAt).thenComparing(MergeEvent::id);
+
+  @Override
   public void replaceGuestIdentifiers(
       UUID tenantId, UUID guestId, Collection<NormalizedIdentifier> identifiers) {
     identifiersByGuest.put(guestId, new HashSet<>(identifiers));

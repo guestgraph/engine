@@ -1,7 +1,6 @@
 package io.guestgraph.api;
 
 import io.guestgraph.auth.TenantContext;
-import io.guestgraph.persistence.GuestQueryService;
 import io.guestgraph.persistence.TimelineQueryService;
 import io.guestgraph.timeline.Association;
 import io.guestgraph.timeline.ObjectObservation;
@@ -24,11 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class TimelineController {
 
   private final TimelineQueryService timeline;
-  private final GuestQueryService guests;
+  private final GuestGate gate;
 
-  public TimelineController(TimelineQueryService timeline, GuestQueryService guests) {
+  public TimelineController(TimelineQueryService timeline, GuestGate gate) {
     this.timeline = timeline;
-    this.guests = guests;
+    this.gate = gate;
   }
 
   public record AssociationDto(
@@ -94,11 +93,9 @@ public class TimelineController {
     }
     UUID tenantId = TenantContext.tenantId();
     // A timeline for a guest that does not exist is a 404, not an empty page — an empty page
-    // would read as "this guest has no bookings". An existence check, not a profile load:
-    // findGuest would fetch every identifier and a link count on the timeline's hot path.
-    if (!guests.guestExists(tenantId, guestId)) {
-      throw new NotFoundException("No guest " + guestId + " in this tenant");
-    }
+    // would read as "this guest has no bookings" — and for a retired id it is a 410 naming the
+    // current guest. The gate checks existence first, so this hot path loads no profile.
+    gate.require(tenantId, guestId);
 
     TimelineQueryService.Page page =
         timeline.timeline(tenantId, guestId, includePast, limit, cursor);

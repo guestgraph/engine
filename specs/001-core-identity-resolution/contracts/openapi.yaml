@@ -93,14 +93,27 @@ paths:
     get:
       operationId: getGuest
       tags: [Guests]
-      summary: Golden profile + identifiers
+      summary: Golden profile + identifiers, or where a retired id went
       parameters: [{ $ref: "#/components/parameters/GuestId" }]
       responses:
         "200":
-          description: The guest
+          # Amended by feature 004: a guest id a merge absorbed or an unmerge emptied answers
+          # 200 with a resolution instead of 404. ActiveGuest and GuestIdResolution are declared
+          # in specs/004-retired-guest-ids/contracts/openapi.yaml and resolve in the served union.
+          description: The guest, or the resolution of a retired id — told apart by status
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Guest" }
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ActiveGuest"
+                  - $ref: "#/components/schemas/GuestIdResolution"
+                discriminator:
+                  propertyName: status
+                  mapping:
+                    ACTIVE: "#/components/schemas/ActiveGuest"
+                    MERGED: "#/components/schemas/GuestIdResolution"
+                    SPLIT: "#/components/schemas/GuestIdResolution"
+                    RETIRED: "#/components/schemas/GuestIdResolution"
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
 
@@ -124,6 +137,9 @@ paths:
                     items: { $ref: "#/components/schemas/SourceRecord" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+        # Feature 004: a retired guest id answers 410 naming the current guests; Retired is
+        # declared in specs/004-retired-guest-ids/contracts/openapi.yaml.
+        "410": { $ref: "#/components/responses/Retired" }
 
   /guests/{guestId}/explain:
     get:
@@ -146,6 +162,9 @@ paths:
                     items: { $ref: "#/components/schemas/MergeEvent" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+        # Feature 004: a retired guest id answers 410 naming the current guests; Retired is
+        # declared in specs/004-retired-guest-ids/contracts/openapi.yaml.
+        "410": { $ref: "#/components/responses/Retired" }
 
   /guests/{guestId}/unmerge:
     post:
@@ -202,6 +221,9 @@ paths:
               schema: { $ref: "#/components/schemas/ProblemDetails" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+        # Feature 004: a retired guest id answers 410 naming the current guests; Retired is
+        # declared in specs/004-retired-guest-ids/contracts/openapi.yaml.
+        "410": { $ref: "#/components/responses/Retired" }
 
   /guests:
     get:
@@ -459,6 +481,10 @@ components:
       required: [id, profile, identifiers, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [ACTIVE]
+          description: Added by feature 004; every guest document this API returns carries it.
         profile:
           type: object
           additionalProperties: true

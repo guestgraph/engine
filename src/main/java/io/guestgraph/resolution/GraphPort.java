@@ -13,6 +13,7 @@ import io.guestgraph.domain.NegativeMatchRule;
 import io.guestgraph.domain.NormalizedIdentifier;
 import io.guestgraph.domain.ReviewStatus;
 import io.guestgraph.domain.SourceRecord;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,25 @@ public interface GraphPort {
   void saveEvent(MergeEvent event);
 
   List<MergeEvent> eventsForGuests(UUID tenantId, Collection<UUID> guestIds);
+
+  // --- retired guest ids (slice 4) ---
+
+  /** Existence only: the first question the id walk asks, before any event is read. */
+  boolean guestExists(UUID tenantId, UUID guestId);
+
+  /**
+   * Events whose absorbed list names the guest, oldest first — the merge that retired it. Only
+   * {@code MERGE} and {@code REVIEW_CONFIRM} events carry absorbed ids.
+   */
+  List<MergeEvent> eventsAbsorbing(UUID tenantId, UUID guestId);
+
+  /**
+   * One page of the tenant's events in {@code (createdAt, id)} order. With a null {@code afterId},
+   * every event at or after {@code from}, because the replay events an unmerge writes share its
+   * transaction and may share its timestamp; with one, strictly after {@code (from, afterId)} — the
+   * keyset for the next page.
+   */
+  List<MergeEvent> eventsSince(UUID tenantId, Instant from, UUID afterId, int limit);
 
   void replaceGuestIdentifiers(
       UUID tenantId, UUID guestId, Collection<NormalizedIdentifier> identifiers);
