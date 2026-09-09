@@ -95,8 +95,11 @@ API surface (`/api/v1`, per-tenant `X-API-Key`, errors are RFC 9457 problem deta
 `GET|POST|DELETE /config/identifier-rules` · `GET|DELETE /negative-rules` — contracts in
 [`specs/001-core-identity-resolution/contracts/`](specs/001-core-identity-resolution/contracts/openapi.yaml),
 [`specs/002-probabilistic-matching/contracts/`](specs/002-probabilistic-matching/contracts/openapi.yaml)
-and [`specs/003-timeline-journey/contracts/`](specs/003-timeline-journey/contracts/openapi.yaml),
-walkthroughs in the matching `quickstart.md` files. A running instance serves the
+[`specs/003-timeline-journey/contracts/`](specs/003-timeline-journey/contracts/openapi.yaml)
+and [`specs/004-retired-guest-ids/contracts/`](specs/004-retired-guest-ids/contracts/openapi.yaml),
+walkthroughs in the matching `quickstart.md` files. A guest id survives merges: reading an id a
+merge absorbed or an unmerge emptied answers with the guest or guests that hold the person now,
+never a bare not-found, so other systems can store it as their reference. A running instance serves the
 complete merged document at `GET /api-docs` (no API key required).
 
 ### Submitting mutable, multi-person source objects
@@ -157,7 +160,7 @@ From the first tagged release on, migrations are additive-only.
 1. ✅ **Core** — identity resolution engine (deterministic, probabilistic-ready), guest graph, REST API
 2. ✅ **Probabilistic matching** — fuzzy/ML resolution behind the same strategy interface, with review queue
 3. ✅ **Timeline** — per-guest business-object associations, attributed decisions
-4. 🚧 **Retired guest ids** — a stored guest id resolves to the current guest after merges and splits *(current)*
+4. ✅ **Retired guest ids** — a stored guest id resolves to the current guest after merges and splits
 5. **Connectors** — ingest from real PMS/POS/booking systems
 
 ## License

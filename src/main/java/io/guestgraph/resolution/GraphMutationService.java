@@ -4,6 +4,7 @@ import io.guestgraph.domain.Actor;
 import io.guestgraph.domain.MatchReview;
 import io.guestgraph.domain.MergeEvent;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,16 +19,19 @@ public class GraphMutationService {
   private final UnmergeOperation unmergeOperation;
   private final ExplainOperation explainOperation;
   private final ReviewDecisionOperation reviewDecisionOperation;
+  private final GuestIdResolver guestIdResolver;
   private final TenantLock tenantLock;
 
   public GraphMutationService(
       UnmergeOperation unmergeOperation,
       ExplainOperation explainOperation,
       ReviewDecisionOperation reviewDecisionOperation,
+      GuestIdResolver guestIdResolver,
       TenantLock tenantLock) {
     this.unmergeOperation = unmergeOperation;
     this.explainOperation = explainOperation;
     this.reviewDecisionOperation = reviewDecisionOperation;
+    this.guestIdResolver = guestIdResolver;
     this.tenantLock = tenantLock;
   }
 
@@ -47,5 +51,11 @@ public class GraphMutationService {
   @Transactional(readOnly = true)
   public List<MergeEvent> explain(UUID tenantId, UUID guestId) {
     return explainOperation.explain(tenantId, guestId);
+  }
+
+  /** Empty when the id never existed in the tenant; a read, so no tenant lock. */
+  @Transactional(readOnly = true)
+  public Optional<GuestIdResolution> resolve(UUID tenantId, UUID guestId) {
+    return guestIdResolver.resolve(tenantId, guestId);
   }
 }

@@ -190,6 +190,25 @@ public class PostgresGraph implements GraphPort {
   }
 
   @Override
+  public boolean guestExists(UUID tenantId, UUID guestId) {
+    return guestRepo.findGuest(tenantId, guestId).isPresent();
+  }
+
+  @Override
+  public List<MergeEvent> eventsAbsorbing(UUID tenantId, UUID guestId) {
+    return mergeEventRepo.findAbsorbing(tenantId, "[\"" + guestId + "\"]").stream()
+        .map(mappers::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<MergeEvent> eventsSince(UUID tenantId, Instant from, UUID afterId, int limit) {
+    return mergeEventRepo.findSince(tenantId, from, afterId, limit).stream()
+        .map(mappers::toDomain)
+        .toList();
+  }
+
+  @Override
   public void replaceGuestIdentifiers(
       UUID tenantId, UUID guestId, Collection<NormalizedIdentifier> identifiers) {
     identifierRepo.deleteForGuest(tenantId, guestId);

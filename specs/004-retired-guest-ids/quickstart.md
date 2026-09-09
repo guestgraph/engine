@@ -50,20 +50,25 @@ Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`,
 
 ### US2 — chains are followed to the end
 
-7. Ingest `d` with a loyalty id → guest `Z`; ingest `e` carrying `Y`'s phone and `d`'s loyalty
-   id → `Y` is absorbed into `Z`.
+7. Ingest `d` with a new email → guest `Z`; ingest `e` carrying that email and `Y`'s phone →
+   `Y` is absorbed into `Z`. The extractor orders identifiers email first and the first matched
+   guest survives, so the bridge's only email must be `Z`'s for the chain to grow.
 8. `GET $B/guests/{X}` → `currentGuestIds: [Z]`, two hops in order: `X → Y`, then `Y → Z`.
 9. `GET $B/guests/{Y}` → `currentGuestIds: [Z]`, one hop.
 
 ### US3 — a split resolves to every guest it became
 
-10. Ingest `r1`, `r2`, `r3` sharing an email → one guest `S` with three records.
-11. `POST $B/guests/{S}/unmerge` with all three record ids → `remainingGuestId: null`; the
-    detached records replay onto their own guests.
+10. Set `reviewThreshold` to 1 with `PUT $B/config/matching`, so a shared email parks instead
+    of attaching. Ingest `r1` with that email plus `loyaltyId: L1`, then `r2` with the email
+    alone → `r2` parks a review; `POST $B/match-reviews/{id}` with `CONFIRM` → guest `S` holds
+    both.
+11. `POST $B/guests/{S}/unmerge` with both record ids → `remainingGuestId: null`; the detached
+    records replay onto two guests, because the email is still crowded.
 12. `GET $B/guests/{S}` → `status: SPLIT`, `currentGuestIds` lists every guest the records
     landed on, one hop of `kind: SPLIT` naming them as successors.
-13. Merge one of those guests into another by ingesting a bridging record → `GET $B/guests/{S}`
-    now names the survivor instead. *Confirms SC-002.*
+13. Raise `reviewThreshold` to 1000, ingest `v` with a new phone → guest `V`, then a bridge
+    carrying that phone and `L1` → `V` survives and `W1` is absorbed. `GET $B/guests/{S}` now
+    names `V` and `W2`, with two hops. *Confirms SC-002.*
 14. Unmerge only one record off a three-record guest → `GET` on that guest is still `ACTIVE`.
 
 ### US4 — everything under a retired id points to the current one

@@ -32,6 +32,18 @@ public class ApiExceptionHandler {
     return problem(HttpStatus.NOT_FOUND, "not-found", "Resource not found", e.getMessage());
   }
 
+  /** Spec 004 FR-008: a retired id under any sub-resource points to the current guests. */
+  @ExceptionHandler(RetiredGuestException.class)
+  public ProblemDetail retiredGuest(RetiredGuestException e) {
+    ProblemDetail problem =
+        problem(HttpStatus.GONE, "guest-retired", "Guest id retired", e.getMessage());
+    // RFC 9457 owns the member named status, so the resolution's status is named apart.
+    problem.setProperty("guestId", e.resolution().id());
+    problem.setProperty("resolutionStatus", e.resolution().status().name());
+    problem.setProperty("currentGuestIds", e.resolution().currentGuestIds());
+    return problem;
+  }
+
   @ExceptionHandler(ConflictException.class)
   public ProblemDetail conflict(ConflictException e) {
     return problem(HttpStatus.CONFLICT, "conflict", "Conflict", e.getMessage());

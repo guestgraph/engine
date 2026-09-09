@@ -27,7 +27,7 @@ replacement:
   R4-1's emit-on-change rule removes most noise; if growth ever matters, add a
   retention/compaction policy for superseded observations that preserves the
   MergeEvent audit chain.
-- **R-X5 The guest id as an external reference (was: a stable primary key)** — the point
+- **R-X5 The guest id as an external reference (was: a stable primary key)** — ✅ consumed by specs/004-retired-guest-ids — the point
   of a golden profile is that other systems can hold its `guestId` as *the* authoritative
   reference for a person. Today they cannot: a merge deletes the absorbed guest
   (`ResolutionEngine.execute` → `deleteGuest`) and `GET /guests/{absorbedId}` then returns a
@@ -147,12 +147,13 @@ The original sketch:
 
 ## Slice 4 — Connectors
 
-**Consume R-X5 with this slice.** Connectors are the first real holders of a `guestId`: writing
-one back into a PMS or CRM is what makes GuestGraph the system of record rather than a report.
-That write-back is unsafe until a retired id resolves instead of 404ing, because the reference
-breaks precisely when a merge happens — and a connector cannot tell that it broke. Either build
-the resolution endpoint in this slice, or state the constraint in the connector contract so no
-integrator stores an id believing it is stable.
+**R-X5 is built** ([specs/004-retired-guest-ids](../specs/004-retired-guest-ids/spec.md)), so
+connectors may hold a `guestId`: writing one back into a PMS or CRM is what makes GuestGraph the
+system of record rather than a report. The connector contract states the integrator rule rather
+than a constraint: a stored guest id may be retired by a merge or a split; reading it answers
+`MERGED` with the one current id, which the connector stores in its place, or `SPLIT` with
+several, which the connector escalates rather than guesses. Every sub-resource under a retired
+id refuses with the current ids, so a connector that skips the read still fails loudly.
 
 
 ### R4-1: externalKey convention for mutable, multi-person source objects (Apaleo pattern) — contract published by specs/003-timeline-journey; connectors remain slice 4

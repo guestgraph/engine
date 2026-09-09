@@ -51,6 +51,8 @@ class GuestQueryApiTest extends PostgresIntegrationTest {
     assertThat(guest.get("profile").get("roomPreference").asString()).isEqualTo("non-smoking");
     assertThat(guest.get("recordCount").asInt()).isEqualTo(3);
     assertThat(guest.get("identifiers").size()).isEqualTo(1);
+    // Slice 4 adds exactly one field to the active guest document (FR-012).
+    assertThat(guest.get("status").asString()).isEqualTo("ACTIVE");
   }
 
   @Test

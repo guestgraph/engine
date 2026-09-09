@@ -5,6 +5,7 @@ import io.guestgraph.resolution.DeterministicMatcher;
 import io.guestgraph.resolution.ExplainOperation;
 import io.guestgraph.resolution.FuzzyMatcher;
 import io.guestgraph.resolution.GraphPort;
+import io.guestgraph.resolution.GuestIdResolver;
 import io.guestgraph.resolution.MatchingPolicy;
 import io.guestgraph.resolution.ResolutionEngine;
 import io.guestgraph.resolution.ResolutionStrategy;
@@ -40,6 +41,11 @@ public class ResolutionConfig {
   @Bean
   public ExplainOperation explainOperation(GraphPort graph) {
     return new ExplainOperation(graph);
+  }
+
+  @Bean
+  public GuestIdResolver guestIdResolver(GraphPort graph) {
+    return new GuestIdResolver(graph);
   }
 
   @Bean
