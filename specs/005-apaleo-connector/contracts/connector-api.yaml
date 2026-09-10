@@ -31,10 +31,11 @@ paths:
       summary: Receive one Apaleo delivery, or its reachability check
       security: []
       description: >
-        Stores the delivery by its id and answers at once; processing happens on the worker.
-        A second delivery of the same id is acknowledged and ignored. An empty body is Apaleo's
-        reachability check and is answered with 200. A wrong secret is 404, indistinguishable
-        from an unknown path.
+        The secret names the connection: the delivery is stored under the connection whose
+        webhook secret hash matches and answered at once; processing happens on the worker. A
+        second delivery of the same id is acknowledged and ignored. An empty body is Apaleo's
+        reachability check and is answered with 200. A secret that matches no connection is 404,
+        indistinguishable from an unknown path.
       parameters:
         - name: secret
           in: path
@@ -54,7 +55,7 @@ paths:
     get:
       tags: [Operations]
       operationId: getStatus
-      summary: Is this connector fine
+      summary: Is this connector fine, connection by connection
       responses:
         "200":
           description: The status document
@@ -63,53 +64,60 @@ paths:
               schema: { $ref: "#/components/schemas/Status" }
         "401": { description: Missing or wrong token }
 
-  /sync/full:
+  /connections/{connectionId}/sync/full:
     post:
       tags: [Operations]
       operationId: startFullSync
-      summary: Start a full sync of every configured property
+      summary: Start a full sync of one connection's properties and bookings
+      parameters: [{ $ref: "#/components/parameters/ConnectionId" }]
       responses:
         "202":
           description: Started
           content:
             application/json:
               schema: { $ref: "#/components/schemas/RunStarted" }
-        "409": { description: A full sync is already running }
+        "404": { description: No such connection }
+        "409": { description: A full sync is already running on this connection }
         "401": { description: Missing or wrong token }
 
-  /sync/reconcile:
+  /connections/{connectionId}/sync/reconcile:
     post:
       tags: [Operations]
       operationId: startReconciliation
-      summary: Start a reconciliation from each property's sync point
+      summary: Start a reconciliation from one connection's sync points
+      parameters: [{ $ref: "#/components/parameters/ConnectionId" }]
       responses:
         "202":
           description: Started
           content:
             application/json:
               schema: { $ref: "#/components/schemas/RunStarted" }
-        "409": { description: A run is already in progress }
+        "404": { description: No such connection }
+        "409": { description: A run is already in progress on this connection }
         "401": { description: Missing or wrong token }
 
-  /refresh:
+  /connections/{connectionId}/refresh:
     post:
       tags: [Operations]
       operationId: startRefresh
-      summary: Re-read every held guest id and apply the integrator rule
+      summary: Re-read one connection's held guest ids and apply the integrator rule
+      parameters: [{ $ref: "#/components/parameters/ConnectionId" }]
       responses:
         "202":
           description: Started
           content:
             application/json:
               schema: { $ref: "#/components/schemas/RunStarted" }
+        "404": { description: No such connection }
         "401": { description: Missing or wrong token }
 
-  /runs/{runId}:
+  /connections/{connectionId}/runs/{runId}:
     get:
       tags: [Operations]
       operationId: getRun
       summary: One run's progress and outcome
       parameters:
+        - $ref: "#/components/parameters/ConnectionId"
         - name: runId
           in: path
           required: true
@@ -120,7 +128,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Run" }
-        "404": { description: No such run }
+        "404": { description: No such connection or run }
         "401": { description: Missing or wrong token }
 
 components:
@@ -128,6 +136,14 @@ components:
     OpsToken:
       type: http
       scheme: bearer
+
+  parameters:
+    ConnectionId:
+      name: connectionId
+      in: path
+      required: true
+      schema: { type: string }
+      description: The connection's name from configuration.
 
   schemas:
     ApaleoEvent:
@@ -150,9 +166,19 @@ components:
 
     Status:
       type: object
-      required:
-        [account, properties, subscription, syncPoints, counters, pendingEvents, splitsAwaitingPerson, lastError]
+      required: [connections]
       properties:
+        connections:
+          type: array
+          items: { $ref: "#/components/schemas/ConnectionStatus" }
+
+    ConnectionStatus:
+      type: object
+      required:
+        [id, tenantLabel, account, properties, subscription, syncPoints, counters, pendingEvents, splitsAwaitingPerson, lastActivityAt, lastError]
+      properties:
+        id: { type: string }
+        tenantLabel: { type: string }
         account: { type: string }
         properties:
           type: array
@@ -181,7 +207,7 @@ components:
           format: date-time
           description: The last successful run or event; a gap longer than Apaleo's retry window starts a full sync.
         counters:
-          description: Since the connector's state was created.
+          description: Since the connection's state was created.
           type: object
           required: [versionsSubmitted, recordsSubmitted, duplicates, flaggedForReview, errors]
           properties:

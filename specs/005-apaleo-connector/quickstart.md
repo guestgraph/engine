@@ -14,8 +14,10 @@ JDK 25, Docker, `./mvnw`. An Apaleo sandbox account with a client-credentials cl
 walk — a tunnel is enough for a sandbox. An engine running locally with the demo tenant, and an
 API key registered as agent-operated and named `connector-apaleo`.
 
-Configuration is the table at the end of [data-model.md](data-model.md), as environment
-variables. Nothing in it is ever printed.
+Configuration is the two tables at the end of [data-model.md](data-model.md): the instance's
+variables and a connections file with one entry for the sandbox account, named `sandbox`. Nothing
+in it is ever printed. `$C` is the connector, `$T` its ops token, and every operation below runs
+under `/connections/sandbox`.
 
 ## Run the test suite (primary validation)
 
@@ -66,9 +68,9 @@ Engine at `$E` with key `$K`; connector at `$C` with ops token `$T`.
 
 3. Start the connector with no state. It registers `apaleo` at the engine, creates its
    subscription, and starts a full sync because no sync point exists.
-4. `GET $C/status` → the properties served, `subscription.active: true`, a sync point per
-   property once the run finishes, counters that match the sandbox's reservation and person
-   counts.
+4. `GET $C/status` → one entry, `sandbox`, with its tenant label, the properties served,
+   `subscription.active: true`, a sync point per property once the run finishes, counters that
+   match the sandbox's reservation and person counts.
 5. Pick a booking with one reservation carrying two additional guests and a distinct booker;
    `GET $E/api/v1/source-objects/apaleo/reservation/{id}` → a roster of three with roles
    `PRIMARY_GUEST`, `ADDITIONAL_GUEST` ×2 and `currentVersion` equal to the reservation's
@@ -76,8 +78,8 @@ Engine at `$E` with key `$K`; connector at `$C` with ops token `$T`.
    `BOOKER`, with business dates spanning the reservation. *Confirms SC-001's shape.*
 6. `GET $E/api/v1/guests/{guestId}/records` for the primary guest → the payload carries
    `firstName`, `lastName`, `email` at the top and `person` and `reservation` nested.
-7. `POST $C/sync/full` again → the run finishes with `duplicates` equal to the records
-   submitted before and `versionsSubmitted: 0`. *Confirms SC-002.*
+7. `POST $C/connections/sandbox/sync/full` again → the run finishes with `duplicates` equal to
+   the records submitted before and `versionsSubmitted: 0`. *Confirms SC-002.*
 
 ### US2 — changes arrive within a minute
 
@@ -94,18 +96,20 @@ Engine at `$E` with key `$K`; connector at `$C` with ops token `$T`.
 
 ### US3 — the connector can be operated
 
-11. Set a wrong Apaleo secret and restart → `GET $C/status` shows `lastError.where: APALEO`
-    with a time and a reason; events still answer 202 and `pendingEvents` grows. Restore the
-    secret → the pending events drain.
+11. Set a wrong Apaleo secret on the connection and restart → `GET $C/status` shows that
+    connection's `lastError.where: APALEO` with a time and a reason; events still answer 202 and
+    its `pendingEvents` grows. Restore the secret → the pending events drain.
 12. Search the connector's log for the client secret, the engine key and one guest's email →
     no hit. *Confirms SC-007.*
 
 ### US4 — the guest ids the connector holds stay valid
 
 13. In the engine, merge a synced guest with another by ingesting a bridging record; `POST
-    $C/refresh` → the run logs the old and new id, and the held id for that slot is the survivor.
-14. In the engine, unmerge a synced guest into two; `POST $C/refresh` → `GET $C/status` shows
-    `splitsAwaitingPerson: 1` and the held row carries both current ids, unchanged.
+    $C/connections/sandbox/refresh` → the run logs the old and new id, and the held id for that
+    slot is the survivor.
+14. In the engine, unmerge a synced guest into two; `POST $C/connections/sandbox/refresh` →
+    `GET $C/status` shows `splitsAwaitingPerson: 1` on `sandbox` and the held row carries both
+    current ids, unchanged.
     *Confirms SC-006.*
 
 ## Success-criteria spot checks

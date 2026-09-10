@@ -41,8 +41,8 @@ Testcontainers integration tests with WireMock for both upstreams; one end-to-en
 against a local engine and an Apaleo sandbox (research R10). ArchUnit, PMD and Spotless as in the
 engine.
 
-**Target Platform**: Linux server, one instance per Apaleo account and engine tenant, reachable
-over HTTPS by Apaleo for the webhook
+**Target Platform**: Linux server, one instance serving many connections, each an engine tenant
+paired with an Apaleo account, reachable over HTTPS by Apaleo for the webhook (research R12)
 
 **Project Type**: Web service — single Maven module, in a new repository
 
@@ -50,12 +50,14 @@ over HTTPS by Apaleo for the webhook
 some 15,000 records in batches of 100, against the engine's 30–100 records per second per tenant.
 SC-003, a person change visible within two minutes, with Apaleo's one-minute delivery.
 
-**Constraints**: One account, one tenant per instance (FR-015). Every key derived from Apaleo's
-state (FR-002). No person data and no credential in any log, status or error (FR-016). Never
+**Constraints**: Every row and every query carries the connection, enforced by ArchUnit; secrets
+in configuration, never in the database (FR-015, FR-015a). Every key derived from Apaleo's state
+(FR-002). No person data and no credential in any log, status or error (FR-016). Never
 drop an event or a reservation (FR-006, FR-011). Never give up a sync on rate limiting (FR-017).
 
-**Scale/Scope**: 1 new repository; 2 source object types; 5 tables; 2 upstream clients; 1
-webhook endpoint; 5 operations endpoints; 2 scheduled runs; 0 engine changes.
+**Scale/Scope**: 1 new repository; 2 source object types; 6 tables; 2 upstream clients, one
+instance each per connection; 1 webhook endpoint; 5 operations endpoints; 2 scheduled runs per
+connection; 0 engine changes.
 
 ## Constitution Check
 
@@ -67,9 +69,10 @@ principles as they reach a client.
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
-- [x] **Tenant isolation (I)**: an instance holds one tenant's credential and one account's, and
-      its state has no tenant column because it has one tenant. Two instances for two tenants
-      share nothing (FR-015; spec edge case on a doubly connected account).
+- [x] **Tenant isolation (I)**: an instance serves many connections, each one tenant paired with
+      one account; every row carries the connection and every query takes it, enforced by the
+      same ArchUnit shape the engine uses for tenants (FR-015, research R12). Two connections
+      share nothing, and a delivery reaches only the connection whose secret it carries.
 - [x] **Immutable source records (II)**: the connector only submits; it never asks the engine to
       alter or remove a record, and a canceled or deleted reservation removes nothing (research
       R5). Its own state is a cache, not a record.
@@ -122,7 +125,7 @@ compose.yaml                          # local PostgreSQL
 
 src/main/java/io/guestgraph/connector/apaleo/
 ├── apaleo/
-│   ├── ApaleoAuth.java               # client credentials, token cache, refresh ahead of expiry (R2)
+│   ├── ApaleoAuth.java               # client credentials per connection, token cache, refresh ahead of expiry (R2, R12)
 │   ├── ApaleoClient.java             # list reservations (paged, sorted, 204 = end), list bookings, fetch either, backoff (R2)
 │   ├── ApaleoWebhooks.java           # list / create / replace the subscription on startup (R5)
 │   └── model/                        # Reservation, Booking, Guest, Booker, Event — the fields the mapping reads
@@ -144,8 +147,8 @@ src/main/java/io/guestgraph/connector/apaleo/
 ├── ops/
 │   ├── StatusController.java         # GET /status, POST /sync/full, /sync/reconcile, /refresh, GET /runs/{id} (R9)
 │   └── OpsTokenFilter.java           # bearer token for the ops surface
-├── state/                            # entities, @Query-only repositories, Flyway-backed
-└── config/                           # ConnectorProperties from the environment; masked in logs
+├── state/                            # entities, @Query-only repositories with connectionId, Flyway-backed
+└── config/                           # ConnectorProperties and the connections file; secrets masked in logs (R12)
 
 src/main/resources/db/migration/V1__connector_state.sql
 
@@ -183,6 +186,7 @@ regeneration.
 | R9 | Five operations endpoints behind a bearer token; structured logs with no person data | [contracts/connector-api.yaml](contracts/connector-api.yaml) |
 | R10 | Unit tests on recorded documents, WireMock integration, one manual end-to-end walk | [research.md](research.md) |
 | R11 | Six sandbox items to settle before the event list and the release | [research.md](research.md) |
+| R12 | Many connections per instance, scoped on every row and query; secrets in configuration | [research.md](research.md) |
 
 ## Complexity Tracking
 
@@ -212,4 +216,5 @@ Three choices worth naming even though none is a violation:
 - An engine container image, so the connector's CI can run the real engine instead of a stub.
 - A status on the source-object block and the association, so a canceled booking can leave a
   guest's timeline (roadmap R3-2).
-- A connect client for many accounts, for the managed offering (research R2).
+- A connect client for many accounts, encrypted secret storage with a management endpoint,
+  per-connection queues and a token per connection, for the managed offering (research R12).

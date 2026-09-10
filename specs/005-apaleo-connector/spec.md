@@ -15,6 +15,7 @@
 - Q: Which connector comes first? → A: Apaleo. The roadmap's R4-1 convention was written for its reservation model: entity-less persons, a modified instant per entity, webhooks plus full re-sync.
 - Q: Where does the connector live? → A: In its own repository, `guestgraph/connector-apaleo`, a standalone service that talks to the engine over its REST API, the way a third-party connector would. It is a new member of the family, so `REPOSITORIES.md` gains a row through a robertblust/conventions release before the repository is created; that step belongs to the owner, not to this slice's tasks.
 - Q: Are bookings in scope, or only reservations? → A: Both, as two source objects. In Apaleo the booker lives on the booking, with the booking's own modified instant and its own events, while the primary and additional guests live on the reservation. Keying the booker by the reservation would lose a booker correction as a duplicate, because the reservation's clock does not move. The booker is therefore an observation on the booking object; this amends roadmap note R4-1, which put the booker on the reservation.
+- Q: Does one connector instance serve one hotel or many? → A: Many. An instance serves a list of connections, each one engine tenant with its key and one Apaleo account with its credential and properties. Every row of the connector's state and every query carries the connection, enforced the way the engine enforces the tenant, because the constitution's first principle says tenancy is cheap on day one and brutal to retrofit. Connections come from configuration for now, so no secret sits in a database; a store for them, fairness between connections, per-tenant operator access and Apaleo's multi-account client are later additions that change no table.
 - Q: Does the first connector write the guest id back into Apaleo? → A: No. It reads reservations and persons, holds the guest ids the engine returns, and follows the integrator rule on them. Writing into a PMS field is a later slice once the field is known.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -73,12 +74,12 @@ A hotel's IT contact, or a GuestGraph steward, needs to know whether the connect
 
 **Why this priority**: A connector nobody can observe is one that fails silently, which is the failure mode this whole family of slices exists to remove. It ranks below the two data stories because it observes them.
 
-**Independent Test**: Start the connector with a valid configuration and read its status; break the Apaleo credential and read it again; trigger a full sync and watch the counters move.
+**Independent Test**: Start the connector with two connections configured and read the status; break one connection's Apaleo credential and read it again; trigger a full sync on the other and watch only its counters move.
 
 **Acceptance Scenarios**:
 
-1. **Given** a running connector, **When** its status is read, **Then** it reports the account and properties it serves, the time of the last successful full sync and reconciliation, the count of observations submitted, duplicates absorbed, records flagged for review, events pending retry, and whether the webhook subscription is active.
-2. **Given** an Apaleo credential that stops working, **When** the next fetch fails, **Then** the status shows the failure and its time, and the connector keeps acknowledging events and queueing them rather than losing them.
+1. **Given** a running connector, **When** its status is read, **Then** it reports, per connection, the tenant and the account and properties served, the time of the last successful full sync and reconciliation, the count of observations submitted, duplicates absorbed, records flagged for review, events pending retry, and whether the webhook subscription is active.
+2. **Given** one connection's Apaleo credential stops working, **When** its next fetch fails, **Then** that connection's status shows the failure and its time, the connector keeps acknowledging its events and queueing them rather than losing them, and every other connection continues unaffected.
 3. **Given** an operator request for a full sync, **When** it runs, **Then** it proceeds like story 1 and the status shows its progress and completion.
 4. **Given** the connector's configuration, **When** any log, status or error is produced, **Then** no credential and no person data appears in it; person data stays in the submissions to the engine.
 5. **Given** a scheduled reconciliation, **When** it runs, **Then** it behaves as story 2's scenario 8 and records its outcome in the status.
@@ -112,7 +113,8 @@ Every submission answers with the guest each person resolved to. The connector k
 - The engine is unreachable while events arrive: events are acknowledged and queued; submissions resume when the engine answers, in any order, because the keys carry the version.
 - The engine answers a retired-id refusal on a sub-resource the connector reads: the connector treats it as the integrator rule instructs and reads the current guest instead.
 - Apaleo's rate limit is hit during a full sync: the connector slows down and continues; a full sync that takes an hour is acceptable, a full sync that stops is not.
-- The same Apaleo account is connected to two engine tenants by mistake: each connector instance serves exactly one tenant and one account, so the mistake produces two independent graphs, not a leak between them.
+- The same Apaleo account is configured under two connections to two engine tenants by mistake: each connection is scoped end to end, so the mistake produces two independent graphs, not a leak between them, and the status shows both.
+- Two connections name the same webhook secret: the configuration is refused at start, because the secret is what routes a delivery to its connection.
 
 ## Requirements *(mandatory)*
 
@@ -143,7 +145,8 @@ Every submission answers with the guest each person resolved to. The connector k
 **Operation**
 
 - **FR-014**: The connector MUST expose a status that reports what it serves, when it last synced and reconciled, its submission counters by outcome, the events pending retry, the splits awaiting a person, and whether its subscription is active.
-- **FR-015**: The connector MUST authenticate to Apaleo with a credential bound to one account and to the engine with one tenant's credential, and MUST serve exactly that pair (Constitution I).
+- **FR-015**: The connector MUST serve a configured list of connections, each pairing one engine tenant and its credential with one Apaleo account, its credential and its properties. Every row of state and every query MUST carry the connection, and nothing read or written under one connection MUST be visible under another (Constitution I). A failure on one connection MUST NOT stop another.
+- **FR-015a**: Connections and their secrets MUST come from configuration, never from the connector's database, so that no credential is stored at rest by this slice; adding a connection is a configuration change.
 - **FR-016**: No credential and no person data MUST appear in logs, status or errors.
 - **FR-017**: The connector MUST slow down on Apaleo rate limiting and continue, never abort a sync.
 
@@ -179,7 +182,8 @@ Every submission answers with the guest each person resolved to. The connector k
 - Apaleo's webhook carries only the reservation id and is delivered at least once, out of order, with retries; the connector's design follows Apaleo's stated behavior and needs no assumption beyond it. Sixteen reservation event types exist; the connector subscribes to the five that can carry a person change and confirms that set against a sandbox (FR-007, FR-007a).
 - Apaleo's reservation list pages at up to 500 items, answers an empty page with no content rather than an empty list, filters by modification date and can be sorted by update time; the reconciliation walks it in that order. The booking list pages the same way but has no modification filter and no sort, which is why bookings are reconciled through their reservations and, after a gap longer than Apaleo's retry window, by a full sync.
 - The connector keeps state: the last submitted version and person hash per object, the processed event ids, the sync points and the held guest ids. That state is a cache of Apaleo's and the engine's facts; losing it costs a full sync, not correctness. It lives in one database schema of the connector's own, reached as a role that sees nothing else, so sharing a database with the engine or not is a deployment choice.
-- The engine credential the connector holds is a tenant key registered as an agent-operated credential named for the connector, so anything it does is attributed. A key scoped to ingest and reads only is roadmap R5-1 prerequisite 2 and is out of scope here.
+- Each connection's engine credential is a tenant key registered as an agent-operated credential named for the connector, so anything it does is attributed. A key scoped to ingest and reads only is roadmap R5-1 prerequisite 2 and is out of scope here.
+- One instance, many connections, in data and queries from the first table. Around that, the connector stays single-operator and configuration-driven: encrypted secret storage with a management endpoint, fairness between connections under load, per-tenant operator access and Apaleo's multi-account client are later slices that add and do not rewrite.
 - The engine's ingest contract, source-object endpoint and retired-id resolution are used as published; this slice asks the engine for nothing new. If implementation finds a gap, it is recorded in the roadmap and built here in a separate change.
 - The repository `guestgraph/connector-apaleo` is created by the owner after `REPOSITORIES.md` names it, vendors the conventions at the pinned release, and carries its own suite and the shared conventions job. This spec lives in the engine repository because the roadmap and the slice history live here; the connector repository links to it.
 - Write-back of guest ids into Apaleo, and any connector for a second system, are later slices.

@@ -3,9 +3,10 @@
 **Feature**: `005-apaleo-connector` | **Date**: 2026-09-10 | Migration: `V1__connector_state.sql` in `guestgraph/connector-apaleo`
 
 The connector's own state, all of it a cache of Apaleo's and the engine's facts (spec assumptions).
-Nothing here is a source record; the engine holds those. Every table carries the property or
-account the row belongs to, and one connector instance serves one account and one tenant, so no
-table needs a tenant column of its own (FR-015).
+Nothing here is a source record; the engine holds those. One instance serves many connections,
+and every table carries `connection_id` as the first column of its primary key or as a NOT NULL
+column with an index; every repository method takes a `connectionId` parameter, and an ArchUnit
+rule refuses one that does not, the way the engine's refuses a query without a tenant (FR-015).
 
 ---
 
@@ -32,6 +33,23 @@ of its own in the engine repository, recorded in the roadmap.
 
 ---
 
+## `connection`
+
+One row per configured connection, written from configuration at start and updated when the
+configuration changes; the secrets themselves never enter the table (FR-015a). The row exists so
+that every other table can reference a stable id and so the status can list connections that have
+not run yet.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | text | PK — the connection's name from configuration, stable across restarts |
+| tenant_label | text | NOT NULL — the engine tenant's name, for the status only |
+| apaleo_account | text | NOT NULL — Apaleo's account id, for the status only |
+| property_ids | jsonb | NOT NULL DEFAULT '[]' — empty means every property of the account |
+| webhook_secret_hash | text | NOT NULL — the delivery path's secret, hashed; routing compares hashes |
+| created_at | timestamptz | NOT NULL |
+| last_activity_at | timestamptz | NOT NULL — the last successful run or event; a gap longer than Apaleo's retry window from here triggers a full sync (FR-012a) |
+
 ## `object_state`
 
 The last version the connector submitted for a reservation or a booking, and the hash that
@@ -39,6 +57,7 @@ decides whether the next one is submitted (research R4).
 
 | Column | Type | Notes |
 |---|---|---|
+| connection_id | text | PK part, FK → `connection` |
 | object_type | text | PK part — `reservation` or `booking` |
 | object_id | text | PK part — Apaleo's id for the object |
 | property_id | text | NULL — set for a reservation; a booking may span properties |
@@ -59,7 +78,8 @@ Every webhook delivery, by Apaleo's event id, so the second delivery is a no-op 
 
 | Column | Type | Notes |
 |---|---|---|
-| event_id | text | PK — the `id` of the delivery |
+| connection_id | text | PK part, FK → `connection` — the connection whose secret routed the delivery |
+| event_id | text | PK part — the `id` of the delivery |
 | event_type | text | NOT NULL — e.g. `reservation/changed`, `booking/changed` |
 | object_type | text | NOT NULL — from the topic |
 | object_id | text | NOT NULL — `data.entityId` |
@@ -70,20 +90,20 @@ Every webhook delivery, by Apaleo's event id, so the second delivery is a no-op 
 | next_attempt_at | timestamptz | NULL — set while `PENDING` after a failure |
 | last_error | text | NULL — the reason, never a payload |
 
-`IGNORED` records an event for a property the connector does not serve. `FAILED` is never
+`IGNORED` records an event for a property the connection does not serve. `FAILED` is never
 final: a failed event stays retryable and the status counts it as pending retry (FR-011).
 
 ## `sync_point`
 
-Per property, how far the connector has submitted (research R6).
+Per connection and property, how far the connector has submitted (research R6).
 
 | Column | Type | Notes |
 |---|---|---|
-| property_id | text | PK |
+| connection_id | text | PK part, FK → `connection` |
+| property_id | text | PK part |
 | modified_through | timestamptz | NOT NULL — the greatest reservation `modified` fully processed |
 | last_full_sync_at | timestamptz | NULL |
 | last_reconcile_at | timestamptz | NULL |
-| last_activity_at | timestamptz | NOT NULL — the last successful run or event; a gap longer than Apaleo's retry window from here triggers a full sync (FR-012a) |
 
 ## `sync_run`
 
@@ -92,6 +112,7 @@ One row per full sync or reconciliation, for the status and for `GET /runs/{id}`
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
+| connection_id | text | NOT NULL, FK → `connection`, indexed |
 | kind | text | NOT NULL CHECK IN (`FULL`, `RECONCILE`, `REFRESH`) |
 | started_at | timestamptz | NOT NULL |
 | finished_at | timestamptz | NULL |
@@ -111,6 +132,7 @@ The guest each person on the latest submitted version resolved to, and its refre
 
 | Column | Type | Notes |
 |---|---|---|
+| connection_id | text | PK part, FK → `connection` |
 | object_type | text | PK part — `reservation` or `booking` |
 | object_id | text | PK part |
 | role | text | PK part — `PRIMARY_GUEST` or `ADDITIONAL_GUEST` on a reservation, `BOOKER` on a booking |
@@ -148,25 +170,39 @@ it waits for a person, and the status counts it.
    rule 2; a run interrupted before that resumes from the previous point.
 5. **Held id.** Rewritten from every result that carries a `guestId`; `DUPLICATE_IGNORED` results
    carry the existing guest and rewrite it too, so a full sync refreshes the held ids for free.
-6. **Refresh.** For each distinct held `guest_id`, one read of `GET /guests/{id}`; the answer's
-   `status` and `currentGuestIds` update every row holding that id.
+6. **Refresh.** For each connection and each distinct held `guest_id`, one read of
+   `GET /guests/{id}` with that connection's key; the answer's `status` and `currentGuestIds`
+   update every row holding that id under that connection.
+7. **Connection.** Every query carries the connection id; a delivery belongs to the connection
+   whose secret hash matches its path, and nothing under one connection is visible under
+   another.
 
 ---
 
 ## Configuration
 
-Read from the environment; none of it is logged.
+Read from the environment or a mounted file; none of it is logged, and none of the secrets
+reaches the database (FR-015a).
+
+Per instance:
 
 | Property | Meaning |
 |---|---|
-| `APALEO_CLIENT_ID`, `APALEO_CLIENT_SECRET` | the client-credentials client, one account |
-| `APALEO_PROPERTY_IDS` | comma-separated; empty means every property of the account |
+| `CONNECTOR_PUBLIC_URL` | the HTTPS base Apaleo can reach; a connection's endpoint is `{base}/apaleo/events/{secret}` |
+| `CONNECTOR_OPS_TOKEN` | bearer token for `/status` and `/connections/*` |
+| `CONNECTOR_CONNECTIONS_FILE` | path to a YAML file listing the connections below |
 | `APALEO_EVENT_TYPES` | default `reservation/created,reservation/changed,reservation/amended,reservation/picked-up-from-block,reservation/checked-in,booking/created,booking/changed` (FR-007) |
-| `CONNECTOR_PUBLIC_URL` | the HTTPS base Apaleo can reach; the endpoint is `{base}/apaleo/events/{secret}` |
-| `CONNECTOR_WEBHOOK_SECRET` | the path secret |
-| `CONNECTOR_OPS_TOKEN` | bearer token for `/status`, `/sync/*`, `/runs/*` |
-| `ENGINE_BASE_URL`, `ENGINE_API_KEY` | the engine and the tenant's agent-registered key |
 | `ENGINE_SOURCE_SYSTEM` | default `apaleo` |
+
+Per connection, in that file, under the connection's name:
+
+| Property | Meaning |
+|---|---|
+| `tenantLabel` | the engine tenant's name, for the status |
+| `engineBaseUrl`, `engineApiKey` | the engine and that tenant's agent-registered key |
+| `apaleoAccount`, `apaleoClientId`, `apaleoClientSecret` | the client-credentials client, one account |
+| `apaleoPropertyIds` | list; empty means every property of the account |
+| `webhookSecret` | the path secret, unique across connections; the configuration is refused otherwise |
 | `RECONCILE_INTERVAL`, `RECONCILE_OVERLAP` | defaults 15 minutes and 1 hour |
 | `RESYNC_AFTER_GAP` | default 24 hours, Apaleo's retry window; a longer gap since the last activity starts a full sync (FR-012a) |
 | `REFRESH_CRON` | default nightly |
