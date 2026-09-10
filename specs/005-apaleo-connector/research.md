@@ -45,7 +45,8 @@ whether it shares the engine's database or has its own is decided at deployment,
 reservations read with `GET /booking/v1/reservations` filtered by `dateFilter=Modification`,
 sorted `updated:asc`, `pageSize=500`; a single reservation with `GET /booking/v1/reservations/{id}`;
 bookings read with `GET /booking/v1/bookings/{id}?expand=reservations` and, for a full sync,
-`GET /booking/v1/bookings?expand=reservations` paged at 500.
+`GET /booking/v1/bookings?expand=reservations` paged at 500. One client and one token cache per
+connection (R12).
 
 **Rationale**: These are the calls the Booking API document offers for exactly this shape of read.
 The booker is read from the booking, where it lives; the copy a reservation shows under its own
@@ -139,8 +140,8 @@ emit; if a later extractor reads addresses, the hash gains the field in the same
 
 ## R5 — Receiving events
 
-**Decision**: `POST /apaleo/events/{secret}` answers 202 as soon as the body is stored, and a
-worker processes the queue. Each event is stored by Apaleo's event id in a `processed_event` table
+**Decision**: `POST /apaleo/events/{secret}` answers 202 as soon as the body is stored under the
+connection whose secret matches, and a worker processes the queue. Each event is stored by Apaleo's event id in a `processed_event` table
 whose primary key makes the second delivery a no-op. Processing fetches the reservation (R2),
 applies R4, submits (R7) and marks the event done; a failure keeps the event with its reason and
 next attempt time, retried with exponential backoff and never discarded (FR-011). On startup the
@@ -225,9 +226,10 @@ Apaleo, it writes the held id and nothing else changes.
 
 ## R9 — Operations surface
 
-**Decision**: `GET /status` returns the report FR-014 lists as one JSON document; `POST /sync/full`
-and `POST /sync/reconcile` start runs and answer 202 with the run id; `GET /runs/{id}` reports a
-run's progress. Spring Boot Actuator's health endpoint is enabled for liveness. All of these sit
+**Decision**: `GET /status` returns the report FR-014 lists, one entry per connection, as one JSON
+document; `POST /connections/{id}/sync/full`, `/sync/reconcile` and `/refresh` start runs on one
+connection and answer 202 with the run id; `GET /connections/{id}/runs/{runId}` reports a run's
+progress. Spring Boot Actuator's health endpoint is enabled for liveness. All of these sit
 behind a bearer token from configuration, distinct from the webhook secret. Logging is structured
 JSON with a fixed field set; person data is never a log argument, and the two credentials are
 held in configuration properties the logger masks.
@@ -252,6 +254,28 @@ functions worth pinning on real documents; everything else is protocol handling 
 against recorded interactions. The engine is not published as an image, so a live engine in CI
 would mean building it there; a stub of its contract, checked against the engine's own
 `openapi.yaml`, is the honest substitute until an image exists.
+
+---
+
+## R12 — Many connections, one instance
+
+**Decision**: An instance serves a configured list of connections. Every state table carries
+`connection_id`, every repository method takes `connectionId`, and an ArchUnit rule refuses one
+that does not — the engine's tenant rule with the name changed. Deliveries route to the
+connection whose webhook secret hash matches the path. Connections and their secrets come from a
+mounted configuration file, never from the database.
+
+**Rationale**: The first draft served one tenant per process and let process isolation stand in
+for data isolation. The constitution's first principle says tenancy is cheap on day one and
+brutal to retrofit, and the org profile promises one instance for many properties; a deployment
+per hotel breaks that promise and the managed offering would pay the retrofit. Scoping every
+row and query now costs one column and one parameter. Keeping secrets in configuration keeps this
+slice free of encryption at rest and a management endpoint, which are additive later.
+
+**Left additive**: encrypted secret storage with a management endpoint; per-connection queues and
+an interleaving scheduler so one hotel's full sync cannot starve another's events; a token per
+connection so a hotel's admin reads only its own status; Apaleo's connect client, one credential
+for many accounts. None changes a table.
 
 ---
 
