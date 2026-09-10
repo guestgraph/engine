@@ -40,7 +40,7 @@ The engine's own checks read its schema: the integration harness resets tables b
 
 1. **Given** the move, **When** the full suite runs, **Then** every existing test passes unchanged in what it asserts.
 2. **Given** the move, **When** the ER diagram is regenerated, **Then** it renders the same tables and constraints as before, taken from the `engine` schema, and the drift gate reports no difference.
-3. **Given** a stale local database from before the move, **When** the engine starts against it, **Then** it fails plainly rather than mixing two schemas, and the README says what to do: drop the volume, as it already says for a checksum mismatch.
+3. **Given** a stale local database from before the move, **When** the engine starts against it, **Then** it starts fresh in its own schema, leaving the old tables where they were and reading none of them, and the README says what to do: drop the volume, as it already says for a checksum mismatch. Detecting the old tables would be code for a case that exists only before the first release.
 
 ---
 
