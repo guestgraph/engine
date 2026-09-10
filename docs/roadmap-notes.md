@@ -109,14 +109,25 @@ summarized recommendation.
   has a database to migrate. The migrations name no schema, so the move is a Flyway default
   schema, a URL search path, the Testcontainers harness, the ER script and one paragraph of
   deployment guidance. Slice 6 named the schema through the connection pool's schema property
-  rather than a URL parameter, one value in one place; the connector should do the same when
-  its configuration is built (slice 5, T008).
+  rather than a URL parameter, one value in one place; the connector did the same when its
+  configuration was built (slice 5, T008).
 
 - **One paging idiom.** Slice 3 moved `/match-reviews` and `/negative-rules` off raw
   `limit`/`offset` onto the same opaque keyset cursor the timeline uses. Offsets are a contract
   commitment that foreclose moving a read into SQL or changing an ordering; a cursor keeps that
   replaceable, and seeks rather than scanning-and-discarding on deep pages. Any new paged endpoint
   uses `api/Cursor.java`.
+
+- **Slice 5 amendments taken during implementation.** The plan's structure tree drew a `state/`
+  package; the connector lays out `persistence/entity` and `persistence/repo` as the engine does,
+  without a mapper layer, because a cache has no domain to map to. Task T007 named a repository
+  read of the connection by secret hash; a delivery routes through the configuration file, which
+  FR-015a makes the authority, and a connection removed from the file keeps its row and its state
+  as history, unread until configured again, so the secret hash carries no uniqueness in the
+  table. Task T008 named the JDBC `currentSchema` parameter; the connector names its schema
+  through the pool's schema property, as slice 6 chose for the engine. The `processed_event`
+  table admits a `FAILED` state that nothing writes, because a failed event stays pending by
+  design (FR-011); a later migration may drop the value or a terminal case may earn it.
 
 ## Scale levers (when volume demands, not before)
 
