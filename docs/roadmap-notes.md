@@ -99,6 +99,16 @@ summarized recommendation.
 
 ## Cross-cutting decisions taken in later slices
 
+- **One schema, one role per service.** Slice 5 gave the Apaleo connector its own schema,
+  `apaleo_connector`, reached as a role that sees nothing else, so that sharing a database with
+  the engine or not is a deployment choice (specs/005-apaleo-connector, data-model). The engine
+  still runs in `public`, which quietly decides the topology for anyone deploying both. **The
+  engine moves to a schema of its own, `engine`, with the same role rule, in a slice of its own
+  before the first release**, while `V1__core_schema.sql` may still be edited and no consumer
+  has a database to migrate. The migrations name no schema, so the move is a Flyway default
+  schema, a URL search path, the Testcontainers harness, the ER script and one paragraph of
+  deployment guidance.
+
 - **One paging idiom.** Slice 3 moved `/match-reviews` and `/negative-rules` off raw
   `limit`/`offset` onto the same opaque keyset cursor the timeline uses. Offsets are a contract
   commitment that foreclose moving a read into SQL or changing an ordering; a cursor keeps that
@@ -145,6 +155,16 @@ The original sketch:
 - The full observation history stays reachable (Constitution II — nothing is lost,
   supersession is a view, not a deletion).
 
+### R3-2: A canceled booking on a guest's timeline — surfaced by specs/005-apaleo-connector
+
+An association carries business dates but no status, so a canceled or no-show reservation looks
+on the timeline exactly like one the guest will arrive for. The connector cannot express it: a
+cancellation changes no person, so under the roster rule it submits nothing, and if it did submit,
+the status would sit inside the payload where nothing reads it. If a consumer needs "does this
+guest currently hold a booking" to exclude cancellations, the answer is an optional status on the
+source-object block of the ingest contract and on the association, with a connector emitting a
+version when it changes — an engine slice, not a connector one.
+
 ## Slice 4 — Connectors
 
 **R-X5 is built** ([specs/004-retired-guest-ids](../specs/004-retired-guest-ids/spec.md)), so
@@ -156,7 +176,14 @@ several, which the connector escalates rather than guesses. Every sub-resource u
 id refuses with the current ids, so a connector that skips the read still fails loudly.
 
 
-### R4-1: externalKey convention for mutable, multi-person source objects (Apaleo pattern) — contract published by specs/003-timeline-journey; connectors remain slice 4
+### R4-1: externalKey convention for mutable, multi-person source objects (Apaleo pattern) — contract published by specs/003-timeline-journey; amended by specs/005-apaleo-connector
+
+*Amended by slice 5*: the booker is a role on the **booking** object, not on the reservation. In
+Apaleo the booker lives on the booking with the booking's own modified instant and events, and a
+reservation only shows a copy of it on request; keyed by the reservation, a booker correction
+would not change the key and would be lost as a duplicate. So a connector emits two source
+objects — `reservation` with the primary and additional guests, `booking` with the booker — each
+versioned by its own clock, and derives the booking's business dates from its reservations.
 
 `externalKey` identifies an *observation*, not the source object (see slice-1 API
 contract). For PMS reservations carrying entity-less persons the convention is:

@@ -1,0 +1,228 @@
+openapi: 3.1.0
+info:
+  title: GuestGraph Apaleo connector — operations
+  version: "0.1.0"
+  # The connector's own surface, served by guestgraph/connector-apaleo, not by the engine. It is
+  # deliberately not named openapi.yaml: the engine bundles every specs/*/contracts/openapi.yaml
+  # into its served document and holds it to conformance, and these paths are not the engine's.
+  # It lives with the spec because the slice's decisions live here (research R9).
+  description: >
+    What an operator and Apaleo can call on the connector. Apaleo delivers events to the
+    webhook endpoint; an operator reads the status, starts a full sync or a reconciliation, and
+    follows a run. Everything else the connector does, it does on its own schedule.
+  license:
+    name: Apache-2.0
+servers:
+  - url: /
+security:
+  - OpsToken: []
+
+tags:
+  - name: Webhook
+    description: What Apaleo calls
+  - name: Operations
+    description: What an operator calls
+
+paths:
+  /apaleo/events/{secret}:
+    post:
+      tags: [Webhook]
+      operationId: receiveApaleoEvent
+      summary: Receive one Apaleo delivery, or its reachability check
+      security: []
+      description: >
+        Stores the delivery by its id and answers at once; processing happens on the worker.
+        A second delivery of the same id is acknowledged and ignored. An empty body is Apaleo's
+        reachability check and is answered with 200. A wrong secret is 404, indistinguishable
+        from an unknown path.
+      parameters:
+        - name: secret
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApaleoEvent" }
+      responses:
+        "200": { description: Reachability check answered }
+        "202": { description: Delivery stored }
+        "404": { description: Unknown path }
+
+  /status:
+    get:
+      tags: [Operations]
+      operationId: getStatus
+      summary: Is this connector fine
+      responses:
+        "200":
+          description: The status document
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Status" }
+        "401": { description: Missing or wrong token }
+
+  /sync/full:
+    post:
+      tags: [Operations]
+      operationId: startFullSync
+      summary: Start a full sync of every configured property
+      responses:
+        "202":
+          description: Started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunStarted" }
+        "409": { description: A full sync is already running }
+        "401": { description: Missing or wrong token }
+
+  /sync/reconcile:
+    post:
+      tags: [Operations]
+      operationId: startReconciliation
+      summary: Start a reconciliation from each property's sync point
+      responses:
+        "202":
+          description: Started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunStarted" }
+        "409": { description: A run is already in progress }
+        "401": { description: Missing or wrong token }
+
+  /refresh:
+    post:
+      tags: [Operations]
+      operationId: startRefresh
+      summary: Re-read every held guest id and apply the integrator rule
+      responses:
+        "202":
+          description: Started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunStarted" }
+        "401": { description: Missing or wrong token }
+
+  /runs/{runId}:
+    get:
+      tags: [Operations]
+      operationId: getRun
+      summary: One run's progress and outcome
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: The run
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Run" }
+        "404": { description: No such run }
+        "401": { description: Missing or wrong token }
+
+components:
+  securitySchemes:
+    OpsToken:
+      type: http
+      scheme: bearer
+
+  schemas:
+    ApaleoEvent:
+      description: The delivery as Apaleo documents it; only id, topic, type and data.entityId are read.
+      type: object
+      required: [id, topic, type, accountId, propertyId, timestamp]
+      properties:
+        id: { type: string }
+        topic: { type: string }
+        type: { type: string }
+        accountId: { type: string }
+        propertyId: { type: string }
+        timestamp: { type: string, format: date-time }
+        clientId: { type: string }
+        subjectId: { type: string }
+        data:
+          type: object
+          properties:
+            entityId: { type: string }
+
+    Status:
+      type: object
+      required:
+        [account, properties, subscription, syncPoints, counters, pendingEvents, splitsAwaitingPerson, lastError]
+      properties:
+        account: { type: string }
+        properties:
+          type: array
+          items: { type: string }
+        subscription:
+          type: object
+          required: [active, eventTypes]
+          properties:
+            active: { type: boolean }
+            id: { type: [string, "null"] }
+            eventTypes:
+              type: array
+              items: { type: string }
+        syncPoints:
+          type: array
+          items:
+            type: object
+            required: [propertyId, modifiedThrough]
+            properties:
+              propertyId: { type: string }
+              modifiedThrough: { type: [string, "null"], format: date-time }
+              lastFullSyncAt: { type: [string, "null"], format: date-time }
+              lastReconcileAt: { type: [string, "null"], format: date-time }
+        lastActivityAt:
+          type: [string, "null"]
+          format: date-time
+          description: The last successful run or event; a gap longer than Apaleo's retry window starts a full sync.
+        counters:
+          description: Since the connector's state was created.
+          type: object
+          required: [versionsSubmitted, recordsSubmitted, duplicates, flaggedForReview, errors]
+          properties:
+            versionsSubmitted: { type: integer }
+            recordsSubmitted: { type: integer }
+            duplicates: { type: integer }
+            flaggedForReview: { type: integer }
+            errors: { type: integer }
+        pendingEvents:
+          type: integer
+          description: Deliveries stored and not yet successfully processed.
+        splitsAwaitingPerson:
+          type: integer
+          description: Held guest ids whose refresh answered SPLIT or RETIRED.
+        lastRefreshAt: { type: [string, "null"], format: date-time }
+        lastError:
+          type: [object, "null"]
+          properties:
+            at: { type: string, format: date-time }
+            where: { type: string, enum: [APALEO, ENGINE, DATABASE] }
+            reason: { type: string, description: Never a payload, never a credential. }
+
+    RunStarted:
+      type: object
+      required: [runId]
+      properties:
+        runId: { type: string, format: uuid }
+
+    Run:
+      type: object
+      required: [id, kind, startedAt, reservationsSeen, versionsSubmitted, recordsSubmitted, duplicates, flaggedForReview, errors]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [FULL, RECONCILE, REFRESH] }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: [string, "null"], format: date-time }
+        outcome: { type: [string, "null"], enum: [SUCCEEDED, FAILED, null] }
+        reservationsSeen: { type: integer }
+        versionsSubmitted: { type: integer }
+        recordsSubmitted: { type: integer }
+        duplicates: { type: integer }
+        flaggedForReview: { type: integer }
+        errors: { type: integer }
+        lastError: { type: [string, "null"] }
