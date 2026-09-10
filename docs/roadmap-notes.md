@@ -128,6 +128,23 @@ summarized recommendation.
   through the pool's schema property, as slice 6 chose for the engine. The `processed_event`
   table admits a `FAILED` state that nothing writes, because a failed event stays pending by
   design (FR-011); a later migration may drop the value or a terminal case may earn it.
+  User stories 1 and 2 added four more. The submitter makes one engine call per object
+  version rather than batching a hundred records, because a version's state is written only
+  when every one of its results was read, and a batch across versions would tie their states
+  together; SC-001 is met at one call per version, and batching returns only if a full sync of
+  a large account proves too slow. A person whose only identification field is the type stays
+  under `person` in the payload rather than becoming a bare `idDocument`, since a document type
+  without a number identifies nothing. The event endpoint answers 400 as a problem detail to a
+  body that is not an Apaleo event, a status the contract does not list; the contract lists what
+  Apaleo sends, and a body Apaleo did not send has no place in it. Event submissions carry no run
+  id, so the run counters count what the full sync and the reconciliation submitted; the status
+  of user story 3 will say so, and a per-connection counter is the amendment if an operator
+  needs the events counted. The connection rows are written on the application-ready event,
+  and a delivery that arrives before them, in the seconds between the server listening and
+  the rows written, answers 404 and is retried by Apaleo. Research R9 chose structured JSON
+  logs for the connector; the family logs one way, as the engine does, in Logback's default
+  text, so the connector dropped the structured format. FR-016 holds in either: what a line may
+  carry is the rule, not its shape.
 
 ## Scale levers (when volume demands, not before)
 
