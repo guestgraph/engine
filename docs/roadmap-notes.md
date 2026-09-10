@@ -137,11 +137,14 @@ summarized recommendation.
   without a number identifies nothing. The event endpoint answers 400 as a problem detail to a
   body that is not an Apaleo event, a status the contract does not list; the contract lists what
   Apaleo sends, and a body Apaleo did not send has no place in it. Event submissions carry no run
-  id, so the run counters count what the full sync and the reconciliation submitted; the status
-  of user story 3 will say so, and a per-connection counter is the amendment if an operator
-  needs the events counted. The connection rows are written on the application-ready event,
+  id, so user story 3 moved the status counters onto the connection row, where every
+  submission counts whether a run or an event made it, and a run's own counters stay on the
+  run. The connection rows are written on the application-ready event,
   and a delivery that arrives before them, in the seconds between the server listening and
-  the rows written, answers 404 and is retried by Apaleo. Research R9 chose structured JSON
+  the rows written, answers 404 and is retried by Apaleo. The refresh of user story 4 walks no
+  Apaleo list, so it runs beside a full sync or a reconciliation and never answers 409, which
+  the contract never gave it; an id the engine does not know is left and counted, and the
+  status reads the last finished refresh rather than the last one without such an id. Research R9 chose structured JSON
   logs for the connector; the family logs one way, as the engine does, in Logback's default
   text, so the connector dropped the structured format. FR-016 holds in either: what a line may
   carry is the rule, not its shape.
