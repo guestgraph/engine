@@ -32,8 +32,9 @@ nothing new.
 health; Spring Data JPA + Hibernate; Flyway; Jackson. Tests: JUnit 5, AssertJ, Testcontainers,
 WireMock. No library the engine does not already carry except WireMock.
 
-**Storage**: PostgreSQL, the connector's own database, migration `V1__connector_state.sql` per
-[data-model.md](data-model.md). All of it a cache; loss costs a full sync.
+**Storage**: PostgreSQL, one schema of its own — `apaleo_connector` — reached as one role,
+migration `V1__connector_state.sql` per [data-model.md](data-model.md); shared with the engine's
+database or separate, as the deployment decides. All of it a cache; loss costs a full sync.
 
 **Testing**: Pure-JVM unit tests for the mapper and the roster hash on recorded Apaleo documents;
 Testcontainers integration tests with WireMock for both upstreams; one end-to-end walk by hand

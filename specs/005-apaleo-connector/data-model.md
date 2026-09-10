@@ -9,6 +9,29 @@ table needs a tenant column of its own (FR-015).
 
 ---
 
+## One schema, one role
+
+The connector owns one PostgreSQL schema, `apaleo_connector` by default, and nothing outside it.
+Flyway creates the schema and keeps its history table inside it, the connection pins its search
+path to it, and no migration or query names a schema. That is what makes the database topology a
+deployment choice rather than a design one: the connector's schema can sit in the engine's
+database or in one of its own, with the same build and the same configuration keys.
+
+The connector connects as a role that owns its schema and has no privilege on any other. In a
+shared database that role cannot read `guest` or `source_record`, which enforces what the design
+already says: the connector is a client of the engine's API, never of its tables. The code cannot
+create that role; the deployment does, and the README says how:
+
+```sql
+create role apaleo_connector login password '…';
+create schema apaleo_connector authorization apaleo_connector;
+```
+
+The engine's side of the same rule — its own schema and role, in place of `public` — is a change
+of its own in the engine repository, recorded in the roadmap.
+
+---
+
 ## `object_state`
 
 The last version the connector submitted for a reservation or a booking, and the hash that
@@ -147,4 +170,5 @@ Read from the environment; none of it is logged.
 | `RECONCILE_INTERVAL`, `RECONCILE_OVERLAP` | defaults 15 minutes and 1 hour |
 | `RESYNC_AFTER_GAP` | default 24 hours, Apaleo's retry window; a longer gap since the last activity starts a full sync (FR-012a) |
 | `REFRESH_CRON` | default nightly |
-| `DATABASE_URL` and credentials | the connector's own PostgreSQL database |
+| `DATABASE_URL` and credentials | a PostgreSQL database, shared with the engine or not, reached as the connector's own role |
+| `DATABASE_SCHEMA` | default `apaleo_connector`; the only schema the connector touches |

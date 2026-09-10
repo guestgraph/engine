@@ -23,7 +23,9 @@ would buy nothing and cost a second toolchain in CI.
 
 PostgreSQL rather than an embedded store because the connector runs beside an engine that
 already has one, the state is small and relational, and the engine's Testcontainers harness
-transfers unchanged. The state is a cache (spec assumptions): losing it costs a full sync.
+transfers unchanged. The state is a cache (spec assumptions): losing it costs a full sync. The
+connector owns one schema and connects as one role (data-model "One schema, one role"), so
+whether it shares the engine's database or has its own is decided at deployment, not here.
 
 **Alternatives considered**:
 
