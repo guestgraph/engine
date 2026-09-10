@@ -144,9 +144,29 @@ Note for Eclipse/Spring Tools users: point the IDE build output away from `targe
 (e.g. `bin/`), or stale IDE-compiled classes can break `./mvnw verify` with
 `NoClassDefFoundError` until a `./mvnw clean`.
 
+The engine creates every table in one schema, `engine` by default, and connects as a role
+that owns that schema and nothing else, so that a second service in the same database — the
+Apaleo connector, say — cannot read the engine's tables, and so that one database or two is
+the deployment's choice. Before the first start:
+
+```sql
+create role engine login password '…';
+create schema engine authorization engine;
+```
+
+Point the engine at the database as that role, through `SPRING_DATASOURCE_URL`,
+`SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD`. To use another schema name, set
+`DATABASE_SCHEMA`. If the schema is left for the engine to create, the role needs `CREATE` on
+the database for the first start only. No migration, query or mapping names the schema; the
+connection carries it, which is what lets one build run in a shared database and in a dedicated
+one.
+
 Until the first release, `V1__core_schema.sql` may still be edited in place; if your local
 dev database reports a Flyway checksum mismatch, recreate it with `docker compose down -v`.
-From the first tagged release on, migrations are additive-only.
+The same applies to a local database from before the engine moved into its own schema: its
+tables sit in `public`, and the engine would create a second, empty set in `engine` beside
+them rather than fail, so drop the volume. From the first tagged release on, migrations are
+additive-only.
 
 ## Design principles
 

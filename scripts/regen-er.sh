@@ -46,15 +46,22 @@ for _ in $(seq 1 120); do
 done
 $ready || { echo "postgres did not become ready" >&2; exit 1; }
 
+# The engine lives in one schema (spec 006). The migrations name none, so this script does by
+# hand what Flyway does for the application: create the schema and run each file into it.
+SCHEMA="engine"
+docker exec "$container" psql -q -v ON_ERROR_STOP=1 -U guestgraph -d guestgraph \
+  -c "create schema ${SCHEMA}"
+
 # Apply migrations in Flyway version order (V1, V2, ... — sort -V handles V10 correctly)
 for f in $(ls src/main/resources/db/migration/V*.sql | sort -V); do
   echo "applying $f"
-  docker exec -i "$container" psql -q -v ON_ERROR_STOP=1 -U guestgraph -d guestgraph < "$f"
+  { echo "set search_path to ${SCHEMA};"; cat "$f"; } \
+    | docker exec -i "$container" psql -q -v ON_ERROR_STOP=1 -U guestgraph -d guestgraph
 done
 
 # --- generate ---
 "$mermerd" -c "postgresql://guestgraph:guestgraph@localhost:${PG_PORT}/guestgraph" \
-  -s public --useAllTables --showAllConstraints -o "$OUT_FILE"
+  -s "$SCHEMA" --useAllTables --showAllConstraints -o "$OUT_FILE"
 
 # Prepend provenance header (mermerd output is a plain .mmd mermaid file)
 tmp=$(mktemp)

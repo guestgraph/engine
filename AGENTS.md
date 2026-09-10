@@ -67,6 +67,10 @@ implement `ResolutionStrategy` — do not redesign the engine.
   tables there or every integration test fails on FK truncate errors.
 - Until the first release, `V1__core_schema.sql`/`V2__*.sql` may be edited in place;
   local Flyway checksum mismatch → `docker compose down -v`. Additive-only after tagging.
+- The engine lives in schema `engine`, and every pooled connection's search path is that
+  schema alone. A `psql` session or a script outside the pool sees no tables until it
+  qualifies names or runs `set search_path to engine` — `\dt` showing nothing is that, not a
+  missing migration.
 
 ## Documentation ownership (prevents drift)
 

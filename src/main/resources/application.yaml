@@ -7,8 +7,17 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  datasource:
+    hikari:
+      # One schema, one role (spec 006): every pooled connection opens with this search path,
+      # so JPA, JdbcClient and the harness's TRUNCATE resolve unqualified names in it.
+      schema: ${DATABASE_SCHEMA:engine}
   flyway:
     enabled: true
+    # The same value, so Flyway creates the schema when missing, keeps its history in it and
+    # runs the unqualified migrations into it. Nothing else names the schema (FR-003).
+    default-schema: ${DATABASE_SCHEMA:engine}
+    create-schemas: true
   jpa:
     open-in-view: false
     hibernate:
