@@ -141,7 +141,10 @@ summarized recommendation.
   of user story 3 will say so, and a per-connection counter is the amendment if an operator
   needs the events counted. The connection rows are written on the application-ready event,
   and a delivery that arrives before them, in the seconds between the server listening and
-  the rows written, answers 404 and is retried by Apaleo.
+  the rows written, answers 404 and is retried by Apaleo. Research R9 chose structured JSON
+  logs for the connector; the family logs one way, as the engine does, in Logback's default
+  text, so the connector dropped the structured format. FR-016 holds in either: what a line may
+  carry is the rule, not its shape.
 
 ## Scale levers (when volume demands, not before)
 
