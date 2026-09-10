@@ -99,7 +99,8 @@ summarized recommendation.
 
 ## Cross-cutting decisions taken in later slices
 
-- **One schema, one role per service.** Slice 5 gave the Apaleo connector its own schema,
+- **One schema, one role per service** — ✅ engine side consumed by specs/006-engine-schema.
+  Slice 5 gave the Apaleo connector its own schema,
   `apaleo_connector`, reached as a role that sees nothing else, so that sharing a database with
   the engine or not is a deployment choice (specs/005-apaleo-connector, data-model). The engine
   still runs in `public`, which quietly decides the topology for anyone deploying both. **The
@@ -107,7 +108,9 @@ summarized recommendation.
   before the first release**, while `V1__core_schema.sql` may still be edited and no consumer
   has a database to migrate. The migrations name no schema, so the move is a Flyway default
   schema, a URL search path, the Testcontainers harness, the ER script and one paragraph of
-  deployment guidance.
+  deployment guidance. Slice 6 named the schema through the connection pool's schema property
+  rather than a URL parameter, one value in one place; the connector should do the same when
+  its configuration is built (slice 5, T008).
 
 - **One paging idiom.** Slice 3 moved `/match-reviews` and `/negative-rules` off raw
   `limit`/`offset` onto the same opaque keyset cursor the timeline uses. Offsets are a contract
