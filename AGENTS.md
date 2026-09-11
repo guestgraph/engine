@@ -113,6 +113,7 @@ what is what causes drift, so the map is explicit:
 | What a source record is | `docs/records.md` |
 | Where a guest stays | `docs/timeline.md` |
 | What a stored guest id still means | `docs/continuity.md` |
+| Which phases shipped; which services run and what they talk to | `guestgraph/.github`, `profile/README.md` |
 | One slice's decisions | `specs/NNN-*/` — **frozen at merge** |
 | Cross-slice decisions, roadmap, deferred work | `docs/roadmap-notes.md` |
 | API surface | `specs/*/contracts/openapi.yaml`, the records; served as the one generated `src/main/resources/api/openapi.yaml`, held to them by regeneration in CI |
@@ -136,9 +137,12 @@ stays readable. Each new version gets its own section and the old one remains. T
 `docs/records.md`, `docs/timeline.md` and `docs/continuity.md`, describe invariants rather than a
 rule that is superseded, so they are written forward and edited in place.
 
-**A second repository links, never restates.** The org profile at `guestgraph/.github` once
-drifted to "Core in development" while two slices had shipped, because it restated a roadmap
-living here. No CI in one repo can catch that.
+**A second repository links, never restates**, and that holds in both directions. The org
+profile at `guestgraph/.github` once drifted to "Core in development" while two slices had
+shipped, because it restated a roadmap living here. No CI in one repo can catch that. The two
+facts a visitor needs before opening any repository — which phases shipped, and which services
+run and what they talk to — are owned there now and linked from this README; restating either
+one here would be the same fault the other way round.
 
 ## Process
 
