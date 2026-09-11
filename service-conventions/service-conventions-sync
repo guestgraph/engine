@@ -1,0 +1,114 @@
+#!/bin/sh
+# service-conventions-sync — vendor a stack's files from guestgraph/service-conventions at the
+# release the pin names, and say whether the copy still matches it.
+#
+#   sh service-conventions/service-conventions-sync sync    write the vendored files from the pin
+#   sh service-conventions/service-conventions-sync check   exit 1 with one ✗ line per file that differs
+#
+# The pin is service-conventions.json in the service's root: {"repo": "...", "tag": "v0.1.0",
+# "stack": "spring", ...}. Files come from https://raw.githubusercontent.com/<repo>/<tag>/<stack>;
+# SERVICE_CONVENTIONS_SOURCE overrides that with another base URL or a local directory that holds
+# the stack's directory, which is how the tests run offline. Beside service-conventions/ the sync
+# writes three files a build reads in a fixed place: the workflow, the rules test and the block
+# of AGENTS.md after the family's block. Needs sh, curl, awk, sed, and shasum or sha256sum.
+set -eu
+
+usage() { echo "usage: sh service-conventions/service-conventions-sync sync|check" >&2; exit 2; }
+[ $# -eq 1 ] || usage
+cmd=$1
+case $cmd in sync|check) ;; *) usage ;; esac
+
+PIN=service-conventions.json
+DIR=service-conventions
+FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java regen-er verify.yml service-conventions-sync AGENTS.md"
+OPEN_RE='^<!-- service-conventions · v[^ ]* -->$'
+CLOSE='<!-- end service-conventions -->'
+FAMILY_CLOSE='<!-- end conventions -->'
+
+[ -f "$PIN" ] || { echo "✗ service-conventions: no $PIN here — a service names the release it follows" >&2; exit 1; }
+pin() { sed -n "s/.*\"$1\" *: *\"\([^\"]*\)\".*/\1/p" "$PIN" | head -1; }
+REPO=$(pin repo)
+TAG=$(pin tag)
+STACK=$(pin stack)
+if [ -z "$REPO" ] || [ -z "$TAG" ] || [ -z "$STACK" ]; then echo "✗ service-conventions: $PIN needs \"repo\", \"tag\" and \"stack\"" >&2; exit 1; fi
+SOURCE=${SERVICE_CONVENTIONS_SOURCE:-https://raw.githubusercontent.com/$REPO/$TAG}
+
+sha() {
+  if command -v sha256sum > /dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
+  else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+
+# fetch <file of the stack> <destination>
+fetch() {
+  case "$SOURCE" in
+    http://*|https://*) curl -fsSL "$SOURCE/$STACK/$1" -o "$2" || { echo "✗ service-conventions: could not fetch $SOURCE/$STACK/$1" >&2; exit 1; } ;;
+    *) cp "$SOURCE/$STACK/$1" "$2" ;;
+  esac
+}
+
+# block_of <file>: the fenced block, markers included, with its version rewritten to the pin.
+block_of() {
+  awk -v tag="$TAG" -v open_re="$OPEN_RE" -v endm="$CLOSE" '
+    !inblock && $0 ~ open_re { inblock = 1; print "<!-- service-conventions · " tag " -->"; next }
+    inblock && $0 == endm  { print; exit }
+    inblock                 { print }' "$1"
+}
+
+# write_block: replace the block in AGENTS.md, or put one after the family's block, or at the top.
+write_block() {
+  new=$(block_of "$DIR/AGENTS.md")
+  [ -n "$new" ] || { echo "✗ service-conventions: $DIR/AGENTS.md carries no block" >&2; exit 1; }
+  tmp=$(mktemp)
+  if [ -f AGENTS.md ] && grep -q "$OPEN_RE" AGENTS.md; then
+    start=$(grep -n "$OPEN_RE" AGENTS.md | head -1 | cut -d: -f1)
+    end=$(awk -v s="$start" -v endm="$CLOSE" 'NR > s && $0 == endm { print NR; exit }' AGENTS.md)
+    [ -n "$end" ] || { echo "✗ service-conventions: AGENTS.md opens a block it never closes" >&2; exit 1; }
+    { sed -n "1,$((start - 1))p" AGENTS.md; printf '%s\n' "$new"; sed -n "$((end + 1)),\$p" AGENTS.md; } > "$tmp"
+  elif [ -f AGENTS.md ] && grep -qF "$FAMILY_CLOSE" AGENTS.md; then
+    fam=$(grep -nF "$FAMILY_CLOSE" AGENTS.md | head -1 | cut -d: -f1)
+    { sed -n "1,${fam}p" AGENTS.md; printf '%s\n' "$new"; sed -n "$((fam + 1)),\$p" AGENTS.md; } > "$tmp"
+  else
+    { printf '%s\n\n' "$new"; [ -f AGENTS.md ] && cat AGENTS.md; } > "$tmp"
+  fi
+  mv "$tmp" AGENTS.md
+}
+
+# The three places a build reads a vendored file from.
+place_of() {
+  case "$1" in
+    verify.yml) echo ".github/workflows/verify.yml" ;;
+    ServiceRulesTest.java) echo "src/test/java/ServiceRulesTest.java" ;;
+    *) echo "" ;;
+  esac
+}
+
+if [ "$cmd" = sync ]; then
+  mkdir -p "$DIR"
+  for f in $FILES; do fetch "$f" "$DIR/$f"; done
+  for f in $FILES; do
+    place=$(place_of "$f"); [ -n "$place" ] || continue
+    mkdir -p "$(dirname "$place")"; cp "$DIR/$f" "$place"
+  done
+  write_block
+  echo "✓ service-conventions: $DIR/, the workflow, the rules test and the AGENTS.md block are at $REPO@$TAG ($STACK)"
+  exit 0
+fi
+
+# check
+TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+status=0
+for f in $FILES; do
+  fetch "$f" "$TMP/$f"
+  if [ ! -f "$DIR/$f" ] || [ "$(sha "$DIR/$f")" != "$(sha "$TMP/$f")" ]; then
+    echo "✗ service-conventions: $DIR/$f differs from $TAG"; status=1
+  fi
+  place=$(place_of "$f"); [ -n "$place" ] || continue
+  if [ ! -f "$place" ] || [ "$(sha "$place")" != "$(sha "$TMP/$f")" ]; then
+    echo "✗ service-conventions: $place differs from $TAG"; status=1
+  fi
+done
+if [ ! -f AGENTS.md ] || [ "$(block_of AGENTS.md)" != "$(block_of "$TMP/AGENTS.md")" ]; then
+  echo "✗ service-conventions: the AGENTS.md block differs from $TAG"; status=1
+fi
+[ $status -eq 0 ] && echo "✓ service-conventions: the vendored copy is at $REPO@$TAG ($STACK)"
+exit $status
