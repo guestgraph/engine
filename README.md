@@ -140,7 +140,9 @@ sh service-conventions/service-conventions-check   # what of the list every gues
 ```
 
 Code conventions (imports over inline FQNs, guardrail layout, known pitfalls) are
-documented in [`AGENTS.md`](AGENTS.md) and enforced by PMD (`service-conventions/pmd-ruleset.xml`),
+documented in [`AGENTS.md`](AGENTS.md), vendored from
+[service-conventions](https://github.com/guestgraph/service-conventions) with every other
+guestgraph service and held by the `service-conventions` job, and enforced by PMD (`service-conventions/pmd-ruleset.xml`),
 Spotless, and ArchUnit in `verify`.
 
 Note for Eclipse/Spring Tools users: point the IDE build output away from `target/classes`

@@ -36,9 +36,11 @@ API-first RFC 9457, TDD on the resolution engine).
 ## Build & verify
 
 ```bash
-./mvnw verify              # tests (Testcontainers, needs Docker), ArchUnit, PMD, Spotless
-./mvnw spotless:apply      # fix formatting (google-java-format) — check fails otherwise
-sh service-conventions/regen-er      # after schema changes — CI checks ER-diagram drift
+./mvnw verify                                        # tests (Testcontainers, needs Docker), the rules, PMD, Spotless
+./mvnw spotless:apply                                # fix formatting (google-java-format) — check fails otherwise
+sh service-conventions/regen-er                      # after schema changes — CI checks ER-diagram drift
+sh service-conventions/service-conventions-check     # what of the list every guestgraph service has this one lacks
+sh conventions/conventions-check                     # the prose
 ```
 
 ## Code conventions
@@ -50,10 +52,16 @@ sh service-conventions/regen-er      # after schema changes — CI checks ER-dia
   expressions) — PMD doesn't look inside strings.
 - **Formatting** is google-java-format via Spotless; don't hand-format.
 - **Comments** state constraints the code can't show; no narration.
-- Mechanical guardrails live in three places, each with its job: **Spotless** (format),
-  **PMD** (source-level conventions), **ArchUnit** (`ServiceRulesTest`: tenant
-  scoping on every repo method, `@Query`-only repositories, no CrudRepository, no ad-hoc
-  EntityManager queries, JdbcClient allowlist, JPA confined to `persistence`).
+- Mechanical guardrails live in three places, each with its job, and all three come vendored
+  from guestgraph/service-conventions at the release `service-conventions.json` names: **Spotless**
+  (format) and **PMD** (source-level conventions) from the parent build every service's `pom.xml`
+  takes by path, **ArchUnit** from `src/test/java/ServiceRulesTest.java` (`tenantId` on every repo
+  method or a justified `@TenantAgnostic`, `@Query`-only repositories, no CrudRepository, no ad-hoc
+  EntityManager queries, `JdbcClient` only in the classes the pin's `jdbcClientAllowed` names,
+  JPA confined to `persistence`). A rule that every service needs changes there, never here; a
+  rule only the engine needs sits beside the shared files.
+- **Packages** are `io.guestgraph.engine`, the family's root and the repository's name, with the
+  endpoints, filters and error answers under `api`, as in every guestgraph service.
 
 ## Architecture in one paragraph
 
@@ -122,9 +130,10 @@ living here. No CI in one repo can catch that.
 
 ## Checks
 
-Three jobs, all required by the ruleset on `main`: `verify` and `er-drift`, this repository's
-own, and `conventions`, called from robertblust/conventions at the pinned tag and shown by
-GitHub as `conventions / conventions`. The prose check leaves out `target`, build output;
+Four jobs, all required by the ruleset on `main`: `verify`, `er-drift` and `service-conventions`
+from the vendored workflow, the last holding the vendored copy to its release and the engine to
+the list every guestgraph service meets, and `conventions`, called from robertblust/conventions
+at the pinned tag and shown by GitHub as `conventions / conventions`. The prose check leaves out `target`, build output;
 `.specify` and `.claude`, spec-kit's templates and skills, which are tooling and not this
 repository's prose; and `docs/superpowers`, whose specs quote the very words it scans for. The
 feature specs under `specs/` are this repository's own writing and are scanned. Everything
