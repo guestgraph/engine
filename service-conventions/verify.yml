@@ -32,7 +32,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
       - name: The vendored copy equals the pinned release
         run: sh service-conventions/service-conventions-sync check
       - name: The service has every item of the list
         run: sh service-conventions/service-conventions-check
+      - name: Regenerate the API document from its sources
+        run: sh service-conventions/regen-api
+      - name: Fail if src/main/resources/api/openapi.yaml is stale
+        run: |
+          git diff --exit-code src/main/resources/api/openapi.yaml || {
+            echo "::error file=src/main/resources/api/openapi.yaml::The sources changed and the API document was not regenerated. Run sh service-conventions/regen-api and commit the result."
+            exit 1
+          }

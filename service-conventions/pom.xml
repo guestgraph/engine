@@ -16,7 +16,7 @@
 
   <groupId>io.guestgraph</groupId>
   <artifactId>service-parent</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
   <packaging>pom</packaging>
   <name>GuestGraph service parent</name>
   <description>The Spring stack of every guestgraph service: platform, shared versions and the plugins that hold the source to the rules</description>
@@ -36,6 +36,7 @@
     <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
     <spotless.version>3.10.1</spotless.version>
     <google-java-format.version>1.36.1</google-java-format.version>
+    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -107,6 +108,23 @@
             <goals>
               <goal>check</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>regen-api</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>RegenApi</mainClass>
+              <classpathScope>test</classpathScope>
+            </configuration>
           </execution>
         </executions>
       </plugin>

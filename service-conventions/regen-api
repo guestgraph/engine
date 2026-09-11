@@ -1,0 +1,10 @@
+#!/bin/sh
+# regen-api — writes src/main/resources/api/openapi.yaml, the one document the service serves,
+# from the sources sources.json beside it names, through the vendored RegenApi program on the
+# service's own classpath. The committed file is held against a fresh run in CI.
+#
+#   sh service-conventions/regen-api
+set -eu
+cd "$(dirname "$0")/.."
+[ -f src/main/resources/api/sources.json ] || { echo "regen-api: src/main/resources/api/sources.json is missing" >&2; exit 1; }
+./mvnw -q test-compile exec:java@regen-api

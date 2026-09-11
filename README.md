@@ -100,9 +100,9 @@ and [`specs/004-retired-guest-ids/contracts/`](specs/004-retired-guest-ids/contr
 walkthroughs in the matching `quickstart.md` files. A guest id survives merges: reading an id a
 merge absorbed or an unmerge emptied answers with the guest or guests that hold the person now,
 never a bare not-found, so other systems can store it as their reference. A running instance serves the
-complete merged document at `GET /api-docs` (no API key required), served from their copies
-under `src/main/resources/api/`, which `sources.json` there names and the service check holds
-equal to the originals.
+complete merged document at `GET /api-docs` (no API key required), served from the one
+`src/main/resources/api/openapi.yaml` that `sh service-conventions/regen-api` generates from them
+and CI holds against a fresh generation.
 
 ### Submitting mutable, multi-person source objects
 

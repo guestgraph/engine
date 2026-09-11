@@ -9,8 +9,8 @@
 # "stack": "spring", ...}. Files come from https://raw.githubusercontent.com/<repo>/<tag>/<stack>;
 # SERVICE_CONVENTIONS_SOURCE overrides that with another base URL or a local directory that holds
 # the stack's directory, which is how the tests run offline. Beside service-conventions/ the sync
-# writes three files a build reads in a fixed place: the workflow, the rules test and the block
-# of AGENTS.md after the family's block. Needs sh, curl, awk, sed, and shasum or sha256sum.
+# writes four files a build reads in a fixed place: the workflow, the rules test, the API
+# generator and the block of AGENTS.md after the family's block. Needs sh, curl, awk, sed, and shasum or sha256sum.
 set -eu
 
 usage() { echo "usage: sh service-conventions/service-conventions-sync sync|check" >&2; exit 2; }
@@ -20,7 +20,7 @@ case $cmd in sync|check) ;; *) usage ;; esac
 
 PIN=service-conventions.json
 DIR=service-conventions
-FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java regen-er verify.yml service-conventions-sync service-conventions-check AGENTS.md"
+FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java RegenApi.java regen-er regen-api verify.yml service-conventions-sync service-conventions-check AGENTS.md"
 OPEN_RE='^<!-- service-conventions · v[^ ]* -->$'
 CLOSE='<!-- end service-conventions -->'
 FAMILY_CLOSE='<!-- end conventions -->'
@@ -78,6 +78,7 @@ place_of() {
   case "$1" in
     verify.yml) echo ".github/workflows/verify.yml" ;;
     ServiceRulesTest.java) echo "src/test/java/ServiceRulesTest.java" ;;
+    RegenApi.java) echo "src/test/java/RegenApi.java" ;;
     *) echo "" ;;
   esac
 }
