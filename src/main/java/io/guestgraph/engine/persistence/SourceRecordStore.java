@@ -1,0 +1,105 @@
+package io.guestgraph.engine.persistence;
+
+import io.guestgraph.engine.domain.BlockKey;
+import io.guestgraph.engine.domain.NormalizedIdentifier;
+import io.guestgraph.engine.domain.RecordObject;
+import io.guestgraph.engine.domain.SourceRecord;
+import io.guestgraph.engine.persistence.entity.RecordBlockKeyEntity;
+import io.guestgraph.engine.persistence.entity.RecordIdentifierEntity;
+import io.guestgraph.engine.persistence.entity.RecordObjectEntity;
+import io.guestgraph.engine.persistence.entity.SourceRecordEntity;
+import io.guestgraph.engine.persistence.entity.SourceSystemEntity;
+import io.guestgraph.engine.persistence.mapper.DomainMappers;
+import io.guestgraph.engine.persistence.repo.SourceRecordRepo;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.stereotype.Repository;
+
+@Repository // @Repository (not @Component) for Hibernate→Spring exception translation
+public class SourceRecordStore {
+
+  @PersistenceContext private EntityManager em;
+
+  private final SourceRecordRepo repo;
+  private final DomainMappers mappers;
+
+  public SourceRecordStore(SourceRecordRepo repo, DomainMappers mappers) {
+    this.repo = repo;
+    this.mappers = mappers;
+  }
+
+  /**
+   * Stores the record and its identifier contributions; flushes so the row (and any constraint
+   * violation) is visible to the resolution queries that follow in the same transaction — the old
+   * code's statement ordering, made explicit.
+   */
+  public void insert(SourceRecord record) {
+    SourceSystemEntity sourceSystem =
+        em.getReference(SourceSystemEntity.class, record.sourceSystemId());
+    SourceRecordEntity entity =
+        new SourceRecordEntity(
+            record.id(),
+            record.tenantId(),
+            sourceSystem,
+            record.externalKey(),
+            record.payloadJson(),
+            record.extracted(),
+            record.recordTimestamp(),
+            record.needsReview(),
+            record.needsReviewReasons(),
+            record.receivedAt());
+    for (NormalizedIdentifier identifier : new LinkedHashSet<>(record.identifiers())) {
+      entity.addIdentifier(
+          new RecordIdentifierEntity(
+              UUID.randomUUID(), record.tenantId(), entity, identifier.type(), identifier.value()));
+    }
+    em.persist(entity);
+    em.flush();
+  }
+
+  public void insertBlockKeys(UUID tenantId, UUID sourceRecordId, List<BlockKey> keys) {
+    for (BlockKey key : keys) {
+      em.persist(
+          new RecordBlockKeyEntity(
+              UUID.randomUUID(), tenantId, sourceRecordId, key.type(), key.value()));
+    }
+  }
+
+  /**
+   * The business object this record describes (FR-001). Absent when the submitter sent no object
+   * identity, and absent when the submitted version could not be parsed — such a record stays
+   * stored and flagged but joins no roster (FR-024).
+   */
+  public void insertRecordObject(RecordObject recordObject) {
+    em.persist(
+        new RecordObjectEntity(
+            recordObject.id(),
+            recordObject.tenantId(),
+            recordObject.sourceRecordId(),
+            recordObject.sourceSystemId(),
+            recordObject.objectType(),
+            recordObject.objectId(),
+            recordObject.role(),
+            recordObject.position(),
+            recordObject.objectVersion(),
+            recordObject.businessStart(),
+            recordObject.businessEnd()));
+  }
+
+  public Optional<UUID> findIdByExternalKey(
+      UUID tenantId, UUID sourceSystemId, String externalKey) {
+    return repo.findIdByExternalKey(tenantId, sourceSystemId, externalKey);
+  }
+
+  public boolean needsReview(UUID tenantId, UUID sourceRecordId) {
+    return repo.needsReview(tenantId, sourceRecordId).orElse(false);
+  }
+
+  public List<SourceRecord> findByGuestId(UUID tenantId, UUID guestId) {
+    return mappers.toDomainRecords(repo.findByGuestId(tenantId, guestId));
+  }
+}
