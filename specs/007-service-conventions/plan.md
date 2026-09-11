@@ -108,13 +108,14 @@ guestgraph/engine/
 ├── src/test/java/ServiceRulesTest.java          # vendored (replaces architecture/PersistenceRulesTest)
 ├── pom.xml                                      # names the parent; actuator added
 ├── src/main/java/io/guestgraph/engine/**        # moved from io/guestgraph/** (R5); auth folded into api
+├── src/main/resources/api/*.yaml, sources.json  # copies of the four spec contracts, each with its source (R4)
 └── src/main/resources/application.yaml          # management.endpoints.web.exposure.include: health
 
 guestgraph/connector-apaleo/
 ├── service-conventions.json, service/, .github/workflows/verify.yml, src/test/java/ServiceRulesTest.java
-├── api/connector-api.yaml, api.json             # the pinned copy of the engine-held contract (R4)
+├── src/main/resources/api/connector-api.yaml, sources.json   # the copy of the engine-held contract, pinned (R4)
 ├── docs/er-schema.mmd                           # generated (R6)
-├── pom.xml                                      # names the parent; bundles api/*.yaml
+├── pom.xml                                      # names the parent
 ├── src/main/java/io/guestgraph/connector/apaleo/api/
 │   ├── ops/**, events/**                        # moved (R5)
 │   ├── ApiDocsController.java                   # /api-docs (R4)
@@ -136,7 +137,7 @@ arrives by the sync and is never edited in place.
 | R1 | A guestgraph repository vendored at a pin, the `conventions/` shape; no publish step | [research.md](research.md) |
 | R2 | The shared files: parent POM by path, ruleset, one ArchUnit class, diagram script, workflow, two scripts, agent block | [research.md](research.md), [data-model.md](data-model.md) |
 | R3 | The service check reads files; behavior is each suite's to prove | [research.md](research.md), [contracts/service-conventions.md](contracts/service-conventions.md) |
-| R4 | The connector serves a pinned copy of its engine-held contract | [research.md](research.md) |
+| R4 | A service serves what is under its resources' `api/`, each file with its source beside it | [research.md](research.md) |
 | R5 | Two package moves, one commit each, first in each service | [research.md](research.md) |
 | R6 | The engine's health; the connector's cap, document, diagram, local profile | [research.md](research.md) |
 | R7 | Created from the engine's files, released, added to the family; engine first, then the connector; a scaffold script | [research.md](research.md) |
