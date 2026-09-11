@@ -40,7 +40,7 @@ least a minor release, a change that asks a service to do more than re-sync is a
 | `AGENTS.md`, service block | vendored, written by the sync | after the family's block, before the service's own text |
 | `src/test/java/ServiceRulesTest.java` | vendored, written by the sync | equals `service-conventions/ServiceRulesTest.java` |
 | `pom.xml` | the service's own | names the parent by `relativePath` at the pinned version |
-| `api/*.yaml`, `api.json` | the service's own, or a pinned copy | the API document served at `/api-docs`; a copy owned elsewhere is pinned by `api.json` to a repository, a commit and a path |
+| `src/main/resources/api/*.yaml`, `sources.json` | copies, or the service's own | what `/api-docs` serves and nothing else; `sources.json` names each file's source: a path in this repository, `owner/repo@commit:path`, or `own` |
 | `docs/er-schema.mmd` | generated | reproduced by `service-conventions/regen-er`, held by `er-drift` |
 | `application.yaml` | the service's own | the properties the list names |
 | `README.md` | the service's own | the sections the list names |
@@ -61,7 +61,7 @@ The items the service check reads, and where each service stands on Sep 11, 2026
 | parent POM by path | own POM | own POM | both adopt the parent |
 | root package `io.guestgraph.<service>` | `io.guestgraph` | yes | the engine's move |
 | endpoints and filters under `api` | `api`, `auth` | `ops`, `events` | the engine folds `auth` into `api`; the connector moves both |
-| API document at `/api-docs` | yes | none | research R4 |
+| API document at `/api-docs` from `src/main/resources/api/` | from a POM bundling of `specs/` | none | research R4, both services |
 | health without a credential | none | yes | the engine adds the actuator |
 | problem details | yes | yes | nothing |
 | request size cap | yes | none | the connector adds the filter |

@@ -23,17 +23,19 @@ One line in the service's root, the pin:
 | `scope` | the parameter every repository method carries | `tenantId` or `connectionId` |
 | `schema` | the database schema the diagram is drawn from | the default of `DATABASE_SCHEMA` |
 
-## `api.json`
+## `src/main/resources/api/sources.json`
 
-Present only when a service serves an API document owned by another repository:
+Beside the documents the service serves, one entry per file, naming where it comes from:
 
 ```json
-{ "repo": "guestgraph/engine", "commit": "<sha>",
-  "files": { "api/connector-api.yaml": "specs/005-apaleo-connector/contracts/connector-api.yaml" } }
+{ "001-core-identity-resolution.yaml": "specs/001-core-identity-resolution/contracts/openapi.yaml",
+  "connector-api.yaml": "guestgraph/engine@<sha>:specs/005-apaleo-connector/contracts/connector-api.yaml",
+  "probe-api.yaml": "own" }
 ```
 
-Each entry maps a file in the service to its path in the owning repository at that commit; the
-service check fetches the owner's file and compares.
+A local path is a file in the same repository, a copy of a frozen record; `owner/repo@commit:path`
+is a file in another repository at that commit, fetched and compared; `own` is a document written
+here and nowhere else. Every `.yaml` under the folder is listed, or the check fails.
 
 ## `sh service-conventions/service-conventions-sync sync | check`
 
@@ -60,7 +62,7 @@ Exit 0 with no output when nothing is missing; 1 otherwise. The items, in the or
 | `parent` | `pom.xml` names `io.guestgraph:service-parent` at the pinned `tag`'s version with `relativePath` `service-conventions/pom.xml` |
 | `root` | exactly one directory under `src/main/java/io/guestgraph/`, and it is `root`'s path |
 | `api` | `<root>/api/` exists; every class annotated `@RestController`, `@Controller` or extending a servlet filter is under it |
-| `api-document` | `api/` holds at least one `.yaml`; `pom.xml` bundles `api/*.yaml` into `api-contracts`; a class under `<root>/api/` maps `/api-docs`; every entry of `api.json`, when present, equals the owner's file at the pinned commit |
+| `api-document` | `src/main/resources/api/` holds at least one `.yaml` and `sources.json`; every `.yaml` there has an entry; every entry that is not `own` equals its source, local or fetched at the commit; a class under `<root>/api/` maps `/api-docs` |
 | `health` | `management.endpoints.web.exposure.include` is `health` |
 | `problem-details` | `spring.mvc.problemdetails.enabled` is `true` |
 | `request-cap` | a property ending in `.max-request-bytes` with a default, and a class under `<root>/api/` reading it |
