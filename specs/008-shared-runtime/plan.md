@@ -46,7 +46,7 @@ classes removed, 1 test added; 1 check item; 1 site page; 1 release of the share
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v0.6.0*
+*Source: `.specify/memory/constitution.md` v1.0.0*
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
