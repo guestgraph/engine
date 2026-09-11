@@ -129,10 +129,10 @@ naming the file.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T022 Walk [quickstart.md](quickstart.md) end to end and tick each step; fix what it finds
+- [x] T022 Walk [quickstart.md](quickstart.md) end to end and tick each step; fix what it finds
 - [x] T023 [P] `engine/docs/roadmap-notes.md`: the frozen contracts of slices 1 to 5 are amended forward with the slugs their problem responses answer (data-model table), and the slice's follow-ons: a published library, the framework's problems carrying the family's type; mark the shared-runtime follow-on of slice 7 consumed by `specs/008-shared-runtime`
 - [x] T024 [P] `engine/AGENTS.md` and `connector/AGENTS.md`: the code conventions name the shared package, the base exception and the rule that no problem is written by hand; `engine/README.md`'s API paragraph names the problems page
-- [ ] T025 Run `./mvnw verify` in both services, `sh tests/run` and the runtime module's `verify` in the shared repository, and read each exit code on its own, then `sh conventions/conventions-check` in all four repositories
+- [x] T025 Run `./mvnw verify` in both services, `sh tests/run` and the runtime module's `verify` in the shared repository, and read each exit code on its own, then `sh conventions/conventions-check` in all four repositories
 
 ---
 

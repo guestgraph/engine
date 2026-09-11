@@ -52,3 +52,26 @@ sh conventions/conventions-check
 | SC-003 | Step 3, and the shared repository's fixtures. |
 | SC-004 | Step 4. |
 | SC-005 | Step 5. |
+
+## Walked
+
+Sep 11, 2026, with service-conventions at v0.8.0, the engine at 234 tests and the connector at
+82, both green.
+
+1. Every origin, one shape: `ErrorShapeTest` in each service provokes the five refusals and
+   reads the shape; the engine's framework case, a body that is not JSON, answers
+   `application/problem+json` with `about:blank`, the follow-on the roadmap names.
+2. One pin move: v0.7.1 changed the `payload-too-large` sentence; engine pull request 54 and
+   connector pull request 22 each touched six files, the pin, the parent's version in the
+   service's `pom.xml` and in the two vendored copies, and the filter class.
+3. Nothing forbidden, then one thing: the check answers nothing in either service; a
+   `ResponseStatusException` planted in `GuestController` and in `StatusController` exits 1
+   naming the file; reverted.
+4. Nothing else changed: since slice 7 closed, the engine's test tree gained `ErrorShapeTest`
+   and `BoomController`, and changed one import in `OpenApiConformanceTest`, one comment in
+   `RequestSizeLimitTest` and four assertions in `RetiredGuestIdApiTest` from the path form
+   `/not-found` to the fragment form `#not-found`; the connector's gained the same two files
+   and renamed two harness properties to the shared keys. No assertion was removed.
+5. Every type has its page: the eleven slugs resolve to a section of
+   `https://guestgraph.io/problems/`, read from the served page; the roadmap names the slugs
+   each frozen contract answers.
