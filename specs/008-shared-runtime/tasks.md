@@ -100,7 +100,7 @@ copy edited in a service fails the sync check.
 the diff is the pin and the class; edit a vendored class in a service: the sync check fails.
 
 - [ ] T017 [US2] Walk quickstart step 2 with a real change: the `payload-too-large` detail sentence in `Problems`, released as `v0.6.1`; move each service's pin in its own pull request and read the diff. Record the walk in the shared repository's README under "How a rule changes" as the runtime's example
-- [ ] T018 [P] [US2] Update `shared/new-service`: no `ApiDocsController` and no `RequestSizeLimitFilter` of its own, `service.max-request-bytes` in its `application.yaml`, the shared package vendored by the sync it runs; `sh tests/run`'s scaffold case passes; `./mvnw verify` in a scaffolded service with the wrapper copied in passes
+- [x] T018 [P] [US2] Update `shared/new-service`: no `ApiDocsController` and no `RequestSizeLimitFilter` of its own, `service.max-request-bytes` in its `application.yaml`, the shared package vendored by the sync it runs; `sh tests/run`'s scaffold case passes; `./mvnw verify` in a scaffolded service with the wrapper copied in passes
 
 **Checkpoint**: Shared code moves by pin; the scaffold carries it.
 
