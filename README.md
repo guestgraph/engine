@@ -134,6 +134,7 @@ removing one of two additional guests does not report the other as their replace
 ./mvnw verify              # build, tests, architecture rules, PMD conventions, format check
 ./mvnw spotless:apply      # format (google-java-format, Google style) — CI rejects unformatted code
 sh service-conventions/regen-er      # regenerate docs/er-schema.mmd after schema changes — CI checks drift
+sh service-conventions/service-conventions-check   # what of the list every guestgraph service has this one lacks
 ```
 
 Code conventions (imports over inline FQNs, guardrail layout, known pitfalls) are

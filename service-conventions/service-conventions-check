@@ -1,0 +1,109 @@
+#!/bin/sh
+# service-conventions-check — read a service on the Spring stack against SERVICE.md, the list
+# of what every guestgraph service has, and say what is missing.
+#
+#   sh service-conventions/service-conventions-check    exit 1 with one ✗ line per missing item
+#
+# The check reads files; what the service does with them is its own suite's to prove. It reads
+# service-conventions.json for the root, the tag and the schema, and api.json, when present,
+# for the documents owned elsewhere: those are fetched from the owner at the pinned commit and
+# compared. SERVICE_CONVENTIONS_ROOT overrides the directory read and SERVICE_CONVENTIONS_OWNER
+# the base the owned documents are fetched from, which is how the tests run on fixtures.
+# Needs sh, awk, sed, grep, find, curl, and shasum or sha256sum.
+set -eu
+
+ROOT=${SERVICE_CONVENTIONS_ROOT:-.}
+cd "$ROOT"
+PIN=service-conventions.json
+YAML=src/main/resources/application.yaml
+status=0
+miss() { echo "✗ service-conventions: $1: $2"; status=1; }
+
+[ -f "$PIN" ] || { echo "✗ service-conventions: pin: no $PIN here" >&2; exit 1; }
+pin() { sed -n "s/.*\"$1\" *: *\"\([^\"]*\)\".*/\1/p" "$PIN" | head -1; }
+root=$(pin root); tag=$(pin tag); schema=$(pin schema)
+[ -n "$root" ] && [ -n "$tag" ] && [ -n "$schema" ] || { echo "✗ service-conventions: pin: $PIN needs \"root\", \"tag\" and \"schema\"" >&2; exit 1; }
+rootpath=src/main/java/$(echo "$root" | tr . /)
+version=${tag#v}
+
+sha() {
+  if command -v sha256sum > /dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
+  else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+
+# parent: pom.xml names the parent at the pinned version by relativePath
+parent=$(awk '/<parent>/{p=1} p{print} /<\/parent>/{exit}' pom.xml 2>/dev/null || true)
+echo "$parent" | grep -q '<artifactId>service-parent</artifactId>' \
+  && echo "$parent" | grep -q "<version>$version</version>" \
+  && echo "$parent" | grep -q '<relativePath>service-conventions/pom.xml</relativePath>' \
+  || miss parent "pom.xml does not name io.guestgraph:service-parent $version by relativePath service-conventions/pom.xml"
+
+# root: the root package exists and holds every source under io/guestgraph
+if [ -d "$rootpath" ]; then
+  stray=$(find src/main/java/io/guestgraph -name '*.java' 2>/dev/null | grep -v "^$rootpath/" | head -1 || true)
+  [ -z "$stray" ] || miss root "$stray is outside the root package $root"
+else
+  miss root "$rootpath does not exist; the pin names $root"
+fi
+
+# api: endpoints, filters and error answers sit under <root>.api
+if [ -d "$rootpath/api" ]; then
+  outside=$(grep -rlE '@RestController|@Controller|@ControllerAdvice|extends (OncePerRequestFilter|HttpFilter|GenericFilter)|implements (Filter|HandlerInterceptor)' src/main/java 2>/dev/null | grep -v "^$rootpath/api/" | head -1 || true)
+  [ -z "$outside" ] || miss api "$outside is an endpoint or filter outside $root.api"
+else
+  miss api "$rootpath/api does not exist"
+fi
+
+# api-document: a contract to serve, bundled, served at /api-docs, and equal to its owner's
+if [ -d api ]; then docs=$(ls api/*.yaml 2>/dev/null || true); else docs=$(ls specs/*/contracts/*.yaml 2>/dev/null || true); fi
+[ -n "$docs" ] || miss api-document "no contract in api/ or specs/*/contracts/"
+grep -q 'api-contracts' pom.xml 2>/dev/null || miss api-document "pom.xml does not bundle the contracts into api-contracts"
+grep -rq '"/api-docs"' "$rootpath/api" 2>/dev/null || miss api-document "no class under $root.api maps /api-docs"
+if [ -f api.json ]; then
+  orepo=$(sed -n 's/.*"repo" *: *"\([^"]*\)".*/\1/p' api.json | head -1)
+  ocommit=$(sed -n 's/.*"commit" *: *"\([^"]*\)".*/\1/p' api.json | head -1)
+  owner=${SERVICE_CONVENTIONS_OWNER:-https://raw.githubusercontent.com/$orepo/$ocommit}
+  TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+  sed -n 's/.*"\(api\/[^"]*\)" *: *"\([^"]*\)".*/\1 \2/p' api.json | while read -r local remote; do
+    case "$owner" in
+      http://*|https://*) curl -fsSL "$owner/$remote" -o "$TMP/owned" 2>/dev/null || { echo "✗ service-conventions: api-document: could not fetch $owner/$remote"; continue; } ;;
+      *) cp "$owner/$remote" "$TMP/owned" 2>/dev/null || { echo "✗ service-conventions: api-document: $owner/$remote is not there"; continue; } ;;
+    esac
+    [ -f "$local" ] && [ "$(sha "$local")" = "$(sha "$TMP/owned")" ] || echo "✗ service-conventions: api-document: $local differs from $orepo@$ocommit $remote"
+  done | { found=0; while read -r line; do echo "$line"; found=1; done; exit $found; } || status=1
+fi
+
+# health: the actuator exposes health and nothing else
+grep -Eq '^[[:space:]]*include:[[:space:]]*health[[:space:]]*$' "$YAML" 2>/dev/null \
+  || miss health "$YAML does not expose health alone under management.endpoints.web.exposure.include"
+
+# problem-details
+awk '/problemdetails:/{p=NR} p && NR==p+1 && /enabled:[[:space:]]*true/{f=1} END{exit !f}' "$YAML" 2>/dev/null \
+  || miss problem-details "$YAML does not enable spring.mvc.problemdetails"
+
+# request-cap: a property, and a class under api that reads it
+grep -q 'max-request-bytes:' "$YAML" 2>/dev/null || miss request-cap "$YAML has no max-request-bytes property"
+grep -rq 'max-request-bytes' "$rootpath/api" 2>/dev/null || miss request-cap "no class under $root.api reads max-request-bytes"
+
+# schema: one variable, the pinned default, in both places
+grep -q "schema: \${DATABASE_SCHEMA:$schema}" "$YAML" 2>/dev/null || miss schema "$YAML does not set hikari.schema to \${DATABASE_SCHEMA:$schema}"
+grep -q "default-schema: \${DATABASE_SCHEMA:$schema}" "$YAML" 2>/dev/null || miss schema "$YAML does not set flyway.default-schema to \${DATABASE_SCHEMA:$schema}"
+
+# diagram
+[ -f docs/er-schema.mmd ] && head -1 docs/er-schema.mmd | grep -q '^%% GENERATED by service-conventions/regen-er' \
+  || miss diagram "docs/er-schema.mmd is missing or not generated by service-conventions/regen-er"
+
+# local-profile
+grep -q 'on-profile: local' "$YAML" 2>/dev/null || [ -f src/main/resources/application-local.yaml ] \
+  || miss local-profile "no local profile in $YAML and no application-local.yaml"
+
+# readme
+for phrase in 'create role' 'create schema' './mvnw verify' 'service-conventions-check'; do
+  grep -qF "$phrase" README.md 2>/dev/null || miss readme "README.md does not carry '$phrase'"
+done
+
+# agents: the stack's block after the family's
+awk '/<!-- end conventions -->/{c=NR} /<!-- service-conventions · /{s=NR} END{exit !(c && s && s>c)}' AGENTS.md 2>/dev/null \
+  || miss agents "AGENTS.md does not carry the service-conventions block after the family's block"
+
+exit $status
