@@ -193,11 +193,11 @@ additive-only.
 
 ## Roadmap
 
-1. ✅ **Core** — identity resolution engine (deterministic, probabilistic-ready), guest graph, REST API
-2. ✅ **Probabilistic matching** — fuzzy/ML resolution behind the same strategy interface, with review queue
-3. ✅ **Timeline** — per-guest business-object associations, attributed decisions
-4. ✅ **Retired guest ids** — a stored guest id resolves to the current guest after merges and splits
-5. ✅ **Connectors** — ingest from real PMS/POS/booking systems; the first, for Apaleo, lives in [connector-apaleo](https://github.com/guestgraph/connector-apaleo) and brings reservations and bookings into the graph
+Which phases have shipped and which come next is on the organization profile at
+[github.com/guestgraph](https://github.com/guestgraph), beside the diagram of what runs, because
+that is the page a reader sees before choosing a repository. The requirements captured for later
+slices, which each `/speckit-specify` run consumes, are in
+[`docs/roadmap-notes.md`](docs/roadmap-notes.md).
 
 ## License
 
