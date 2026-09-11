@@ -1,47 +1,22 @@
+# What is the engine's own; everything every guestgraph service shares comes from the vendored
+# service-defaults.yaml, beneath this file and the environment.
 spring:
   application:
     name: guestgraph
-  threads:
-    virtual:
-      enabled: true
-  mvc:
-    problemdetails:
-      enabled: true
-  datasource:
-    hikari:
-      # One schema, one role (spec 006): every pooled connection opens with this search path,
-      # so JPA, JdbcClient and the harness's TRUNCATE resolve unqualified names in it.
-      schema: ${DATABASE_SCHEMA:engine}
-  flyway:
-    enabled: true
-    # The same value, so Flyway creates the schema when missing, keeps its history in it and
-    # runs the unqualified migrations into it. Nothing else names the schema (FR-003).
-    default-schema: ${DATABASE_SCHEMA:engine}
-    create-schemas: true
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
-  docker:
-    compose:
-      lifecycle-management: start_only
 
 server:
   port: 8080
+
+service:
+  schema: engine
+  # Request body cap on every path (RFC 9457 413 when exceeded): payloads are stored forever,
+  # so the engine bounds them tighter than the default a service starts from.
+  max-request-bytes: 5242880
 
 guestgraph:
   # ISO region for national-format phone numbers (e.g. "CH"); unset = only
   # +international numbers are accepted as identifiers (research R5).
   default-phone-region: ""
-  # Request body cap on /api (RFC 9457 413 when exceeded) — payloads are stored forever.
-  max-request-bytes: 5242880
-
-# Health for the platform, and nothing else: the document carries no data and needs no key.
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health
 
 ---
 # The local profile: the demo tenant and its key are seeded under it (LocalDevSeeder), so a

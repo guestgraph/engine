@@ -22,7 +22,8 @@ import org.junit.jupiter.api.Test;
  */
 class RequestSizeLimitTest extends PostgresIntegrationTest {
 
-  private static final long CAP = 5 * 1024 * 1024; // guestgraph.max-request-bytes default
+  private static final long CAP =
+      5 * 1024 * 1024; // service.max-request-bytes, the engine's own value
 
   @Test
   void declaredContentLengthOverCapIs413ProblemDetails() throws Exception {

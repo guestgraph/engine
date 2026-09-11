@@ -85,7 +85,7 @@ class RetiredGuestIdApiTest extends PostgresIntegrationTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     JsonNode problem = json(response.getBody());
-    assertThat(problem.get("type").asString()).endsWith("/not-found");
+    assertThat(problem.get("type").asString()).endsWith("#not-found");
     assertThat(problem.has("currentGuestIds")).isFalse();
   }
 
@@ -102,7 +102,7 @@ class RetiredGuestIdApiTest extends PostgresIntegrationTest {
             .toEntity(String.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    assertThat(json(response.getBody()).get("type").asString()).endsWith("/not-found");
+    assertThat(json(response.getBody()).get("type").asString()).endsWith("#not-found");
     assertThat(json(response.getBody()).has("currentGuestIds")).isFalse();
   }
 
@@ -231,7 +231,7 @@ class RetiredGuestIdApiTest extends PostgresIntegrationTest {
       assertThat(response.getHeaders().getContentType().toString())
           .contains("application/problem+json");
       JsonNode problem = json(response.getBody());
-      assertThat(problem.get("type").asString()).endsWith("/guest-retired");
+      assertThat(problem.get("type").asString()).endsWith("#guest-retired");
       assertThat(problem.get("title").asString()).isEqualTo("Guest id retired");
       assertThat(problem.get("status").asInt()).isEqualTo(410);
       assertThat(problem.get("guestId").asString()).isEqualTo(merge.absorbed);
@@ -259,7 +259,7 @@ class RetiredGuestIdApiTest extends PostgresIntegrationTest {
     for (ResponseEntity<String> response : responses) {
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
       JsonNode problem = json(response.getBody());
-      assertThat(problem.get("type").asString()).endsWith("/not-found");
+      assertThat(problem.get("type").asString()).endsWith("#not-found");
       assertThat(problem.has("currentGuestIds")).isFalse();
     }
   }

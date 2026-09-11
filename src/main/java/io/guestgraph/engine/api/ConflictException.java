@@ -1,8 +1,10 @@
 package io.guestgraph.engine.api;
 
-public class ConflictException extends RuntimeException {
+import io.guestgraph.service.ServiceException;
+import org.springframework.http.HttpStatus;
 
+public class ConflictException extends ServiceException {
   public ConflictException(String detail) {
-    super(detail);
+    super(HttpStatus.CONFLICT, "conflict", "Conflict", detail);
   }
 }

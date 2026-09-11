@@ -1,0 +1,34 @@
+# The settings every guestgraph service on the Spring stack shares, loaded beneath a service's
+# own configuration and its environment by io.guestgraph.service.ServiceDefaults, so a service's
+# own file names its schema and what is its own, and restates nothing here. Vendored from
+# guestgraph/service-conventions, never edited in a service.
+spring:
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+  datasource:
+    hikari:
+      # One schema, one role: every pooled connection opens with this search path.
+      schema: ${DATABASE_SCHEMA:${service.schema}}
+  flyway:
+    enabled: true
+    default-schema: ${DATABASE_SCHEMA:${service.schema}}
+    create-schemas: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  docker:
+    compose:
+      lifecycle-management: start_only
+service:
+  # A body larger than this is refused with a problem detail, by the shared runtime's filter.
+  max-request-bytes: ${MAX_REQUEST_BYTES:1048576}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
