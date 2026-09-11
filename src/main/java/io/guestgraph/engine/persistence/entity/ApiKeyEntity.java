@@ -1,0 +1,62 @@
+package io.guestgraph.engine.persistence.entity;
+
+import io.guestgraph.engine.domain.ActorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.Instant;
+import java.util.UUID;
+
+/** Read-only within the service; keys are provisioned by the operator (or seeder). */
+@Entity
+@Table(name = "api_key")
+public class ApiKeyEntity {
+
+  @Id private UUID id;
+  private UUID tenantId;
+  private String keyHash;
+  private String label;
+
+  @Enumerated(EnumType.STRING)
+  private ActorType actorType;
+
+  private String actorName;
+  private Instant createdAt;
+  private Instant revokedAt;
+
+  protected ApiKeyEntity() {}
+
+  public UUID getId() {
+    return id;
+  }
+
+  public UUID getTenantId() {
+    return tenantId;
+  }
+
+  public String getKeyHash() {
+    return keyHash;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public ActorType getActorType() {
+    return actorType;
+  }
+
+  public String getActorName() {
+    return actorName;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getRevokedAt() {
+    return revokedAt;
+  }
+}

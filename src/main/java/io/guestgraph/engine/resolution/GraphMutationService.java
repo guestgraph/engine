@@ -1,0 +1,61 @@
+package io.guestgraph.engine.resolution;
+
+import io.guestgraph.engine.domain.Actor;
+import io.guestgraph.engine.domain.MatchReview;
+import io.guestgraph.engine.domain.MergeEvent;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Transactional boundary around the pure graph operations: unmerge and review decisions mutate the
+ * graph, so they run inside a transaction under the per-tenant lock (FR-011).
+ */
+@Service
+public class GraphMutationService {
+
+  private final UnmergeOperation unmergeOperation;
+  private final ExplainOperation explainOperation;
+  private final ReviewDecisionOperation reviewDecisionOperation;
+  private final GuestIdResolver guestIdResolver;
+  private final TenantLock tenantLock;
+
+  public GraphMutationService(
+      UnmergeOperation unmergeOperation,
+      ExplainOperation explainOperation,
+      ReviewDecisionOperation reviewDecisionOperation,
+      GuestIdResolver guestIdResolver,
+      TenantLock tenantLock) {
+    this.unmergeOperation = unmergeOperation;
+    this.explainOperation = explainOperation;
+    this.reviewDecisionOperation = reviewDecisionOperation;
+    this.guestIdResolver = guestIdResolver;
+    this.tenantLock = tenantLock;
+  }
+
+  @Transactional
+  public MatchReview decideReview(UUID tenantId, UUID reviewId, boolean confirm, Actor actor) {
+    tenantLock.acquire(tenantId);
+    return reviewDecisionOperation.decide(tenantId, reviewId, confirm, actor);
+  }
+
+  @Transactional
+  public UnmergeOperation.UnmergeResult unmerge(
+      UUID tenantId, UUID guestId, List<UUID> sourceRecordIds, Actor actor) {
+    tenantLock.acquire(tenantId);
+    return unmergeOperation.unmerge(tenantId, guestId, sourceRecordIds, actor);
+  }
+
+  @Transactional(readOnly = true)
+  public List<MergeEvent> explain(UUID tenantId, UUID guestId) {
+    return explainOperation.explain(tenantId, guestId);
+  }
+
+  /** Empty when the id never existed in the tenant; a read, so no tenant lock. */
+  @Transactional(readOnly = true)
+  public Optional<GuestIdResolution> resolve(UUID tenantId, UUID guestId) {
+    return guestIdResolver.resolve(tenantId, guestId);
+  }
+}
