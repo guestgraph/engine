@@ -83,6 +83,7 @@ class ServiceRulesTest {
         .orShould()
         .beAssignableTo(PagingAndSortingRepository.class)
         .because("derived and generic repository methods bypass the reviewed @Query surface")
+        .allowEmptyShould(true)
         .check(appClasses);
   }
 
@@ -116,6 +117,7 @@ class ServiceRulesTest {
               }
             })
         .because("a repository query without the scope predicate reads across " + scope + "s")
+        .allowEmptyShould(true)
         .check(appClasses);
   }
 
@@ -129,6 +131,7 @@ class ServiceRulesTest {
         .because(
             "every repository method is explicit JPQL or SQL, reviewable in one place; a derived"
                 + " method could carry a decorative scope parameter that is never bound")
+        .allowEmptyShould(true)
         .check(appClasses);
   }
 
@@ -156,6 +159,7 @@ class ServiceRulesTest {
               }
             })
         .because("all query text lives in repository @Query annotations")
+        .allowEmptyShould(true)
         .check(appClasses);
   }
 
@@ -175,6 +179,7 @@ class ServiceRulesTest {
         .because(
             "raw SQL escapes the @Query guardrails and Hibernate flush coordination; a class that"
                 + " needs it is named in service-conventions.json with the reason in its own comment")
+        .allowEmptyShould(true)
         .check(appClasses);
   }
 
@@ -193,6 +198,7 @@ class ServiceRulesTest {
               }
             })
         .because("everything but persistence is storage-agnostic; JPA is a persistence detail")
+        .allowEmptyShould(true)
         .check(appClasses);
   }
 

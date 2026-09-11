@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -41,7 +42,9 @@ class OpenApiConformanceTest extends PostgresIntegrationTest {
     }
   }
 
-  @Autowired RequestMappingHandlerMapping handlerMapping;
+  // The actuator registers a second mapping of this type; the served API is the MVC one.
+  @Autowired
+  @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping handlerMapping;
 
   @Autowired ApiDocsController apiDocsController;
 

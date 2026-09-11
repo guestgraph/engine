@@ -35,3 +35,18 @@ guestgraph:
   default-phone-region: ""
   # Request body cap on /api (RFC 9457 413 when exceeded) — payloads are stored forever.
   max-request-bytes: 5242880
+
+# Health for the platform, and nothing else: the document carries no data and needs no key.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+---
+# The local profile: the demo tenant and its key are seeded under it (LocalDevSeeder), so a
+# developer runs the engine in one command and the quickstart's curl lines work as written.
+spring:
+  config:
+    activate:
+      on-profile: local

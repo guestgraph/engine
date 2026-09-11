@@ -20,7 +20,7 @@ case $cmd in sync|check) ;; *) usage ;; esac
 
 PIN=service-conventions.json
 DIR=service-conventions
-FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java regen-er verify.yml service-conventions-sync AGENTS.md"
+FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java regen-er verify.yml service-conventions-sync service-conventions-check AGENTS.md"
 OPEN_RE='^<!-- service-conventions · v[^ ]* -->$'
 CLOSE='<!-- end service-conventions -->'
 FAMILY_CLOSE='<!-- end conventions -->'

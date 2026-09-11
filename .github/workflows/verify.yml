@@ -34,3 +34,5 @@ jobs:
       - uses: actions/checkout@v7
       - name: The vendored copy equals the pinned release
         run: sh service-conventions/service-conventions-sync check
+      - name: The service has every item of the list
+        run: sh service-conventions/service-conventions-check
