@@ -16,6 +16,7 @@ everywhere.
 | guestgraph/guestgraph.github.io | guestgraph.io, the landing page and the intro talk | main | ~/git/guestgraph/guestgraph.github.io |
 | guestgraph/engine | identity resolution, guest graph and REST API, the open core | main | ~/git/guestgraph/engine |
 | guestgraph/connector-apaleo | the Apaleo connector: reservations and bookings into the guest graph, a client of the engine's API | main | ~/git/guestgraph/connector-apaleo |
+| guestgraph/service-conventions | the code-level rules of the guestgraph services: one list, one directory per stack, vendored by every service at a pinned release | main | ~/git/guestgraph/service-conventions |
 | guestgraph/.github | the organization profile GitHub shows, and nothing else | main | ~/git/guestgraph/.github |
 | companygraph/companygraph.github.io | companygraph.io, the landing page, the model and example pages, the intro talk | main | ~/git/companygraph/companygraph.github.io |
 | companygraph/meta-model | the meta-model: core vocabulary, packs and the conventions that make a graph of Markdown checkable | main | ~/git/companygraph/meta-model |
@@ -45,8 +46,9 @@ the pin, never from this file, so this file does not repeat versions.
 ## Re-syncing after a release
 
 In this order, one pull request each: design, then the three sites, then mental-model and
-meta-model, then the engine, then the connector, then field-notes, then the two `.github`
-repositories. Design first because a site's suite runs design's checks; the models before the
-engine because the sites' model pages are built from them; the connector after the engine
-because it is a client of the engine's API and its specification lives there. Nothing here
-opens those pull requests for you.
+meta-model, then service-conventions, then the engine, then the connector, then field-notes,
+then the two `.github` repositories. Design first because a site's suite runs design's checks;
+the models before the engine because the sites' model pages are built from them;
+service-conventions before the engine and the connector because both vendor it; the connector
+after the engine because it is a client of the engine's API and its specification lives there.
+Nothing here opens those pull requests for you.
