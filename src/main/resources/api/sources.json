@@ -1,0 +1,6 @@
+{
+  "001-core-identity-resolution.yaml": "specs/001-core-identity-resolution/contracts/openapi.yaml",
+  "002-probabilistic-matching.yaml": "specs/002-probabilistic-matching/contracts/openapi.yaml",
+  "003-timeline-journey.yaml": "specs/003-timeline-journey/contracts/openapi.yaml",
+  "004-retired-guest-ids.yaml": "specs/004-retired-guest-ids/contracts/openapi.yaml"
+}

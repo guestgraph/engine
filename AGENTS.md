@@ -14,7 +14,7 @@ says whether the copy matches the release, `sync` brings it to the release the p
 `sh conventions/conventions-check` holds this repository's own Markdown to `WRITING.md`. Edit
 a shared file in robertblust/conventions, never here.
 <!-- end conventions -->
-<!-- service-conventions · v0.3.0 -->
+<!-- service-conventions · v0.4.0 -->
 The code-level rules of every guestgraph service on the Spring stack live in
 `service-conventions/`, vendored from guestgraph/service-conventions at the release
 `service-conventions.json` names: the parent build every `pom.xml` takes by path, the source rules,
@@ -94,7 +94,7 @@ what is what causes drift, so the map is explicit:
 | Matching behavior | `docs/matching.md`, sectioned per matcher version |
 | One slice's decisions | `specs/NNN-*/` — **frozen at merge** |
 | Cross-slice decisions, roadmap, deferred work | `docs/roadmap-notes.md` |
-| API surface | `specs/*/contracts/openapi.yaml` |
+| API surface | `specs/*/contracts/openapi.yaml`; served from their copies under `src/main/resources/api/`, held equal by the service check |
 | Why a reader should care | `README.md` — concepts, never values |
 
 **The edit test.** Before writing a number, threshold, or algorithm name into prose, ask: *if
