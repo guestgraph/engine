@@ -178,7 +178,7 @@ summarized recommendation.
   resubmitted by the reconciliation right after its reservation's check-in, its hash moved while
   its key did not, and the engine dropped the copy as a duplicate.
 
-## Next — Service conventions
+## Next — Service conventions — ✅ consumed by specs/007-service-conventions
 
 Every guestgraph Java service should have the same shape by check, not by hand: the engine and
 the connector match in stack, guardrails and CI because the second copied the first, and nothing
@@ -191,6 +191,16 @@ configuration, the shared ArchUnit rules as source, the CI workflow templates an
 that asserts the list every service must have; each service runs its sync check and the service
 check beside `verify` and `conventions`. Adding a repository means a conventions release naming
 it in `REPOSITORIES.md`.
+
+*Taken by slice 7, Sep 11, 2026*: the repository exists, released four times on the day, and both
+services vendor it and pass the service check. Two decisions moved during the build. The served
+API lives under `src/main/resources/api/` in every service, with `sources.json` beside the
+documents naming where each comes from, rather than a POM bundling of the specs directory in the
+engine and a root directory in the connector; the engine's contracts under `specs/` stay the frozen
+records and are served as copies held equal to them. And what is shared is rules, configuration
+and one test class, not runtime code: the size filter, the health endpoint and the document
+controller are a few lines each service carries, because shared code needs a library and a
+publish step the family does not have; that is the follow-on.
 
 ## Scale levers (when volume demands, not before)
 
