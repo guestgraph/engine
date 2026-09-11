@@ -66,7 +66,7 @@ public class RequestSizeLimitFilter extends OncePerRequestFilter {
             HttpStatus.CONTENT_TOO_LARGE,
             "payload-too-large",
             "Payload too large",
-            "The request body may not exceed " + maxRequestBytes + " bytes"));
+            "The request body exceeds the cap of " + maxRequestBytes + " bytes"));
   }
 
   /** Reads the full stream, or returns null as soon as it exceeds {@code max} bytes. */
