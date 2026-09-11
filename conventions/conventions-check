@@ -5,8 +5,9 @@
 #
 #   sh conventions/conventions-check     exit 1 with one ✗ line per hit, file:line: word
 #
-# Needs sh, awk, sed, grep and find. Nothing else. CONVENTIONS_ROOT overrides the directory
-# scanned, which is how the tests point it at a fixture.
+# Needs sh, awk, sed, grep and find. git is asked for the member's identity when it is there
+# and skipped when it is not. CONVENTIONS_ROOT overrides the directory scanned and
+# CONVENTIONS_REPO the identity read, which is how the tests point it at a fixture.
 set -eu
 
 ROOT=${CONVENTIONS_ROOT:-.}
@@ -81,8 +82,56 @@ hits=$(printf '%s\n' "$files" | while IFS= read -r f; do
   ' "$f"
 done)
 
-if [ -n "$hits" ]; then
-  echo "$hits"
+# --- the README title ------------------------------------------------------------------------
+# The two tripwires above are properties of a line; this one is a property of the repository, so
+# it runs once, after the walk. The identity is not in conventions.json: the "repo" there names
+# where the vendored files come from, robertblust/conventions, and reads the same in every
+# member. So it is the runner's GITHUB_REPOSITORY, else the origin remote of a checkout whose
+# own root is the tree being scanned — an ancestor's remote would answer for a repository the
+# scan never opened — and CONVENTIONS_REPO overrides both. No identity, no row and no vendored
+# list are each a quiet pass with its reason: a worktree, a fixture and a repository outside the
+# family are not failures of the prose, and a tripwire that fails there fails for a reason that
+# has nothing to do with the change under it.
+LIST=$ROOT/conventions/REPOSITORIES.md
+README=$ROOT/README.md
+title_hit=""
+
+self=${CONVENTIONS_REPO:-${GITHUB_REPOSITORY:-}}
+if [ -z "$self" ] && [ -e "$ROOT/.git" ]; then
+  self=$(git -C "$ROOT" remote get-url origin 2>/dev/null || true)
+  self=$(printf '%s' "$self" | sed -e 's/\.git$//' -e 's#.*[:/]\([^/][^/]*/[^/][^/]*\)$#\1#')
+fi
+
+if [ -z "$self" ]; then
+  echo "· conventions: no repository identity here, so the README title is not checked"
+elif [ ! -f "$LIST" ]; then
+  echo "· conventions: no conventions/REPOSITORIES.md here, so the README title is not checked"
+else
+  # The row is found on its first cell and the title is its second. A separator row and a
+  # heading never carry an owner/repo in that cell, so neither can match.
+  want=$(awk -F'|' -v repo="$self" '
+    /^\|/ {
+      name = $2; gsub(/^[ \t]+|[ \t]+$/, "", name)
+      if (name == repo) { t = $3; gsub(/^[ \t]+|[ \t]+$/, "", t); print t; exit }
+    }' "$LIST")
+  if [ -z "$want" ]; then
+    echo "· conventions: $self is not in REPOSITORIES.md, so the README title is not checked"
+  elif [ ! -f "$README" ]; then
+    title_hit="✗ README.md: $self is in REPOSITORIES.md and has no README.md"
+  else
+    # Whole lines are compared, the "# " included, so a first line that is not a heading is told
+    # apart from the title it otherwise matches. Trailing whitespace and a CR are dropped
+    # because neither is visible to the reader the title is for.
+    first=$(sed -n '1p' "$README" | sed -e 's/\r$//' -e 's/[[:space:]]*$//')
+    if [ "$first" != "# $want" ]; then
+      title_hit="✗ README.md:1: first line is \"$first\", REPOSITORIES.md asks for \"# $want\""
+    fi
+  fi
+fi
+
+if [ -n "$hits" ] || [ -n "$title_hit" ]; then
+  if [ -n "$hits" ]; then echo "$hits"; fi
+  if [ -n "$title_hit" ]; then echo "$title_hit"; fi
   exit 1
 fi
 echo "✓ every Markdown file follows WRITING.md"

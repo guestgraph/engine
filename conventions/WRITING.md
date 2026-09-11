@@ -78,6 +78,16 @@ paragraph wearing a bullet. A table only for data with more than one dimension, 
 sentences. Bold at most one sentence per section, and that sentence is the rule. Headers only
 where a reader would jump to, never to segment a text that fits on a screen.
 
+A repository's `README.md` opens with an H1 of the brand, a spaced em-dash and the thing:
+`CompanyGraph — Meta Model`. The brand is the organization as prose writes it, not as GitHub
+spells the account; the thing is the repository in words, not in the hyphens a directory needs.
+A reader arrives from a search result or a tab with no other context, and the brand is the part
+they cannot recover from the path. A site repository is titled by its domain alone, because the
+domain is already the brand and the thing, and `profile/README.md` in a `.github` repository is
+the organization's front page rather than a repository's README and keeps its own title.
+`REPOSITORIES.md` carries every member's title in full and a tripwire holds each member to its
+row.
+
 Sentence case in headings and titles; a proper noun keeps its capitals. The first sentence of
 a section carries the point; the rest is its support.
 
