@@ -209,6 +209,25 @@ migrations; the engine's four records under `specs/` are its sources, the connec
 engine's contract at a pinned commit. The copies of slice 7's first shape are gone, and a
 consumer reads the whole API in one file.
 
+*Amended Sep 11, 2026, specs/008-shared-runtime*: the follow-on is consumed. The runtime code is
+shared after all, as source vendored by the same sync into the package `io.guestgraph.service`,
+tested in a module of the shared repository, because a library needs a publish step the family
+does not have and a vendored copy held by a check does not. Every refusal from every service is
+a problem detail whose type is `https://guestgraph.io/problems/#<slug>`, and the page says what
+each slug means. The frozen contracts of slices 1 to 5 keep their status codes and are amended
+forward here with the slugs their problem responses carry: slice 1's source systems, records,
+guests, explain and unmerge answer `invalid-request`, `not-found`, `conflict`, `invalid-unmerge`
+and `payload-too-large`, with `unauthorized` and `invalid-actor-claim` from the key filter;
+slice 2's match reviews, matching configuration and identifier rules add
+`review-already-decided`; slice 3's timeline, source objects and negative rules answer
+`invalid-request` and `not-found`; slice 4's retired ids answer `guest-retired` with the members
+`guestId`, `resolutionStatus` and `currentGuestIds`; slice 5's connector API answers
+`unauthorized`, `not-found`, `run-in-progress`, `invalid-request` and `payload-too-large`; and
+every one answers `internal-error` from the shared advice, its detail saying nothing of the
+cause. Two follow-ons: a published library replacing the vendored copies without a rename, once
+the family has a repository to publish to; and the framework's own problems, a body that is not
+JSON among them, carrying the family's type rather than `about:blank`.
+
 ## Scale levers (when volume demands, not before)
 
 - `ResolutionEngine.rebuildGuest` is O(records-on-guest) per ingest and loads full rows

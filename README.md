@@ -87,7 +87,9 @@ curl -s -X POST localhost:8080/api/v1/records \
   -d '{"sourceSystem":"opera-pms","externalKey":"r-1","payload":{"firstName":"Anna","email":"anna@example.com"}}'
 ```
 
-API surface (`/api/v1`, per-tenant `X-API-Key`, errors are RFC 9457 problem details):
+API surface (`/api/v1`, per-tenant `X-API-Key`, errors are RFC 9457 problem details whose `type`
+leads to the section of [guestgraph.io/problems](https://guestgraph.io/problems/) that says what
+to do):
 `POST /source-systems` · `POST /records` · `GET /guests/{id}` · `GET /guests/{id}/records` ·
 `GET /guests/{id}/explain` · `POST /guests/{id}/unmerge` · `GET /guests?identifier=…` ·
 `GET /guests/{id}/timeline` · `GET /source-objects/{system}/{type}/{id}` ·
