@@ -1,10 +1,9 @@
-package io.guestgraph.engine.architecture;
-
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaAnnotation;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaMethod;
@@ -13,11 +12,15 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
-import io.guestgraph.engine.config.LocalDevSeeder;
-import io.guestgraph.engine.persistence.repo.TenantAgnostic;
-import io.guestgraph.engine.resolution.TenantLock;
+import java.io.IOException;
 import java.lang.reflect.Parameter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.repository.Query;
@@ -26,14 +29,19 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.Repository;
 
 /**
- * The persistence guardrails from research R1, enforced at build time: tenant isolation must be
- * reviewable in every query, every query must be explicit (no derived methods, no ad-hoc
- * EntityManager queries), and repository scaffolding that bypasses it (CrudRepository&#38;co) is
- * banned — wherever the class lives, not just in the expected package.
+ * The persistence guardrails every guestgraph service on the Spring stack holds, vendored from
+ * guestgraph/service-conventions and never edited in a service: every repository query is explicit
+ * and scoped by the service's own key, tenant or connection, repository scaffolding that bypasses
+ * it is banned, no ad-hoc EntityManager queries, raw SQL only where the service names it, and JPA
+ * confined to the persistence package. In the default package on purpose: one file runs in every
+ * service, reading the root, the scope and the exemptions from service-conventions.json.
  */
-class PersistenceRulesTest {
+class ServiceRulesTest {
 
   static JavaClasses appClasses;
+  static String root;
+  static String scope;
+  static List<String> jdbcClientAllowed;
 
   static final DescribedPredicate<JavaClass> SPRING_DATA_REPOSITORY =
       new DescribedPredicate<>("are Spring Data repositories") {
@@ -43,15 +51,28 @@ class PersistenceRulesTest {
         }
       };
 
+  /** A method annotated with the service's own agnostic marker, found by its name's ending. */
+  static final DescribedPredicate<JavaAnnotation<?>> SCOPE_AGNOSTIC =
+      new DescribedPredicate<>("are the service's *Agnostic annotation") {
+        @Override
+        public boolean test(JavaAnnotation<?> annotation) {
+          return annotation.getRawType().getSimpleName().endsWith("Agnostic");
+        }
+      };
+
   @BeforeAll
-  static void importClasses() {
+  static void importClasses() throws IOException {
+    String pin = Files.readString(Path.of("service-conventions.json"));
+    root = field(pin, "root");
+    scope = field(pin, "scope");
+    jdbcClientAllowed = list(pin, "jdbcClientAllowed");
     appClasses =
         new ClassFileImporter()
             .withImportOption(new ImportOption.DoNotIncludeTests())
-            // Spring AOT artifacts (Foo__BeanDefinitions, FooImpl__AotRepository) are
-            // generated from the reviewed source — the rules target what humans write.
+            // Spring AOT artifacts are generated from the reviewed source; the rules target
+            // what people write.
             .withImportOption(location -> !location.contains("__"))
-            .importPackages("io.guestgraph.engine");
+            .importPackages(root);
   }
 
   @Test
@@ -61,38 +82,40 @@ class PersistenceRulesTest {
         .beAssignableTo(CrudRepository.class)
         .orShould()
         .beAssignableTo(PagingAndSortingRepository.class)
-        .because("CrudRepository-style methods (findById without tenantId) bypass tenant scoping")
+        .because("derived and generic repository methods bypass the reviewed @Query surface")
         .check(appClasses);
   }
 
   @Test
-  void everyRepositoryMethodIsTenantScoped() {
+  void everyRepositoryMethodIsScoped() {
     // Scoped by type, not package: a Repository declared anywhere is held to the rule.
     methods()
         .that()
         .areDeclaredInClassesThat(SPRING_DATA_REPOSITORY)
         .should(
             new ArchCondition<>(
-                "take a tenantId parameter or be @TenantAgnostic with a justification") {
+                "take a " + scope + " parameter or carry an *Agnostic annotation with a reason") {
               @Override
               public void check(JavaMethod method, ConditionEvents events) {
-                if (method.isAnnotatedWith(TenantAgnostic.class)) {
+                if (method.isAnnotatedWith(SCOPE_AGNOSTIC)) {
                   return;
                 }
-                boolean hasTenantId =
+                boolean scoped =
                     Arrays.stream(method.reflect().getParameters())
                         .map(Parameter::getName)
-                        .anyMatch("tenantId"::equals);
-                if (!hasTenantId) {
+                        .anyMatch(scope::equals);
+                if (!scoped) {
                   events.add(
                       SimpleConditionEvent.violated(
                           method,
                           method.getFullName()
-                              + " has no tenantId parameter and no @TenantAgnostic"));
+                              + " has no "
+                              + scope
+                              + " parameter and no *Agnostic annotation"));
                 }
               }
             })
-        .because("a repository query without a tenant predicate is a cross-tenant data leak")
+        .because("a repository query without the scope predicate reads across " + scope + "s")
         .check(appClasses);
   }
 
@@ -104,8 +127,8 @@ class PersistenceRulesTest {
         .should()
         .beAnnotatedWith(Query.class)
         .because(
-            "R1: every repository method is explicit JPQL — a derived query method could carry"
-                + " a decorative tenantId parameter that is never bound in the query")
+            "every repository method is explicit JPQL or SQL, reviewable in one place; a derived"
+                + " method could carry a decorative scope parameter that is never bound")
         .check(appClasses);
   }
 
@@ -132,22 +155,26 @@ class PersistenceRulesTest {
                                         + " @Query surface")));
               }
             })
-        .because(
-            "all query text lives in repository @Query annotations where tenant scoping is reviewable")
+        .because("all query text lives in repository @Query annotations")
         .check(appClasses);
   }
 
   @Test
-  void jdbcClientOnlyWhereJustified() {
+  void jdbcClientOnlyWhereTheServiceNamesIt() {
     noClasses()
-        .that()
-        .doNotBelongToAnyOf(TenantLock.class, LocalDevSeeder.class)
+        .that(
+            new DescribedPredicate<>("are not named in jdbcClientAllowed") {
+              @Override
+              public boolean test(JavaClass javaClass) {
+                return !jdbcClientAllowed.contains(javaClass.getName());
+              }
+            })
         .should()
         .dependOnClassesThat()
         .haveFullyQualifiedName("org.springframework.jdbc.core.simple.JdbcClient")
         .because(
-            "raw SQL escapes both the @Query guardrails and Hibernate flush coordination;"
-                + " only the advisory lock and the local-dev seeder are exempt")
+            "raw SQL escapes the @Query guardrails and Hibernate flush coordination; a class that"
+                + " needs it is named in service-conventions.json with the reason in its own comment")
         .check(appClasses);
   }
 
@@ -155,7 +182,7 @@ class PersistenceRulesTest {
   void onlyPersistenceDependsOnJpa() {
     noClasses()
         .that()
-        .resideOutsideOfPackage("io.guestgraph.engine.persistence..")
+        .resideOutsideOfPackage(root + ".persistence..")
         .should()
         .dependOnClassesThat(
             new DescribedPredicate<>("belong to jakarta.persistence or Hibernate") {
@@ -165,7 +192,27 @@ class PersistenceRulesTest {
                 return name.startsWith("jakarta.persistence") || name.startsWith("org.hibernate");
               }
             })
-        .because("the engine and API are storage-agnostic; JPA is a persistence-internal detail")
+        .because("everything but persistence is storage-agnostic; JPA is a persistence detail")
         .check(appClasses);
+  }
+
+  private static String field(String pin, String name) {
+    Matcher m = Pattern.compile("\"" + name + "\"\\s*:\\s*\"([^\"]*)\"").matcher(pin);
+    if (!m.find()) {
+      throw new IllegalStateException("service-conventions.json has no \"" + name + "\"");
+    }
+    return m.group(1);
+  }
+
+  private static List<String> list(String pin, String name) {
+    List<String> values = new ArrayList<>();
+    Matcher m = Pattern.compile("\"" + name + "\"\\s*:\\s*\\[([^\\]]*)\\]").matcher(pin);
+    if (m.find()) {
+      Matcher v = Pattern.compile("\"([^\"]*)\"").matcher(m.group(1));
+      while (v.find()) {
+        values.add(v.group(1));
+      }
+    }
+    return values;
   }
 }

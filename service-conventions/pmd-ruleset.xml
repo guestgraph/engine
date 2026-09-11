@@ -5,7 +5,7 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
   <description>
-    GuestGraph code conventions enforced mechanically (see CLAUDE.md). Kept deliberately
+    GuestGraph code conventions enforced mechanically (see AGENTS.md), the same in every service. Kept deliberately
     small: formatting is Spotless's job, architecture is ArchUnit's — PMD covers what
     neither can see in source form.
   </description>

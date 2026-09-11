@@ -14,6 +14,16 @@ says whether the copy matches the release, `sync` brings it to the release the p
 `sh conventions/conventions-check` holds this repository's own Markdown to `WRITING.md`. Edit
 a shared file in robertblust/conventions, never here.
 <!-- end conventions -->
+<!-- service-conventions · v0.2.0 -->
+The code-level rules of every guestgraph service on the Spring stack live in
+`service-conventions/`, vendored from guestgraph/service-conventions at the release
+`service-conventions.json` names: the parent build every `pom.xml` takes by path, the source rules,
+the architecture rules in `src/test/java/ServiceRulesTest.java`, the diagram script, the workflow
+in `.github/workflows/verify.yml`, and this block. `sh service-conventions/service-conventions-sync
+check` says whether the copy matches the release, `sync` brings it to the release the pin names.
+What every service has, whatever its stack, is `SERVICE.md` there. Edit a shared file in
+guestgraph/service-conventions, never here.
+<!-- end service-conventions -->
 
 # GuestGraph — working conventions
 
@@ -27,20 +37,20 @@ API-first RFC 9457, TDD on the resolution engine).
 ```bash
 ./mvnw verify              # tests (Testcontainers, needs Docker), ArchUnit, PMD, Spotless
 ./mvnw spotless:apply      # fix formatting (google-java-format) — check fails otherwise
-./scripts/regen-er.sh      # after schema changes — CI checks ER-diagram drift
+sh service-conventions/regen-er      # after schema changes — CI checks ER-diagram drift
 ```
 
 ## Code conventions
 
 - **Imports, not inline FQNs.** Types are referenced by simple name with a proper
   import — never `java.time.LocalDate` inline in code. Enforced by PMD
-  (`UnnecessaryFullyQualifiedName`, `config/pmd-ruleset.xml`) in `verify`. Exception:
+  (`UnnecessaryFullyQualifiedName`, `service-conventions/pmd-ruleset.xml`) in `verify`. Exception:
   JPQL query strings, where FQNs are required syntax (enum literals, constructor
   expressions) — PMD doesn't look inside strings.
 - **Formatting** is google-java-format via Spotless; don't hand-format.
 - **Comments** state constraints the code can't show; no narration.
 - Mechanical guardrails live in three places, each with its job: **Spotless** (format),
-  **PMD** (source-level conventions), **ArchUnit** (`PersistenceRulesTest`: tenant
+  **PMD** (source-level conventions), **ArchUnit** (`ServiceRulesTest`: tenant
   scoping on every repo method, `@Query`-only repositories, no CrudRepository, no ad-hoc
   EntityManager queries, JdbcClient allowlist, JPA confined to `persistence`).
 
@@ -62,7 +72,7 @@ implement `ResolutionStrategy` — do not redesign the engine.
   UUID pairs by `toString()` when a DB CHECK depends on it.
 - `@Service` beans get no persistence exception translation — only `@Repository` does.
 - Spring AOT generates `*__*` classes into `target/classes`; ArchUnit imports must
-  filter them (already done in `PersistenceRulesTest`).
+  filter them (already done in `ServiceRulesTest`).
 - Test harness truncates tables in `PostgresIntegrationTest.resetDatabase` — add new
   tables there or every integration test fails on FK truncate errors.
 - Until the first release, `V1__core_schema.sql`/`V2__*.sql` may be edited in place;

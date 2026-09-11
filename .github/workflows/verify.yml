@@ -1,0 +1,36 @@
+# Vendored from guestgraph/service-conventions by service-conventions-sync; edited there, never here.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - name: Build and test
+        run: ./mvnw -B verify
+  er-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Regenerate the diagram from the migrations
+        run: sh service-conventions/regen-er
+      - name: Fail if docs/er-schema.mmd is stale
+        run: |
+          git diff --exit-code docs/er-schema.mmd || {
+            echo "::error file=docs/er-schema.mmd::The schema changed and the diagram was not regenerated. Run sh service-conventions/regen-er and commit the result."
+            exit 1
+          }
+  service-conventions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: The vendored copy equals the pinned release
+        run: sh service-conventions/service-conventions-sync check

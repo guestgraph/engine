@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.1.1</version>
-    <relativePath/>
+    <groupId>io.guestgraph</groupId>
+    <artifactId>service-parent</artifactId>
+    <version>0.2.0</version>
+    <relativePath>service-conventions/pom.xml</relativePath>
   </parent>
 
   <groupId>io.guestgraph</groupId>
@@ -25,29 +25,11 @@
   </licenses>
 
   <properties>
-    <java.version>25</java.version>
     <libphonenumber.version>9.0.38</libphonenumber.version>
     <commons-text.version>1.15.0</commons-text.version>
     <commons-codec.version>1.22.1</commons-codec.version>
-    <testcontainers.version>2.0.5</testcontainers.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <archunit.version>1.5.0</archunit.version>
-    <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
-    <spotless.version>3.10.1</spotless.version>
-    <google-java-format.version>1.36.1</google-java-format.version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers-bom</artifactId>
-        <version>${testcontainers.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -125,7 +107,6 @@
     <dependency>
       <groupId>com.tngtech.archunit</groupId>
       <artifactId>archunit-junit5</artifactId>
-      <version>${archunit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -146,10 +127,6 @@
     </resources>
     <plugins>
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -161,52 +138,6 @@
             </path>
           </annotationProcessorPaths>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>${maven-pmd-plugin.version}</version>
-        <configuration>
-          <rulesets>
-            <ruleset>config/pmd-ruleset.xml</ruleset>
-          </rulesets>
-          <includeTests>true</includeTests>
-          <failOnViolation>true</failOnViolation>
-          <printFailingErrors>true</printFailingErrors>
-          <linkXRef>false</linkXRef>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <!-- verify fails on convention violations, e.g. inline FQNs instead of imports -->
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.diffplug.spotless</groupId>
-        <artifactId>spotless-maven-plugin</artifactId>
-        <version>${spotless.version}</version>
-        <configuration>
-          <java>
-            <googleJavaFormat>
-              <version>${google-java-format.version}</version>
-              <style>GOOGLE</style>
-              <formatJavadoc>true</formatJavadoc>
-            </googleJavaFormat>
-            <removeUnusedImports/>
-            <formatAnnotations/>
-          </java>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <!-- verify fails on unformatted code; fix with ./mvnw spotless:apply -->
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
