@@ -16,7 +16,7 @@
 
   <groupId>io.guestgraph</groupId>
   <artifactId>service-parent</artifactId>
-  <version>0.7.1</version>
+  <version>0.8.0</version>
   <packaging>pom</packaging>
   <name>GuestGraph service parent</name>
   <description>The Spring stack of every guestgraph service: platform, shared versions and the plugins that hold the source to the rules</description>
