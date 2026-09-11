@@ -52,6 +52,11 @@ service's `src/main/java/io/guestgraph/service/`:
 | `ApiDocsController` | none; `classpath:api/openapi.yaml` |
 | `BearerTokenFilter` | `service.bearer.token`, `service.bearer.open-paths`; absent token, absent filter |
 
+| `ServiceDefaults` | none; loads `service-defaults.yaml` beneath everything |
+
+Two resources travel with the package: `service-defaults.yaml`, vendored into
+`src/main/resources/`, and `META-INF/spring.factories`, which names the post-processor.
+
 The package also carries a `pom.xml` of its own in the shared repository, naming the parent, so
 the sources compile and their unit tests run where they are written; the sync copies the
 classes and not the pom.
@@ -72,5 +77,7 @@ classes and not the pom.
 3. **Nothing foreseen is 500.** The advice answers `internal-error` only for what nothing else
    caught, and logs it in full on the server.
 4. **A slug has a page.** No type is answered that the problems page does not explain.
-5. **Shared code is edited once.** A file under `io/guestgraph/service/` in a service is never
+5. **Defaults beneath, the service above.** A shared setting lives in `service-defaults.yaml`;
+   a service's own file names its schema and what is its own, and restates nothing shared.
+6. **Shared code is edited once.** A file under `io/guestgraph/service/` in a service is never
    edited there; the sync check names it when it differs.

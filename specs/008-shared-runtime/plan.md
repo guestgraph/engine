@@ -31,7 +31,7 @@ unchanged.
 **Target Platform**: Linux server, unchanged.
 
 **Project Type**: a source module in the shared repository, plus changes in two web services and
-one page in the family's site.
+one page in the family's site; a defaults document every service loads beneath its own.
 
 **Performance Goals**: none.
 
@@ -93,7 +93,10 @@ guestgraph/service-conventions/
 │   │   ├── ServiceExceptionHandler.java
 │   │   ├── RequestSizeLimitFilter.java
 │   │   ├── ApiDocsController.java
-│   │   └── BearerTokenFilter.java
+│   │   ├── BearerTokenFilter.java
+│   │   └── ServiceDefaults.java                 # loads the defaults beneath everything (R7)
+│   ├── src/main/resources/service-defaults.yaml  # vendored into a service's resources
+│   ├── src/main/resources/META-INF/spring.factories
 │   └── src/test/java/io/guestgraph/service/    # unit tests on Problems and ServiceException
 ├── spring/service-conventions-sync              # vendors runtime/src/main/java/io/guestgraph/service/*.java
 ├── spring/service-conventions-check             # error-shape; root and api learn the package
@@ -130,6 +133,7 @@ its own logic.
 | R3 | Types as fragments of one page on the family's site; frozen contracts amended forward | [research.md](research.md), [data-model.md](data-model.md) |
 | R4 | The check's `error-shape` item, five greps; `root` and `api` learn the package | [research.md](research.md), [contracts/shared-runtime.md](contracts/shared-runtime.md) |
 | R5 | What each service drops and extends | [research.md](research.md), [data-model.md](data-model.md) |
+| R7 | One defaults document beneath everything; a service names its schema and restates nothing | [research.md](research.md), [contracts/shared-runtime.md](contracts/shared-runtime.md) |
 | R6 | Unit tests in the runtime module, fixtures, one `ErrorShapeTest` per service | [research.md](research.md), [quickstart.md](quickstart.md) |
 
 ## Complexity Tracking

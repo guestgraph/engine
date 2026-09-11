@@ -121,13 +121,35 @@ the shared package provides, which is what FR-006 and the check ask.
 
 ---
 
+## R7 — The configuration every service starts from
+
+**Decision**: `service-defaults.yaml` in the shared stack, vendored into `src/main/resources/`,
+holds the settings both services carry by hand: virtual threads, problem details,
+`spring.datasource.hikari.schema` and `spring.flyway.default-schema` as
+`${DATABASE_SCHEMA:${service.schema}}`, Flyway enabled with schema creation, JPA's validate and
+open-in-view off, the compose lifecycle, `service.max-request-bytes` with its default, and health
+alone. A service's own `application.yaml` sets `service.schema` and keeps only what is its own.
+The file is loaded at the lowest precedence by `ServiceDefaults`, an environment post-processor
+in the shared package registered through a vendored `META-INF/spring.factories`, so the
+service's own file and the environment override it. The check reads the shared items from
+either file and names a shared setting restated in the service's own.
+
+**Rationale**: `spring.config.import` cannot serve defaults: an imported document lands beneath
+the importing one in the file and above it in precedence, so it would override the service
+rather than the reverse. A post-processor adding the file last is the one placement that reads
+as "defaults" and behaves as one. The schema's name is the only value that differs, so it is the
+one property a service must set.
+
+---
+
 ## R6 — What proves it
 
 **Decision**: The shared repository tests the runtime where it can without a context: `Problems`
 and `ServiceException` as plain unit tests run by a small Maven module under `spring/runtime/`,
 which also holds the classes' own `pom.xml` naming the parent, so the shared sources compile
-and format in the repository they come from; the check's new item on fixtures. Each service
-gains one integration test, `ErrorShapeTest`, that provokes a refusal from each origin, a
+and format in the repository they come from; the check's new item on fixtures. The post-processor
+is tested in the runtime module with an environment built by hand: the defaults are present, and
+a property set above them wins. Each service gains one integration test, `ErrorShapeTest`, that provokes a refusal from each origin, a
 filter, a controller, the advice and the framework, and asserts the shape and the type base
 (SC-001). The quickstart walks a shared change reaching both services by one pin move.
 

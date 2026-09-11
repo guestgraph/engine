@@ -42,11 +42,48 @@ service:
     open-paths: [/actuator/health, /api-docs, /apaleo/events/]
 ```
 
+## `service-defaults.yaml`
+
+Vendored into `src/main/resources/`, loaded beneath everything by `ServiceDefaults`:
+
+```yaml
+spring:
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+  datasource:
+    hikari:
+      schema: ${DATABASE_SCHEMA:${service.schema}}
+  flyway:
+    enabled: true
+    default-schema: ${DATABASE_SCHEMA:${service.schema}}
+    create-schemas: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  docker:
+    compose:
+      lifecycle-management: start_only
+service:
+  max-request-bytes: ${MAX_REQUEST_BYTES:1048576}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+```
+
+A service's own `application.yaml` sets `service.schema` and nothing the defaults carry.
+
 ## The sync
 
-`service-conventions-sync` vendors `runtime/*.java` from the stack's directory into
-`src/main/java/io/guestgraph/service/`, and `check` names any that differs, as for every other
-vendored file.
+`service-conventions-sync` vendors the runtime's classes into
+`src/main/java/io/guestgraph/service/` and its two resources into `src/main/resources/`, and
+`check` names any that differs, as for every other vendored file.
 
 ## `service-conventions-check`
 
@@ -57,6 +94,8 @@ One new item, and two items that learn the shared package:
 | `error-shape` | in the service's own sources, outside `io/guestgraph/service/`: no `ResponseStatusException`; no `ProblemDetail.forStatus`; no `application/problem+json` literal; no `@ControllerAdvice` or `@RestControllerAdvice`; no `getWriter()` in a class that extends a filter |
 | `root` | `io/guestgraph/service/` beside the root is not a stray root |
 | `api` | controllers and filters under `io/guestgraph/service/` are not expected under `<root>.api` |
+| `defaults` | `src/main/resources/service-defaults.yaml` is present; `application.yaml` sets `service.schema`; none of the defaults' keys is restated in `application.yaml` |
+| `health`, `problem-details`, `schema`, `request-cap` | read from the defaults when they are vendored, from `application.yaml` otherwise |
 
 Failure lines name the file: `✗ service-conventions: error-shape: <path> throws ResponseStatusException`.
 

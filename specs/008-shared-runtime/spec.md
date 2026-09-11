@@ -61,6 +61,31 @@ A rule that holds by inspection is one that a new service or a hurried afternoon
 
 ---
 
+### User Story 4 - The Configuration Every Service Starts From (Priority: P4)
+
+Both services' configuration files carry the same lines by hand: virtual threads, problem
+details, the schema pair read from one variable, the migration tool's schema, the persistence
+layer's validation, the compose lifecycle, health alone, the size cap's default. Only the
+schema's name differs. After this slice, those lines live once in the shared rules as a
+defaults document every service carries, loaded beneath everything else so a service's own
+configuration and its environment override it, and a service's own file keeps only what is its
+own: its name, its port, its schema's name, its datasource and its own properties.
+
+**Why this priority**: It is the same drift as the code's, in configuration, and it removes the
+last place where the two services say the same thing twice.
+
+**Independent Test**: Delete the shared lines from a service's own configuration and start it:
+it behaves as before; set one of them in the service's own file to another value and verify the
+service's value wins.
+
+**Acceptance Scenarios**:
+
+1. **Given** a service with the shared defaults and its own file naming its schema, **When** it starts, **Then** every shared setting is in effect as before, and the schema is the service's.
+2. **Given** a setting present in both the shared defaults and the service's own file, **When** the service starts, **Then** the service's value is the one in effect, and an environment variable wins over both.
+3. **Given** a service's own configuration, **When** it is read, **Then** it carries none of the shared lines, and the check names one that it does.
+
+---
+
 ### Edge Cases
 
 - A service-specific exception needs members beyond the standard four, as the engine's retired-guest problem carries the current guest ids: the base exception lets a subclass add named members, and the advice writes them, so the engine keeps its answer unchanged.
@@ -82,6 +107,7 @@ A rule that holds by inspection is one that a new service or a hurried afternoon
 - **FR-007**: The service check MUST fail naming the file when a service's own code writes a problem by hand, throws the framework's status exception, or edits the shared package.
 - **FR-008**: A service-specific exception MUST be able to add named members to its problem, and the engine's retired-guest answer MUST keep its members.
 - **FR-009**: The scaffold MUST write a service that carries the shared package and passes the check on its first run.
+- **FR-010**: The shared rules MUST hold one defaults document every service vendors, carrying the settings every service shares, loaded beneath a service's own configuration and its environment; a service's own configuration MUST name its schema and MUST NOT restate a shared setting, and the check MUST name one that does.
 
 ### Key Entities
 
@@ -99,6 +125,7 @@ A rule that holds by inspection is one that a new service or a hurried afternoon
 - **SC-003**: The service check names nothing in either service at the slice's end, and fails within one run when a hand-written problem or a framework status exception is added.
 - **SC-004**: Every existing integration test of both services passes unchanged in what it asserts.
 - **SC-005**: Every problem type either service answers is named in that service's contract and resolves to a page.
+- **SC-006**: Neither service's own configuration file carries a shared setting at the slice's end, and both start with the shared settings in effect; verified by the check and by both suites.
 
 ## Assumptions
 
