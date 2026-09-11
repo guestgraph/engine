@@ -32,11 +32,11 @@
     <java.version>25</java.version>
     <testcontainers.version>2.0.5</testcontainers.version>
     <archunit.version>1.5.0</archunit.version>
-    <wiremock.version>3.13.1</wiremock.version>
+    <wiremock.version>3.13.2</wiremock.version>
     <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
-    <spotless.version>3.10.1</spotless.version>
+    <spotless.version>3.10.2</spotless.version>
     <google-java-format.version>1.36.1</google-java-format.version>
-    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
+    <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
