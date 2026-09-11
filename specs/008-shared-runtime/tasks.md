@@ -120,8 +120,8 @@ naming the file.
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Extend `shared/spring/service-conventions-check`: the `error-shape` item with the five greps over `src/main/java` excluding `io/guestgraph/service/`; `root` and `api` learn the shared package. Then run T019 and watch it pass; release `v0.7.0`
-- [ ] T021 [US3] Move both services' pins to `v0.7.0`, one pull request each; `sh service-conventions/service-conventions-check` answers nothing in either
+- [x] T020 [US3] Extend `shared/spring/service-conventions-check`: the `error-shape` item with the five greps over `src/main/java` excluding `io/guestgraph/service/`; `root` and `api` learn the shared package. Then run T019 and watch it pass; release `v0.7.0`
+- [x] T021 [US3] Move both services' pins to `v0.7.0`, one pull request each; `sh service-conventions/service-conventions-check` answers nothing in either
 
 **Checkpoint**: The shape is a rule, not a state.
 
