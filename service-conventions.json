@@ -1,1 +1,1 @@
-{ "repo": "guestgraph/service-conventions", "tag": "v0.1.0", "stack": "spring", "root": "io.guestgraph.engine", "scope": "tenantId", "schema": "engine", "jdbcClientAllowed": ["io.guestgraph.engine.resolution.TenantLock", "io.guestgraph.engine.config.LocalDevSeeder"] }
+{ "repo": "guestgraph/service-conventions", "tag": "v0.2.0", "stack": "spring", "root": "io.guestgraph.engine", "scope": "tenantId", "schema": "engine", "jdbcClientAllowed": ["io.guestgraph.engine.resolution.TenantLock", "io.guestgraph.engine.config.LocalDevSeeder"] }

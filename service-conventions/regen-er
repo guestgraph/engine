@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # regen-er — regenerates docs/er-schema.mmd from the Flyway migrations via mermerd, in the
 # schema service-conventions.json names. Vendored from guestgraph/service-conventions.
 #
@@ -9,12 +9,13 @@
 #   sh service-conventions/regen-er
 #
 # Requires: docker, curl. mermerd is downloaded (pinned) on first use.
-set -euo pipefail
+set -eu
 
 MERMERD_VERSION="0.13.0"
 PG_IMAGE="postgres:18"
 PG_PORT="55432"
 OUT_FILE="docs/er-schema.mmd"
+mkdir -p "$(dirname "$OUT_FILE")"
 
 cd "$(dirname "$0")/.."
 SCHEMA=$(sed -n 's/.*"schema" *: *"\([^"]*\)".*/\1/p' service-conventions.json | head -1)
@@ -22,9 +23,9 @@ SCHEMA=$(sed -n 's/.*"schema" *: *"\([^"]*\)".*/\1/p' service-conventions.json |
 
 # --- mermerd (pinned, cached in .cache/) ---
 os=$(uname -s | tr '[:upper:]' '[:lower:]')
-arch=$(uname -m); [[ "$arch" == "x86_64" ]] && arch="amd64"; [[ "$arch" == "aarch64" ]] && arch="arm64"
+arch=$(uname -m); [ "$arch" = x86_64 ] && arch=amd64; [ "$arch" = aarch64 ] && arch=arm64
 mermerd=".cache/mermerd-${MERMERD_VERSION}"
-if [[ ! -x "$mermerd" ]]; then
+if [ ! -x "$mermerd" ]; then
   mkdir -p .cache
   curl -sfL "https://github.com/KarnerTh/mermerd/releases/download/v${MERMERD_VERSION}/mermerd_${MERMERD_VERSION}_${os}_${arch}.tar.gz" \
     | tar -xz -C .cache mermerd

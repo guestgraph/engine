@@ -1,4 +1,4 @@
-<!-- service-conventions · v0.1.0 -->
+<!-- service-conventions · v0.2.0 -->
 The code-level rules of every guestgraph service on the Spring stack live in
 `service-conventions/`, vendored from guestgraph/service-conventions at the release
 `service-conventions.json` names: the parent build every `pom.xml` takes by path, the source rules,
