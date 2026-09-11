@@ -2,8 +2,8 @@ package io.guestgraph.engine.contract;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.guestgraph.engine.api.ApiDocsController;
 import io.guestgraph.engine.integration.PostgresIntegrationTest;
+import io.guestgraph.service.ApiDocsController;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;

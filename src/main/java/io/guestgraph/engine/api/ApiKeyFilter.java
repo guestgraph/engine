@@ -2,17 +2,16 @@ package io.guestgraph.engine.api;
 
 import io.guestgraph.engine.domain.Credential;
 import io.guestgraph.engine.persistence.TenantStore;
+import io.guestgraph.service.Problems;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Authenticates every /api request with a per-tenant API key (header X-API-Key, SHA-256 hash
@@ -24,11 +23,9 @@ public class ApiKeyFilter extends OncePerRequestFilter {
   public static final String API_KEY_HEADER = "X-API-Key";
 
   private final TenantStore tenantStore;
-  private final ObjectMapper mapper;
 
-  public ApiKeyFilter(TenantStore tenantStore, ObjectMapper mapper) {
+  public ApiKeyFilter(TenantStore tenantStore) {
     this.tenantStore = tenantStore;
-    this.mapper = mapper;
   }
 
   @Override
@@ -72,28 +69,13 @@ public class ApiKeyFilter extends OncePerRequestFilter {
   }
 
   private void invalidActorClaim(HttpServletResponse response, String detail) throws IOException {
-    problem(
+    Problems.write(
         response,
-        HttpServletResponse.SC_BAD_REQUEST,
-        "invalid-actor-claim",
-        "Invalid actor claim",
-        detail);
+        Problems.of(HttpStatus.BAD_REQUEST, "invalid-actor-claim", "Invalid actor claim", detail));
   }
 
   private void unauthorized(HttpServletResponse response, String detail) throws IOException {
-    problem(response, HttpServletResponse.SC_UNAUTHORIZED, "unauthorized", "Unauthorized", detail);
-  }
-
-  private void problem(
-      HttpServletResponse response, int status, String type, String title, String detail)
-      throws IOException {
-    response.setStatus(status);
-    response.setContentType("application/problem+json");
-    Map<String, Object> problem = new LinkedHashMap<>();
-    problem.put("type", "https://guestgraph.io/problems/" + type);
-    problem.put("title", title);
-    problem.put("status", status);
-    problem.put("detail", detail);
-    response.getWriter().write(mapper.writeValueAsString(problem));
+    Problems.write(
+        response, Problems.of(HttpStatus.UNAUTHORIZED, "unauthorized", "Unauthorized", detail));
   }
 }

@@ -1,4 +1,4 @@
-package io.guestgraph.engine.api;
+package io.guestgraph.service;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
@@ -11,38 +11,30 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
 
 /**
- * Caps request body size on /api (payloads are stored immutably forever — an unbounded body is an
- * unbounded liability). A declared Content-Length over the cap is rejected from the header alone; a
- * body without a declared length (Transfer-Encoding: chunked — the bypass a header-only check would
- * miss) is buffered up to cap+1 bytes right here and rejected when it overruns. Both paths answer
- * RFC 9457 413. Memory is bounded by the cap, which the JSON layer would buffer anyway.
+ * Caps the size of a request body on every path: what a service stores is never larger than it
+ * meant to store. A declared length over the cap is refused from the header alone; a body without a
+ * declared length, the chunked one a header-only check misses, is buffered up to the cap plus one
+ * byte and refused when it overruns. Both answer the family's payload-too-large problem. Memory is
+ * bounded by the cap, which the JSON layer would buffer anyway. Vendored from
+ * guestgraph/service-conventions, never edited in a service.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestSizeLimitFilter extends OncePerRequestFilter {
 
   private final long maxRequestBytes;
-  private final ObjectMapper mapper;
 
   public RequestSizeLimitFilter(
-      @Value("${guestgraph.max-request-bytes:5242880}") long maxRequestBytes, ObjectMapper mapper) {
+      @Value("${service.max-request-bytes:1048576}") long maxRequestBytes) {
     this.maxRequestBytes = maxRequestBytes;
-    this.mapper = mapper;
-  }
-
-  @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) {
-    return !request.getRequestURI().startsWith("/api/");
   }
 
   @Override
@@ -51,7 +43,7 @@ public class RequestSizeLimitFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     long declared = request.getContentLengthLong();
     if (declared > maxRequestBytes) {
-      writeProblem(response);
+      refuse(response);
       return;
     }
     if (declared >= 0) {
@@ -61,14 +53,24 @@ public class RequestSizeLimitFilter extends OncePerRequestFilter {
     }
     byte[] body = readAtMost(request.getInputStream(), maxRequestBytes);
     if (body == null) {
-      writeProblem(response);
+      refuse(response);
       return;
     }
     chain.doFilter(new CachedBodyRequest(request, body), response);
   }
 
+  private void refuse(HttpServletResponse response) throws IOException {
+    Problems.write(
+        response,
+        Problems.of(
+            HttpStatus.CONTENT_TOO_LARGE,
+            "payload-too-large",
+            "Payload too large",
+            "The request body may not exceed " + maxRequestBytes + " bytes"));
+  }
+
   /** Reads the full stream, or returns null as soon as it exceeds {@code max} bytes. */
-  private byte[] readAtMost(InputStream in, long max) throws IOException {
+  private static byte[] readAtMost(InputStream in, long max) throws IOException {
     ByteArrayOutputStream buffer = new ByteArrayOutputStream(8192);
     byte[] chunk = new byte[8192];
     long total = 0;
@@ -81,17 +83,6 @@ public class RequestSizeLimitFilter extends OncePerRequestFilter {
       buffer.write(chunk, 0, n);
     }
     return buffer.toByteArray();
-  }
-
-  private void writeProblem(HttpServletResponse response) throws IOException {
-    response.setStatus(413);
-    response.setContentType("application/problem+json");
-    Map<String, Object> problem = new LinkedHashMap<>();
-    problem.put("type", "https://guestgraph.io/problems/payload-too-large");
-    problem.put("title", "Payload too large");
-    problem.put("status", 413);
-    problem.put("detail", "Request body exceeds the limit of " + maxRequestBytes + " bytes");
-    response.getWriter().write(mapper.writeValueAsString(problem));
   }
 
   private static final class CachedBodyRequest extends HttpServletRequestWrapper {
@@ -138,9 +129,7 @@ public class RequestSizeLimitFilter extends OncePerRequestFilter {
         }
 
         @Override
-        public void setReadListener(ReadListener readListener) {
-          throw new UnsupportedOperationException("Async body reading is not supported here");
-        }
+        public void setReadListener(ReadListener listener) {}
       };
     }
   }

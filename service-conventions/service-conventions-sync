@@ -10,7 +10,8 @@
 # SERVICE_CONVENTIONS_SOURCE overrides that with another base URL or a local directory that holds
 # the stack's directory, which is how the tests run offline. Beside service-conventions/ the sync
 # writes four files a build reads in a fixed place: the workflow, the rules test, the API
-# generator and the block of AGENTS.md after the family's block. Needs sh, curl, awk, sed, and shasum or sha256sum.
+# generator and the block of AGENTS.md after the family's block, and the shared runtime, the
+# package io.guestgraph.service every service carries as source. Needs sh, curl, awk, sed, and shasum or sha256sum.
 set -eu
 
 usage() { echo "usage: sh service-conventions/service-conventions-sync sync|check" >&2; exit 2; }
@@ -21,6 +22,9 @@ case $cmd in sync|check) ;; *) usage ;; esac
 PIN=service-conventions.json
 DIR=service-conventions
 FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java RegenApi.java regen-er regen-api verify.yml service-conventions-sync service-conventions-check AGENTS.md"
+RUNTIME="Problems.java ServiceException.java ServiceExceptionHandler.java RequestSizeLimitFilter.java ApiDocsController.java BearerTokenFilter.java ServiceDefaults.java ServiceAutoConfiguration.java"
+RESOURCES="service-defaults.yaml META-INF/spring.factories META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports"
+RUNTIME_DIR=src/main/java/io/guestgraph/service
 OPEN_RE='^<!-- service-conventions · v[^ ]* -->$'
 CLOSE='<!-- end service-conventions -->'
 FAMILY_CLOSE='<!-- end conventions -->'
@@ -84,8 +88,11 @@ place_of() {
 }
 
 if [ "$cmd" = sync ]; then
-  mkdir -p "$DIR"
+  mkdir -p "$DIR" "$RUNTIME_DIR"
   for f in $FILES; do fetch "$f" "$DIR/$f"; done
+  for f in $RUNTIME; do fetch "runtime/src/main/java/io/guestgraph/service/$f" "$RUNTIME_DIR/$f"; done
+  mkdir -p src/main/resources/META-INF/spring
+  for f in $RESOURCES; do fetch "runtime/src/main/resources/$f" "src/main/resources/$f"; done
   for f in $FILES; do
     place=$(place_of "$f"); [ -n "$place" ] || continue
     mkdir -p "$(dirname "$place")"; cp "$DIR/$f" "$place"
@@ -106,6 +113,18 @@ for f in $FILES; do
   place=$(place_of "$f"); [ -n "$place" ] || continue
   if [ ! -f "$place" ] || [ "$(sha "$place")" != "$(sha "$TMP/$f")" ]; then
     echo "✗ service-conventions: $place differs from $TAG"; status=1
+  fi
+done
+for f in $RESOURCES; do
+  mkdir -p "$TMP/$(dirname "$f")"; fetch "runtime/src/main/resources/$f" "$TMP/$f"
+  if [ ! -f "src/main/resources/$f" ] || [ "$(sha "src/main/resources/$f")" != "$(sha "$TMP/$f")" ]; then
+    echo "✗ service-conventions: src/main/resources/$f differs from $TAG"; status=1
+  fi
+done
+for f in $RUNTIME; do
+  fetch "runtime/src/main/java/io/guestgraph/service/$f" "$TMP/$f"
+  if [ ! -f "$RUNTIME_DIR/$f" ] || [ "$(sha "$RUNTIME_DIR/$f")" != "$(sha "$TMP/$f")" ]; then
+    echo "✗ service-conventions: $RUNTIME_DIR/$f differs from $TAG"; status=1
   fi
 done
 if [ ! -f AGENTS.md ] || [ "$(block_of AGENTS.md)" != "$(block_of "$TMP/AGENTS.md")" ]; then
