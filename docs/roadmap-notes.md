@@ -149,6 +149,49 @@ summarized recommendation.
   text, so the connector dropped the structured format. FR-016 holds in either: what a line may
   carry is the rule, not its shape.
 
+- **Sandbox session and quickstart walk, Sep 11, 2026 (research R11, tasks T033 and T034).**
+  Run against an Apaleo test account with five properties and a hundred reservations, a local
+  engine and a tunnel, with the connector at its pull request 11. The six items: (1) a guest
+  correction, an added guest and a removed guest each fire `reservation/changed`; a check-in
+  fires `reservation/checked-in` and changed no person field; a room assignment fires
+  `reservation/amended` and submitted nothing, as the hash rule intends; the default event list
+  stands and `picked-up-from-block` stays unverified. (2) A simple client, the client-credentials
+  kind, may list and create subscriptions; no connect client is needed. (3) No 429 was met by a
+  hundred reservations and their bookings; the limit stays unverified. (4) The reachability check
+  is not an empty body: a JSON document with topic `system`, type `healthcheck`, the account, an
+  empty `propertyIds` and a `timestamp` in epoch milliseconds, no entity, and it needs a 2xx; a
+  reservation delivery carries `propertyId`, a booking delivery none; listing subscriptions with
+  none answers 204; Apaleo returns `modified` in the property's offset, `+02:00` in the test
+  account, not in Z, and the observation key carries it as returned. (5) A person-only edit moves
+  the reservation's modified instant. (6) A booker edit moves the booking's modified only; no
+  reservation event followed it. The walk found five things the code now does: the token error
+  names the OAuth code, an unreadable connections file is named in quotes, the reachability check
+  is answered 200, a booking event is served under a configured property list, and a removed
+  guest releases its held slot. The second full sync submitted nothing, zero duplicates, where
+  the quickstart's step 7 expected duplicates equal to the first run's records; the hash rule
+  never sends an unchanged version, which is the stronger form of SC-002. Step 10, the gap rule,
+  was not waited for; its integration test stands for it. Three observations without a change:
+  the test account gives every guest one phone number, so the engine's probabilistic matcher
+  queued 9,602 reviews during the first full sync, which is the data's doing; the engine logs a
+  constraint violation at ERROR when a source system is registered a second time, though it
+  answers 409, and a lookup before the insert would spare the line; and a booking was once
+  resubmitted by the reconciliation right after its reservation's check-in, its hash moved while
+  its key did not, and the engine dropped the copy as a duplicate.
+
+## Next — Service conventions
+
+Every guestgraph Java service should have the same shape by check, not by hand: the engine and
+the connector match in stack, guardrails and CI because the second copied the first, and nothing
+compares them. A comparison on Sep 10, 2026 found the connector serving no API document where
+the engine serves the union of its contracts at `/api-docs`, no request size cap on the webhook
+endpoint, no ER diagram with a drift job, no local profile and a thinner error layer, and the
+engine without a health endpoint. The slice: a repository `guestgraph/service-conventions`,
+vendored at a pinned tag like `conventions/`, holding the PMD ruleset, the Spotless
+configuration, the shared ArchUnit rules as source, the CI workflow templates and a service check
+that asserts the list every service must have; each service runs its sync check and the service
+check beside `verify` and `conventions`. Adding a repository means a conventions release naming
+it in `REPOSITORIES.md`.
+
 ## Scale levers (when volume demands, not before)
 
 - `ResolutionEngine.rebuildGuest` is O(records-on-guest) per ingest and loads full rows
@@ -199,7 +242,7 @@ guest currently hold a booking" to exclude cancellations, the answer is an optio
 source-object block of the ingest contract and on the association, with a connector emitting a
 version when it changes — an engine slice, not a connector one.
 
-## Slice 4 — Connectors
+## Slice 4 — Connectors — ✅ consumed by specs/005-apaleo-connector
 
 **R-X5 is built** ([specs/004-retired-guest-ids](../specs/004-retired-guest-ids/spec.md)), so
 connectors may hold a `guestId`: writing one back into a PMS or CRM is what makes GuestGraph the

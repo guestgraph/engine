@@ -166,8 +166,8 @@ in the status with nothing chosen.
 
 **Purpose**: The sandbox facts, the release, and the documentation this repository owns.
 
-- [ ] T033 👤 The sandbox session of research R11: record which event fires for a guest edit, an added guest, a removed guest and a check-in with registration data; whether the client-credentials client may create subscriptions; the rate-limit status and headers; the bodies of the reachability check and a delivery; whether a person-only edit moves the reservation's `modified`; whether a booker edit moves only the booking's. Amend research R11 with the findings, dated, and set the `APALEO_EVENT_TYPES` default and the 429 handling from them
-- [ ] T034 Walk [quickstart.md](quickstart.md) end to end against a local engine and the sandbox and tick each step; fix what it finds
+- [x] T033 👤 The sandbox session of research R11: record which event fires for a guest edit, an added guest, a removed guest and a check-in with registration data; whether the client-credentials client may create subscriptions; the rate-limit status and headers; the bodies of the reachability check and a delivery; whether a person-only edit moves the reservation's `modified`; whether a booker edit moves only the booking's. Amend research R11 with the findings, dated, and set the `APALEO_EVENT_TYPES` default and the 429 handling from them
+- [x] T034 Walk [quickstart.md](quickstart.md) end to end against a local engine and the sandbox and tick each step; fix what it finds
 - [ ] T035 [P] `engine/docs/roadmap-notes.md`: mark the Slice 4 — Connectors section consumed by `specs/005-apaleo-connector`, keeping its text; `docs/matching.md` is untouched, no matcher changed
 - [ ] T036 [P] `engine/README.md`: flip roadmap line 5 to ✅ and add one sentence naming the Apaleo connector with a link to its repository; concepts, never values
 - [ ] T037 [P] Update the org profile README at `guestgraph/.github` (`profile/README.md`): the "Where to start" table gains the connector repository and "Where we are" says the first connector is built — a separate repository and a separate pull request, opened only after the connector's first release
