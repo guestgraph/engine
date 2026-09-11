@@ -14,7 +14,7 @@ says whether the copy matches the release, `sync` brings it to the release the p
 `sh conventions/conventions-check` holds this repository's own Markdown to `WRITING.md`. Edit
 a shared file in robertblust/conventions, never here.
 <!-- end conventions -->
-<!-- service-conventions · v0.7.0 -->
+<!-- service-conventions · v0.7.1 -->
 The code-level rules of every guestgraph service on the Spring stack live in
 `service-conventions/`, vendored from guestgraph/service-conventions at the release
 `service-conventions.json` names: the parent build every `pom.xml` takes by path, the source rules,
