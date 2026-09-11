@@ -138,7 +138,7 @@ repository list and the agent files name the shared repository.
 
 - [x] T031 [US3] Create `shared/new-service` (POSIX sh, `<stack> <name>`): writes the pin with `root` derived from the name, `scope` `tenantId`, `schema` the name with hyphens as underscores; runs the sync from the local stack directory; writes a `pom.xml` naming the parent, `src/main/java/<root>/Application.java`, `<root>/api/ApiDocsController.java`, `<root>/api/RequestSizeLimitFilter.java`, `application.yaml` with the list's properties and a `local` profile, `api/<name>-api.yaml` with one health-free empty document, `db/migration/V1__init.sql` creating one table, `docs/er-schema.mmd`, a README with the required sections and `AGENTS.md`. Then run T030 and watch it pass; release `v0.3.0`
 - [x] T032 [US3] Walk the throwaway service by hand: `./mvnw verify` in it passes with Docker; record in `shared/README.md` how a new service starts
-- [ ] T033 [P] [US3] Rewrite the service-specific part of `engine/AGENTS.md` and `connector/AGENTS.md` below the two blocks: the code conventions paragraph now points at the vendored files and the pin, the checks section names the four required jobs, and the pitfalls list keeps what is the service's own; `sh conventions/conventions-check` in both
+- [x] T033 [P] [US3] Rewrite the service-specific part of `engine/AGENTS.md` and `connector/AGENTS.md` below the two blocks: the code conventions paragraph now points at the vendored files and the pin, the checks section names the four required jobs, and the pitfalls list keeps what is the service's own; `sh conventions/conventions-check` in both
 
 **Checkpoint**: A third service can start from the rules; the family knows the repository.
 
@@ -146,10 +146,10 @@ repository list and the agent files name the shared repository.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T034 Walk [quickstart.md](quickstart.md) end to end and tick each step; fix what it finds
-- [ ] T035 [P] `engine/docs/roadmap-notes.md`: mark the "Next — Service conventions" section consumed by `specs/007-service-conventions`, keeping its text; add the follow-on that shared runtime code waits for a library
-- [ ] T036 [P] `engine/README.md`: one sentence in the checks section naming the shared rules and the `service-conventions` job; concepts, never values
-- [ ] T037 Run `./mvnw verify` in both services and `sh tests/run` in the shared repository and read each exit code on its own, then `sh conventions/conventions-check` in all three
+- [x] T034 Walk [quickstart.md](quickstart.md) end to end and tick each step; fix what it finds
+- [x] T035 [P] `engine/docs/roadmap-notes.md`: mark the "Next — Service conventions" section consumed by `specs/007-service-conventions`, keeping its text; add the follow-on that shared runtime code waits for a library
+- [x] T036 [P] `engine/README.md`: one sentence in the checks section naming the shared rules and the `service-conventions` job; concepts, never values
+- [x] T037 Run `./mvnw verify` in both services and `sh tests/run` in the shared repository and read each exit code on its own, then `sh conventions/conventions-check` in all three
 
 ---
 
