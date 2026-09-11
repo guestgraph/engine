@@ -64,6 +64,12 @@ sh conventions/conventions-check                     # the prose
   rule only the engine needs sits beside the shared files.
 - **Packages** are `io.guestgraph.engine`, the family's root and the repository's name, with the
   endpoints, filters and error answers under `api`, as in every guestgraph service.
+- **Refusals** are `ServiceException`s from the vendored package `io.guestgraph.service`, each
+  with its slug, status and title, thrown where the refusal is decided and written by the shared
+  advice; a filter refuses through the shared `Problems.write`. No problem detail, status
+  exception or advice is written here, and the service check's `error-shape` item names the file
+  that does. A new slug is added to the problems page on guestgraph.io before the engine answers
+  it.
 
 ## Architecture in one paragraph
 
