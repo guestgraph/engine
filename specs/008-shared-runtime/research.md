@@ -17,8 +17,9 @@ Spring's status exception, one handler and two filters writing JSON strings.
 `src/main/java/io/guestgraph/service/`, and the sync check holds them to the release as it holds
 every vendored file. The package name is the one a published library would carry, so the copies
 can be replaced by a dependency later without a rename in any service. A change to the runtime
-that asks a service to do more than re-sync, this slice's adoption among them, is a major release
-of the shared repository, as the family's rules say: `v1.0.0`.
+that asks a service to do more than re-sync, this slice's adoption among them, is what the
+family's rules call a major; the repository stays below 1.0 until the owner calls it stable, and
+under 0.x that step is the minor one: `v0.6.0`.
 
 **Rationale**: The family publishes nothing and has no Maven repository; a GitHub package
 registry would put a credential into every build. The sites take the design system as fenced

@@ -41,13 +41,12 @@ Apaleo expects them.
 
 **Scale/Scope**: 6 shared classes with tests; in the engine 8 exceptions rebased, 3 classes
 removed, 1 filter's refusals rerouted, 1 test added; in the connector 4 exceptions added, 3
-classes removed, 1 test added; 1 check item; 1 site page; 1 major release of the shared
-repository.
+classes removed, 1 test added; 1 check item; 1 site page; 1 release of the shared repository that asks the services to replace their own classes.
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*Source: `.specify/memory/constitution.md` v0.6.0*
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
@@ -126,7 +125,7 @@ its own logic.
 
 | # | Decision | Where |
 |---|---|---|
-| R1 | Shared as source under `io.guestgraph.service`, a major release to take | [research.md](research.md) |
+| R1 | Shared as source under `io.guestgraph.service`; taking it is the 0.x minor step the rules call a major | [research.md](research.md) |
 | R2 | Six classes; `ServiceException` extends `ErrorResponseException`, so the advice keeps the catch-all only | [research.md](research.md), [contracts/shared-runtime.md](contracts/shared-runtime.md) |
 | R3 | Types as fragments of one page on the family's site; frozen contracts amended forward | [research.md](research.md), [data-model.md](data-model.md) |
 | R4 | The check's `error-shape` item, five greps; `root` and `api` learn the package | [research.md](research.md), [contracts/shared-runtime.md](contracts/shared-runtime.md) |

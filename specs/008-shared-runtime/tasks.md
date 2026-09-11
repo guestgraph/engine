@@ -80,9 +80,9 @@ type under the family's base; the 500 is logged and says nothing.
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Release the shared repository as `v1.0.0` after T010 merges, the notes saying it is a major: a service replaces its own classes with the vendored package and reroutes its refusals through it
-- [ ] T014 [US1] In the engine: move the pin and the parent to `v1.0.0`, sync twice; make `NotFoundException`, `ConflictException`, `BadRequestException`, `InvalidUnmergeException`, `ReviewNotFoundException`, `ReviewAlreadyDecidedException`, `InvalidActorClaimException` and `RetiredGuestException` extend `ServiceException` with the slug, status and title the data model gives each, `RetiredGuestException` adding `guestId`, `resolutionStatus` and `currentGuestIds` through `withProperty`; delete `ApiExceptionHandler`, the engine's `RequestSizeLimitFilter` and `ApiDocsController`; `ApiKeyFilter` refuses through `Problems.write` with `unauthorized` and, for a bad actor claim, `invalid-request`; rename `guestgraph.max-request-bytes` to `service.max-request-bytes` in `application.yaml`; `./mvnw verify`, both checks. Then run T011 and watch it pass; open the pull request
-- [ ] T015 [US1] In the connector: move the pin and the parent to `v1.0.0`, sync twice; create `NoSuchConnectionException` and `NoSuchRunException` (`not-found`), `NotAnEventException` (`invalid-request`) and make `RunInProgressException` extend `ServiceException` (`run-in-progress`, 409, "A run is in progress"); `StatusController` throws them and loses its handler, `EventEndpoint` throws `NotAnEventException`; delete `OpsTokenFilter`, the connector's `RequestSizeLimitFilter` and `ApiDocsController`; `application.yaml` gains `service.max-request-bytes` and `service.bearer.token: ${CONNECTOR_OPS_TOKEN:}` with `open-paths [/actuator/health, /api-docs, /apaleo/events/]`, and the local profile's token moves under it; `ConnectorProperties` drops `opsToken`; the status suite's 401 assertions read the shared shape; `./mvnw verify`, both checks. Then run T012 and watch it pass; open the pull request
+- [ ] T013 [US1] Release the shared repository as `v0.6.0` after T010 merges, the notes saying it asks more than a re-sync, the step the family calls a major, taken as the minor one below 1.0: a service replaces its own classes with the vendored package and reroutes its refusals through it
+- [ ] T014 [US1] In the engine: move the pin and the parent to `v0.6.0`, sync twice; make `NotFoundException`, `ConflictException`, `BadRequestException`, `InvalidUnmergeException`, `ReviewNotFoundException`, `ReviewAlreadyDecidedException`, `InvalidActorClaimException` and `RetiredGuestException` extend `ServiceException` with the slug, status and title the data model gives each, `RetiredGuestException` adding `guestId`, `resolutionStatus` and `currentGuestIds` through `withProperty`; delete `ApiExceptionHandler`, the engine's `RequestSizeLimitFilter` and `ApiDocsController`; `ApiKeyFilter` refuses through `Problems.write` with `unauthorized` and, for a bad actor claim, `invalid-request`; rename `guestgraph.max-request-bytes` to `service.max-request-bytes` in `application.yaml`; `./mvnw verify`, both checks. Then run T011 and watch it pass; open the pull request
+- [ ] T015 [US1] In the connector: move the pin and the parent to `v0.6.0`, sync twice; create `NoSuchConnectionException` and `NoSuchRunException` (`not-found`), `NotAnEventException` (`invalid-request`) and make `RunInProgressException` extend `ServiceException` (`run-in-progress`, 409, "A run is in progress"); `StatusController` throws them and loses its handler, `EventEndpoint` throws `NotAnEventException`; delete `OpsTokenFilter`, the connector's `RequestSizeLimitFilter` and `ApiDocsController`; `application.yaml` gains `service.max-request-bytes` and `service.bearer.token: ${CONNECTOR_OPS_TOKEN:}` with `open-paths [/actuator/health, /api-docs, /apaleo/events/]`, and the local profile's token moves under it; `ConnectorProperties` drops `opsToken`; the status suite's 401 assertions read the shared shape; `./mvnw verify`, both checks. Then run T012 and watch it pass; open the pull request
 - [ ] T016 [P] [US1] Create `site/problems/index.html` through the writer role from a brief: one section per slug of the data model with the slug as its anchor, what the problem means and what a caller does, in the site's shell; add `/problems/` to the site's README table and sitemap; `npm run verify` and the design check as the site's agent file says; open the pull request
 
 **Checkpoint**: Every refusal in both services has one shape; every type resolves.
@@ -97,7 +97,7 @@ copy edited in a service fails the sync check.
 **Independent Test**: Change one line in the shared repository, release, move a pin, re-sync:
 the diff is the pin and the class; edit a vendored class in a service: the sync check fails.
 
-- [ ] T017 [US2] Walk quickstart step 2 with a real change: the `payload-too-large` detail sentence in `Problems`, released as `v1.0.1`; move each service's pin in its own pull request and read the diff. Record the walk in the shared repository's README under "How a rule changes" as the runtime's example
+- [ ] T017 [US2] Walk quickstart step 2 with a real change: the `payload-too-large` detail sentence in `Problems`, released as `v0.6.1`; move each service's pin in its own pull request and read the diff. Record the walk in the shared repository's README under "How a rule changes" as the runtime's example
 - [ ] T018 [P] [US2] Update `shared/new-service`: no `ApiDocsController` and no `RequestSizeLimitFilter` of its own, `service.max-request-bytes` in its `application.yaml`, the shared package vendored by the sync it runs; `sh tests/run`'s scaffold case passes; `./mvnw verify` in a scaffolded service with the wrapper copied in passes
 
 **Checkpoint**: Shared code moves by pin; the scaffold carries it.
@@ -118,8 +118,8 @@ naming the file.
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Extend `shared/spring/service-conventions-check`: the `error-shape` item with the five greps over `src/main/java` excluding `io/guestgraph/service/`; `root` and `api` learn the shared package. Then run T019 and watch it pass; release `v1.1.0`
-- [ ] T021 [US3] Move both services' pins to `v1.1.0`, one pull request each; `sh service-conventions/service-conventions-check` answers nothing in either
+- [ ] T020 [US3] Extend `shared/spring/service-conventions-check`: the `error-shape` item with the five greps over `src/main/java` excluding `io/guestgraph/service/`; `root` and `api` learn the shared package. Then run T019 and watch it pass; release `v0.7.0`
+- [ ] T021 [US3] Move both services' pins to `v0.7.0`, one pull request each; `sh service-conventions/service-conventions-check` answers nothing in either
 
 **Checkpoint**: The shape is a rule, not a state.
 
@@ -157,13 +157,13 @@ naming the file.
 
 ### MVP First (User Story 1 Only)
 
-Phases 1 to 3: the module, the six classes with their tests, `v1.0.0`, both adoptions and the
+Phases 1 to 3: the module, the six classes with their tests, `v0.6.0`, both adoptions and the
 problems page. A caller then reads one shape from both services with types that resolve.
 
 ### Incremental Delivery
 
 Phase 4 proves the pin move with a real change and brings the scaffold along; phase 5 turns the
-shape into a check and releases `v1.1.0`; phase 6 records the amendments and walks the
+shape into a check and releases `v0.7.0`; phase 6 records the amendments and walks the
 quickstart. Three releases of the shared repository, and each service moves its pin three
 times.
 
