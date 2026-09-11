@@ -108,6 +108,11 @@ what is what causes drift, so the map is explicit:
 |---|---|
 | Constants, thresholds, algorithms | the code |
 | Matching behavior | `docs/matching.md`, sectioned per matcher version |
+| What a guest's profile says | `docs/profile.md`, sectioned per survivorship version |
+| What counts as identity | `docs/identifiers.md`, sectioned per normalization version |
+| What a source record is | `docs/records.md` |
+| Where a guest stays | `docs/timeline.md` |
+| What a stored guest id still means | `docs/continuity.md` |
 | One slice's decisions | `specs/NNN-*/` — **frozen at merge** |
 | Cross-slice decisions, roadmap, deferred work | `docs/roadmap-notes.md` |
 | API surface | `specs/*/contracts/openapi.yaml`, the records; served as the one generated `src/main/resources/api/openapi.yaml`, held to them by regeneration in CI |
@@ -123,8 +128,13 @@ slice 3 amended R4-1 there rather than rewriting slice 2's spec. Spelling is the
 a British form brought to `conventions/WRITING.md` changes no decision, and the prose check
 reads merged specs like everything else.
 
-**`docs/matching.md` is append-only.** Merge events permanently record the `matcherName` that
-decided them, so a new matcher version gets a new section and the old one stays readable.
+**Three of the six concept documents are append-only**, `docs/matching.md`, `docs/profile.md`
+and `docs/identifiers.md`, for one reason: a merge event permanently records the `matcherName`
+that decided it, a profile was computed under one survivorship rule, and a value was stored under
+one normalization rule, so old data stays interpretable only while the rule that produced it
+stays readable. Each new version gets its own section and the old one remains. The other three,
+`docs/records.md`, `docs/timeline.md` and `docs/continuity.md`, describe invariants rather than a
+rule that is superseded, so they are written forward and edited in place.
 
 **A second repository links, never restates.** The org profile at `guestgraph/.github` once
 drifted to "Core in development" while two slices had shipped, because it restated a roadmap

@@ -39,6 +39,15 @@ Every value behind this — blocking keys, weights, thresholds, band semantics, 
 and the known recall limits — is in [`docs/matching.md`](docs/matching.md), which is the single
 place they are defined.
 
+Matching is one of six concepts with a reference document of its own, each answering the question
+a reader arrives with and each the single place its subject is defined: what makes an identifier
+strong enough to merge on ([`docs/identifiers.md`](docs/identifiers.md)), how two records become
+one person ([`docs/matching.md`](docs/matching.md)), where each field in a guest's profile came
+from ([`docs/profile.md`](docs/profile.md)), why a guest has several records of the same person
+([`docs/records.md`](docs/records.md)), why a timeline is shorter than the records behind it
+([`docs/timeline.md`](docs/timeline.md)), and what happens to a guest id you stored when guests
+merge ([`docs/continuity.md`](docs/continuity.md)).
+
 ## How it fits together
 
 ```mermaid
