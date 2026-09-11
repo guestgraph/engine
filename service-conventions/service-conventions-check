@@ -54,23 +54,34 @@ else
   miss api "$rootpath/api does not exist"
 fi
 
-# api-document: a contract to serve, bundled, served at /api-docs, and equal to its owner's
-if [ -d api ]; then docs=$(ls api/*.yaml 2>/dev/null || true); else docs=$(ls specs/*/contracts/*.yaml 2>/dev/null || true); fi
-[ -n "$docs" ] || miss api-document "no contract in api/ or specs/*/contracts/"
-grep -q 'api-contracts' pom.xml 2>/dev/null || miss api-document "pom.xml does not bundle the contracts into api-contracts"
+# api-document: what is under src/main/resources/api is served, and each file has its source
+API=src/main/resources/api
+docs=$(ls "$API"/*.yaml 2>/dev/null || true)
+[ -n "$docs" ] || miss api-document "no contract under $API"
 grep -rq '"/api-docs"' "$rootpath/api" 2>/dev/null || miss api-document "no class under $root.api maps /api-docs"
-if [ -f api.json ]; then
-  orepo=$(sed -n 's/.*"repo" *: *"\([^"]*\)".*/\1/p' api.json | head -1)
-  ocommit=$(sed -n 's/.*"commit" *: *"\([^"]*\)".*/\1/p' api.json | head -1)
-  owner=${SERVICE_CONVENTIONS_OWNER:-https://raw.githubusercontent.com/$orepo/$ocommit}
+if [ -f "$API/sources.json" ]; then
   TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
-  sed -n 's/.*"\(api\/[^"]*\)" *: *"\([^"]*\)".*/\1 \2/p' api.json | while read -r local remote; do
-    case "$owner" in
-      http://*|https://*) curl -fsSL "$owner/$remote" -o "$TMP/owned" 2>/dev/null || { echo "✗ service-conventions: api-document: could not fetch $owner/$remote"; continue; } ;;
-      *) cp "$owner/$remote" "$TMP/owned" 2>/dev/null || { echo "✗ service-conventions: api-document: $owner/$remote is not there"; continue; } ;;
+  for doc in $docs; do
+    name=$(basename "$doc")
+    source=$(sed -n "s/.*\"$name\" *: *\"\([^\"]*\)\".*/\1/p" "$API/sources.json" | head -1)
+    if [ -z "$source" ]; then miss api-document "$API/sources.json does not name where $name comes from"; continue; fi
+    case "$source" in
+      own) ;;
+      *@*:*)
+        orepo=${source%%@*}; rest=${source#*@}; ocommit=${rest%%:*}; opath=${rest#*:}
+        base=${SERVICE_CONVENTIONS_OWNER:-https://raw.githubusercontent.com/$orepo/$ocommit}
+        case "$base" in
+          http://*|https://*) curl -fsSL "$base/$opath" -o "$TMP/owned" 2>/dev/null || { miss api-document "could not fetch $base/$opath for $name"; continue; } ;;
+          *) cp "$base/$opath" "$TMP/owned" 2>/dev/null || { miss api-document "$base/$opath is not there for $name"; continue; } ;;
+        esac
+        [ "$(sha "$doc")" = "$(sha "$TMP/owned")" ] || miss api-document "$name differs from $orepo@$ocommit $opath" ;;
+      *)
+        [ -f "$source" ] || { miss api-document "$name names $source, which is not there"; continue; }
+        [ "$(sha "$doc")" = "$(sha "$source")" ] || miss api-document "$name differs from $source" ;;
     esac
-    [ -f "$local" ] && [ "$(sha "$local")" = "$(sha "$TMP/owned")" ] || echo "✗ service-conventions: api-document: $local differs from $orepo@$ocommit $remote"
-  done | { found=0; while read -r line; do echo "$line"; found=1; done; exit $found; } || status=1
+  done
+else
+  miss api-document "$API/sources.json is missing; every served document names its source"
 fi
 
 # health: the actuator exposes health and nothing else

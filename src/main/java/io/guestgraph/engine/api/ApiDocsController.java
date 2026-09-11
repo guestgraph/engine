@@ -19,10 +19,11 @@ import org.yaml.snakeyaml.Yaml;
 
 /**
  * Serves the complete OpenAPI document at GET /api-docs: the union of the per-feature contracts
- * (specs/&#42;/contracts/openapi.yaml, bundled at build time). The hand-written contracts stay the
- * source of truth — the conformance test proves both that they match the served surface and that
- * this merge equals their union. Outside /api/, so no API key is required (the document contains no
- * tenant data).
+ * under src/main/resources/api, copies of specs/&#42;/contracts/openapi.yaml that sources.json
+ * names and the service check holds equal to them. The hand-written contracts stay the source of
+ * truth — the conformance test proves both that they match the served surface and that this merge
+ * equals their union. Outside /api/, so no API key is required (the document contains no tenant
+ * data).
  */
 @RestController
 public class ApiDocsController {
@@ -41,8 +42,7 @@ public class ApiDocsController {
   private static Map<String, Object>[] loadContracts() {
     try {
       Resource[] resources =
-          new PathMatchingResourcePatternResolver()
-              .getResources("classpath:api-contracts/*/contracts/openapi.yaml");
+          new PathMatchingResourcePatternResolver().getResources("classpath:api/*.yaml");
       Arrays.sort(resources, Comparator.comparing(Resource::getDescription));
       @SuppressWarnings("unchecked")
       Map<String, Object>[] documents = new Map[resources.length];

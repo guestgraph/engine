@@ -7,7 +7,7 @@
   <parent>
     <groupId>io.guestgraph</groupId>
     <artifactId>service-parent</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <relativePath>service-conventions/pom.xml</relativePath>
   </parent>
 
@@ -116,19 +116,6 @@
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-      <!-- Bundle the per-feature API contracts so /api-docs can serve their union. -->
-      <resource>
-        <directory>specs</directory>
-        <includes>
-          <include>*/contracts/openapi.yaml</include>
-        </includes>
-        <targetPath>api-contracts</targetPath>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
