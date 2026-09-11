@@ -4,23 +4,24 @@ Three organizations, one family. `robertblust` holds the person and the shared m
 `guestgraph` the guest identity graph, `companygraph` the meta-model for operating a company.
 Every repository below vendors this repository's `conventions/` at a pinned release and opens
 its `AGENTS.md` with the same block; `CLAUDE.md` is the same four-line vendor adapter
-everywhere.
+everywhere. The `Title` column is the member's README title in full, the string its first line
+carries after `# `, and a tripwire in `conventions-check` holds each member to its own row.
 
-| Repository | Purpose | Default branch | Local path |
-|---|---|---|---|
-| robertblust/conventions | how the family writes and works, vendored by every member | main | ~/git/robertblust/conventions |
-| robertblust/design | the design system shared by the three sites: tokens, chrome, page checks | main | ~/git/robertblust/design |
-| robertblust/robertblust.github.io | blust.ch, the profile page and two talks | main | ~/git/robertblust/robertblust.github.io |
-| robertblust/mental-model | Robert Blust described in CompanyGraph, the reference instance | main | ~/git/robertblust/mental-model |
-| robertblust/field-notes | problems that took real work to understand, one file each | main | ~/git/robertblust/field-notes |
-| guestgraph/guestgraph.github.io | guestgraph.io, the landing page and the intro talk | main | ~/git/guestgraph/guestgraph.github.io |
-| guestgraph/engine | identity resolution, guest graph and REST API, the open core | main | ~/git/guestgraph/engine |
-| guestgraph/connector-apaleo | the Apaleo connector: reservations and bookings into the guest graph, a client of the engine's API | main | ~/git/guestgraph/connector-apaleo |
-| guestgraph/service-conventions | the code-level rules of the guestgraph services: one list, one directory per stack, vendored by every service at a pinned release | main | ~/git/guestgraph/service-conventions |
-| guestgraph/.github | the organization profile GitHub shows, and nothing else | main | ~/git/guestgraph/.github |
-| companygraph/companygraph.github.io | companygraph.io, the landing page, the model and example pages, the intro talk | main | ~/git/companygraph/companygraph.github.io |
-| companygraph/meta-model | the meta-model: core vocabulary, packs and the conventions that make a graph of Markdown checkable | main | ~/git/companygraph/meta-model |
-| companygraph/.github | the organization profile GitHub shows, and nothing else | main | ~/git/companygraph/.github |
+| Repository | Title | Purpose | Default branch | Local path |
+|---|---|---|---|---|
+| robertblust/conventions | Robert Blust — Conventions | how the family writes and works, vendored by every member | main | ~/git/robertblust/conventions |
+| robertblust/design | Robert Blust — Design | the design system shared by the three sites: tokens, chrome, page checks | main | ~/git/robertblust/design |
+| robertblust/robertblust.github.io | blust.ch | blust.ch, the profile page and two talks | main | ~/git/robertblust/robertblust.github.io |
+| robertblust/mental-model | Robert Blust — Mental Model | Robert Blust described in CompanyGraph, the reference instance | main | ~/git/robertblust/mental-model |
+| robertblust/field-notes | Robert Blust — Field Notes | problems that took real work to understand, one file each | main | ~/git/robertblust/field-notes |
+| guestgraph/guestgraph.github.io | guestgraph.io | guestgraph.io, the landing page and the intro talk | main | ~/git/guestgraph/guestgraph.github.io |
+| guestgraph/engine | GuestGraph — Engine | identity resolution, guest graph and REST API, the open core | main | ~/git/guestgraph/engine |
+| guestgraph/connector-apaleo | GuestGraph — Apaleo Connector | the Apaleo connector: reservations and bookings into the guest graph, a client of the engine's API | main | ~/git/guestgraph/connector-apaleo |
+| guestgraph/service-conventions | GuestGraph — Service Conventions | the code-level rules of the guestgraph services: one list, one directory per stack, vendored by every service at a pinned release | main | ~/git/guestgraph/service-conventions |
+| guestgraph/.github | GuestGraph — Organization | the organization profile GitHub shows, and nothing else | main | ~/git/guestgraph/.github |
+| companygraph/companygraph.github.io | companygraph.io | companygraph.io, the landing page, the model and example pages, the intro talk | main | ~/git/companygraph/companygraph.github.io |
+| companygraph/meta-model | CompanyGraph — Meta Model | the meta-model: core vocabulary, packs and the conventions that make a graph of Markdown checkable | main | ~/git/companygraph/meta-model |
+| companygraph/.github | CompanyGraph — Organization | the organization profile GitHub shows, and nothing else | main | ~/git/companygraph/.github |
 
 ## The list is the scope
 
