@@ -181,7 +181,7 @@ additive-only.
 2. ✅ **Probabilistic matching** — fuzzy/ML resolution behind the same strategy interface, with review queue
 3. ✅ **Timeline** — per-guest business-object associations, attributed decisions
 4. ✅ **Retired guest ids** — a stored guest id resolves to the current guest after merges and splits
-5. **Connectors** — ingest from real PMS/POS/booking systems
+5. ✅ **Connectors** — ingest from real PMS/POS/booking systems; the first, for Apaleo, lives in [connector-apaleo](https://github.com/guestgraph/connector-apaleo) and brings reservations and bookings into the graph
 
 ## License
 
