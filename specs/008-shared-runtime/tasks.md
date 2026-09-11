@@ -116,7 +116,7 @@ naming the file.
 
 ### Tests for User Story 3 ⚠
 
-- [ ] T019 [US3] ⚠ Extend `shared/tests/run` and `shared/tests/fixtures/passing`: the passing fixture carries the shared package under `src/main/java/io/guestgraph/service/` (written by the sync) and none of the five forbidden things; one case per grep of the contract's `error-shape` item, each planted in a file under the fixture's root package and each failing with `✗ service-conventions: error-shape: <path> …`; a case with a stray `io/guestgraph/other/` still fails `root` while `io/guestgraph/service/` does not; a case with the shared controller in place passes `api`. Run and watch it fail
+- [x] T019 [US3] ⚠ Extend `shared/tests/run` and `shared/tests/fixtures/passing`: the passing fixture carries the shared package under `src/main/java/io/guestgraph/service/` (written by the sync) and none of the five forbidden things; one case per grep of the contract's `error-shape` item, each planted in a file under the fixture's root package and each failing with `✗ service-conventions: error-shape: <path> …`; a case with a stray `io/guestgraph/other/` still fails `root` while `io/guestgraph/service/` does not; a case with the shared controller in place passes `api`. Run and watch it fail
 
 ### Implementation for User Story 3
 
