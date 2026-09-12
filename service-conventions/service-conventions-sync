@@ -21,7 +21,7 @@ case $cmd in sync|check) ;; *) usage ;; esac
 
 PIN=service-conventions.json
 DIR=service-conventions
-FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java RegenApi.java regen-er regen-api verify.yml service-conventions-sync service-conventions-check AGENTS.md"
+FILES="pom.xml pmd-ruleset.xml ServiceRulesTest.java RegenApi.java regen-er regen-api verify.yml dependabot.yml service-conventions-sync service-conventions-check AGENTS.md"
 RUNTIME="Problems.java ServiceException.java ServiceExceptionHandler.java RequestSizeLimitFilter.java ApiDocsController.java BearerTokenFilter.java ServiceDefaults.java ServiceAutoConfiguration.java"
 RESOURCES="service-defaults.yaml META-INF/spring.factories META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports"
 RUNTIME_DIR=src/main/java/io/guestgraph/service
@@ -81,6 +81,7 @@ write_block() {
 place_of() {
   case "$1" in
     verify.yml) echo ".github/workflows/verify.yml" ;;
+    dependabot.yml) echo ".github/dependabot.yml" ;;
     ServiceRulesTest.java) echo "src/test/java/ServiceRulesTest.java" ;;
     RegenApi.java) echo "src/test/java/RegenApi.java" ;;
     *) echo "" ;;
@@ -98,7 +99,7 @@ if [ "$cmd" = sync ]; then
     mkdir -p "$(dirname "$place")"; cp "$DIR/$f" "$place"
   done
   write_block
-  echo "✓ service-conventions: $DIR/, the workflow, the rules test and the AGENTS.md block are at $REPO@$TAG ($STACK)"
+  echo "✓ service-conventions: $DIR/, the workflows, the rules test and the AGENTS.md block are at $REPO@$TAG ($STACK)"
   exit 0
 fi
 
