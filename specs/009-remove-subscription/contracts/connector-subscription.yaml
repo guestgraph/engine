@@ -1,0 +1,117 @@
+openapi: 3.1.0
+info:
+  title: GuestGraph Apaleo connector — subscription
+  version: "0.2.0"
+  # Slice 5's contract is frozen, so this slice's two paths live here and the connector lists
+  # both files in its sources.json. The connector's served document is the merge of them; the
+  # engine does not serve either, as slice 5's own header explains.
+  description: >
+    Removing and restoring one connection's webhook subscription. The connector creates a
+    subscription for every configured connection when it starts and confirms it during every
+    reconciliation; these two paths are how an operator takes one away before a teardown and
+    puts it back without a restart.
+  license:
+    name: Apache-2.0
+servers:
+  - url: /
+security:
+  - OpsToken: []
+
+tags:
+  - name: Operations
+    description: What an operator calls
+
+paths:
+  /connections/{connectionId}/subscription:
+    delete:
+      tags: [Operations]
+      operationId: removeSubscription
+      summary: Remove this connection's webhook subscription in Apaleo
+      description: >
+        Deletes the subscription whose endpoint is this connection's, and nothing else in the
+        Apaleo account, so two connections sharing an account are independent. A statement of
+        the end state rather than of an act: asking twice, or asking when none exists, succeeds
+        and says so in `removed`. The absence lasts until the connector is restarted or the
+        subscription is restored; a restart subscribes every configured connection again.
+      parameters: [{ $ref: "#/components/parameters/ConnectionId" }]
+      responses:
+        "200":
+          description: No subscription now names this connection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubscriptionRemoved" }
+        "401": { description: Missing or wrong token }
+        "404": { description: No such connection }
+        "502": { description: Apaleo refused or could not be reached; nothing was removed }
+
+    put:
+      tags: [Operations]
+      operationId: restoreSubscription
+      summary: Create this connection's webhook subscription again
+      description: >
+        The same act the connector performs for every connection when it starts: creates the
+        subscription, or replaces one whose endpoint, events or properties differ. Idempotent,
+        and the way back from a removal without editing configuration or restarting.
+      parameters: [{ $ref: "#/components/parameters/ConnectionId" }]
+      responses:
+        "200":
+          description: A subscription names this connection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubscriptionState" }
+        "401": { description: Missing or wrong token }
+        "404": { description: No such connection }
+        "502": { description: Apaleo refused or could not be reached; nothing was created }
+
+components:
+  parameters:
+    ConnectionId:
+      name: connectionId
+      in: path
+      required: true
+      schema: { type: string }
+
+  schemas:
+    SubscriptionState:
+      type: object
+      required: [state, eventTypes]
+      properties:
+        state:
+          description: >
+            ACTIVE when Apaleo holds a subscription for this connection; REMOVED when an
+            operator asked for none; MISSING when there is none and nobody asked, which is a
+            fault; UNKNOWN before the first read.
+          type: string
+          enum: [ACTIVE, MISSING, REMOVED, UNKNOWN]
+        id:
+          description: Apaleo's id for the subscription, when there is one
+          type: [string, "null"]
+        eventTypes:
+          type: array
+          items: { type: string }
+        checkedAt:
+          description: When this was last read from or written to Apaleo
+          type: [string, "null"]
+          format: date-time
+
+    SubscriptionRemoved:
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionState"
+        - type: object
+          required: [removed]
+          properties:
+            removed:
+              description: >
+                Whether this request deleted a subscription. False means there was none to
+                delete, which is success: the end state asked for is the end state now.
+              type: boolean
+            endpoint:
+              description: >
+                The endpoint URL the removed subscription pointed at, so an operator taking away
+                a stale one can see which address it was.
+              type: [string, "null"]
+
+  securitySchemes:
+    OpsToken:
+      type: http
+      scheme: bearer
