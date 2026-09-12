@@ -9,6 +9,14 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    # Maven follows the parent this pom takes by relativePath, and that parent is vendored from
+    # guestgraph/service-conventions: editing it here makes the copy differ from its release and
+    # the service-conventions job refuses the change. These three are declared there and nowhere
+    # else, so they are bumped there and arrive by a re-sync.
+    ignore:
+      - dependency-name: "org.wiremock:wiremock-standalone"
+      - dependency-name: "com.diffplug.spotless:spotless-maven-plugin"
+      - dependency-name: "org.codehaus.mojo:exec-maven-plugin"
 
   - package-ecosystem: "github-actions"
     directory: "/"
