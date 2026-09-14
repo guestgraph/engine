@@ -111,6 +111,12 @@ components:
                 a stale one can see which address it was.
               type: [string, "null"]
 
+  # The status document's `subscription` block is slice 5's and carries `active` alone. The
+  # implementation adds `state` beside it, and this file cannot say so: regen-api merges schemas
+  # by name with the first source winning, so redefining `Status` here would be ignored rather
+  # than applied, and slice 5's contract is frozen history that must not be edited. The block
+  # permits extra members, so the document under-describes the response rather than contradicting
+  # it. Recorded in the engine's roadmap notes as a limit of the tooling, with what it would take.
   securitySchemes:
     OpsToken:
       type: http
