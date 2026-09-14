@@ -178,6 +178,42 @@ summarized recommendation.
   resubmitted by the reconciliation right after its reservation's check-in, its hash moved while
   its key did not, and the engine dropped the copy as a duplicate.
 
+## Slice 5 follow-on — a subscription the connector could not remove — ✅ consumed by specs/009-remove-subscription
+
+The sandbox session of Sep 11, 2026 left a subscription in Apaleo pointing at a tunnel that was
+about to go down, and the connector had no way to take it away: it creates a subscription at
+start and confirms it during every reconciliation, and the webhook client had list and create and
+no delete. The only recourse was Apaleo's own API with the credentials the connector already
+holds. Agreed as deferred in conversation that day and never written down, which is how a
+deferral becomes a thing nobody can find; the specification is its first written form.
+
+*Taken by slice 9, Sep 14, 2026*: a delete and a put on
+`/connections/{connectionId}/subscription`, with four named states replacing the boolean that
+could not tell a connection deliberately without a subscription from one whose creation failed.
+Two decisions are worth carrying forward. The intended state is **not persisted**, so a restart
+subscribes every configured connection again: a column would have made a subscription removed in
+a sandbox session still absent months later while the connector looked healthy, and configuration
+is where "which connections this connector serves" belongs. And a **restore** exists because a
+removal nobody can reverse without a restart is one an operator will not use.
+
+Two findings the slice produced without looking for them.
+
+- **A listing Apaleo could not give read as a listing with nothing in it.** The webhook client
+  checked for an empty body before checking for an error, and a 500 carries no body either. A
+  transient failure would have created a second subscription, and a removal would have answered
+  that there was nothing to remove while Apaleo still held one. Fixed in the slice; 204 and 404
+  stay what they were, legitimate answers meaning none.
+- **A later contract cannot extend an earlier contract's schema.** `regen-api` merges components
+  by name with the first source winning, and a merged slice's contract is frozen, so the status
+  document describes its `subscription` block as slice 5 wrote it while the response now also
+  carries `state`. The block permits extra members, so the document under-describes rather than
+  contradicts, and no check can see the gap because the connector has no conformance test. Three
+  ways out, none taken here: let a later source override a named schema, which makes merge order
+  load-bearing; move the served contract out of the frozen specs into a file a slice may edit,
+  which costs the record of what each slice decided; or give the connector a conformance test so
+  the gap at least fails loudly. Worth deciding before a slice needs to change a response rather
+  than add one.
+
 ## Next — Service conventions — ✅ consumed by specs/007-service-conventions
 
 Every guestgraph Java service should have the same shape by check, not by hand: the engine and

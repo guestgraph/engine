@@ -37,7 +37,7 @@ whose paths below are relative to that repository's root.
 
 ## Phase 1: Setup
 
-- [ ] T001 Add this slice's contract to the connector's served document: `src/main/resources/api/sources.json` gains `guestgraph/engine@<this branch's merge commit>:specs/009-remove-subscription/contracts/connector-subscription.yaml` beside the slice 5 source it already names, then `sh service-conventions/regen-api` writes `src/main/resources/api/openapi.yaml` from both. The commit is not known until this branch merges, so this task runs with the engine branch's head and is re-run with the merge commit before the connector's pull request is opened.
+- [x] T001 Add this slice's contract to the connector's served document: `src/main/resources/api/sources.json` gains `guestgraph/engine@<this branch's merge commit>:specs/009-remove-subscription/contracts/connector-subscription.yaml` beside the slice 5 source it already names, then `sh service-conventions/regen-api` writes `src/main/resources/api/openapi.yaml` from both. The commit is not known until this branch merges, so this task runs with the engine branch's head and is re-run with the merge commit before the connector's pull request is opened.
 
 ---
 
@@ -89,15 +89,15 @@ absence was asked for; break a second connection's creation and see a different 
 
 ### Tests for User Story 2 ⚠
 
-- [ ] T015 [US2] ⚠ In `src/test/java/io/guestgraph/connector/apaleo/integration/StatusTest.java`, the status distinguishes the two: after a removal the connection reports `subscription.state` of `REMOVED`; a connection whose `ensure` failed reports `MISSING`; a connection with one reports `ACTIVE` and its id. Run and watch it fail.
-- [ ] T016 [P] [US2] ⚠ In `SubscriptionLifecycleTest`, the log carries the act and no secret: capture the connector's log across a removal, assert one line names the connection and the removal, and assert the line contains neither the connection's webhook secret nor any part of its Apaleo credentials. Run and watch it fail.
+- [x] T015 [US2] ⚠ In `src/test/java/io/guestgraph/connector/apaleo/integration/StatusTest.java`, the status distinguishes the two: after a removal the connection reports `subscription.state` of `REMOVED`; a connection whose `ensure` failed reports `MISSING`; a connection with one reports `ACTIVE` and its id. Run and watch it fail.
+- [x] T016 [P] [US2] ⚠ In `SubscriptionLifecycleTest`, the log carries the act and no secret: capture the connector's log across a removal, assert one line names the connection and the removal, and assert the line contains neither the connection's webhook secret nor any part of its Apaleo credentials. Run and watch it fail.
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Publish the state in the status document: `StatusDocuments.Subscription` gains `state` beside `active`, and `StatusController.status` passes it through from `Subscriptions.status`.
-- [ ] T018 [US2] Log one line at info in `Subscriptions.remove`, naming the connection and whether a subscription was deleted, never the endpoint's secret — the endpoint goes in the response, which is behind the operations token, and not in the log.
+- [x] T017 [US2] Publish the state in the status document: `StatusDocuments.Subscription` gains `state` beside `active`, and `StatusController.status` passes it through from `Subscriptions.status`.
+- [x] T018 [US2] Log one line at info in `Subscriptions.remove`, naming the connection and whether a subscription was deleted, never the endpoint's secret — the endpoint goes in the response, which is behind the operations token, and not in the log.
 - [x] T019 [US2] ~~Amend slice 5's status contract forward~~ — **not possible, and recorded instead**: `regen-api` merges component schemas by name with the first source winning, so a later contract cannot extend an earlier one's schema, and slice 5's is frozen. The served document therefore describes `subscription` with `active` alone while the response also carries `state`; the block permits extra members, so it under-describes rather than contradicts. The contract says so where a reader will look, and T028 records the limit and its options in `docs/roadmap-notes.md`.
-- [ ] T020 [US2] Run T015 and T016 and watch them pass, then `./mvnw verify`.
+- [x] T020 [US2] Run T015 and T016 and watch them pass, then `./mvnw verify`.
 
 **Checkpoint**: a teardown reads as a teardown, in the status and in the log.
 
@@ -128,9 +128,9 @@ about a connection that is deliberately without a subscription.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T026 [P] `connector-apaleo/README.md`: the "How changes arrive" section says a subscription can be removed and restored through the operations surface, and says plainly that a restart subscribes every configured connection again, so an operator tearing down stops the connector before the tunnel. The "Watching and driving it" section lists the two new calls beside the runs.
-- [ ] T027 [P] Add the `apaleo-unreachable` section to `guestgraph.github.io/problems/index.html` in English, with its status and the service that answers it, then the `ids` list in `verify/check.mjs`; the German follows the owner's review, as every page's does.
-- [ ] T028 [P] `docs/roadmap-notes.md` in the engine: record the deferral this slice consumes, under the sandbox session that found it, and mark it consumed by `specs/009-remove-subscription`. The deferral was never written down, which the specification's checklist records; this is where it belongs.
+- [x] T026 [P] `connector-apaleo/README.md`: the "How changes arrive" section says a subscription can be removed and restored through the operations surface, and says plainly that a restart subscribes every configured connection again, so an operator tearing down stops the connector before the tunnel. The "Watching and driving it" section lists the two new calls beside the runs.
+- [x] T027 [P] Add the `apaleo-unreachable` section to `guestgraph.github.io/problems/index.html` in English, with its status and the service that answers it, then the `ids` list in `verify/check.mjs`; the German follows the owner's review, as every page's does.
+- [x] T028 [P] `docs/roadmap-notes.md` in the engine: record the deferral this slice consumes, under the sandbox session that found it, and mark it consumed by `specs/009-remove-subscription`. The deferral was never written down, which the specification's checklist records; this is where it belongs.
 - [ ] T029 Move the API page's connector pin: `guestgraph.github.io/api-sources.json` takes the connector's new commit, `npm run api` rewrites the rows, and the two new operations appear with their schemas. `build-api.mjs` needs `removeSubscription` and `restoreSubscription` placed in `IN_SECTION` and their refusals in `PROBLEMS`, or the build stops and names them, which is the point of both lists.
 - [ ] T030 👤 Walk [quickstart.md](quickstart.md) with the owner against the sandbox, including step 8, the teardown it was built for. Record what the walk finds in `docs/roadmap-notes.md`, not in this spec, which is frozen at merge.
 - [ ] T031 Run `./mvnw verify` in the connector, `sh service-conventions/service-conventions-check`, and `sh conventions/conventions-check` in the engine, the connector and the site, reading each exit code on its own. Then open the spec branch's pull request with every task ticked.
