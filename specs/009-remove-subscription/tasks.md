@@ -37,7 +37,7 @@ whose paths below are relative to that repository's root.
 
 ## Phase 1: Setup
 
-- [x] T001 Add this slice's contract to the connector's served document: `src/main/resources/api/sources.json` gains `guestgraph/engine@<this branch's merge commit>:specs/009-remove-subscription/contracts/connector-subscription.yaml` beside the slice 5 source it already names, then `sh service-conventions/regen-api` writes `src/main/resources/api/openapi.yaml` from both. The commit is not known until this branch merges, so this task runs with the engine branch's head and is re-run with the merge commit before the connector's pull request is opened.
+- [x] T001 Add this slice's contract to the connector's served document: `src/main/resources/api/sources.json` gains `guestgraph/engine@6eba9cc:specs/009-remove-subscription/contracts/connector-subscription.yaml` beside the slice 5 source it already names, then `sh service-conventions/regen-api` writes `src/main/resources/api/openapi.yaml` from both. **Pinned to this branch's commit rather than to its merge commit**: a commit reachable from the remote survives the merge, so re-pointing afterwards would change the pin without changing what it names. Note that the raw host caches a 404, so a commit fetched before it was pushed stays missing for a minute after.
 
 ---
 
