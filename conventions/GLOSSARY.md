@@ -18,6 +18,8 @@ marks `TRANSLATOR.md` repeats are the only places the shared files carry German 
 | guest identity graph | guest identity graph | `Identitätsgraph für Gäste` | guestgraph.io's own phrase; `Open-Source-Identitätsgraph` where the sentence says open source. |
 | identity resolution | identity resolution | `Identitätsauflösung` | guestgraph.io, the billing page and the intro talk. |
 | Mental Model | Mental Model | `Mental Model` | A coined name for the owner's knowledge base, kept in English in both languages like CompanyGraph; `mentales Modell` is the psychology term and is not meant. The page `/model/` is `Modell`, the generic noun. |
+| connector | connector | `Connector` | The component that brings one source system into the graph. Kept English like `core`, because the repositories are named for it — `connector-apaleo` — and a reader who met a German form would have to bridge to find them. Masculine, `der Connector`; plural `die Connectors`. |
+| engine | engine | `Engine` | The open core itself, the service that resolves identities and serves the API. Feminine, `die Engine`, the form the intro talk and the problems page both already use. |
 | open core | open core | `Open Core` | Kept in English on blust.ch; a term of the trade. |
 | open source | open source | `quelloffen` | The adjective; capitalized `Quelloffen` where it stands alone as a tag; in a compound, `Open-Source-`, as guestgraph.io writes it. Never the bare English `Open Source` in German. |
 | talk | talk | `Vortrag` | A talk on a site; the deck is the file that carries it. |

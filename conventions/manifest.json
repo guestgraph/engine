@@ -1,14 +1,14 @@
 {
   "repo": "robertblust/conventions",
-  "tag": "v1.10.0",
+  "tag": "v1.11.0",
   "files": {
     "conventions/WRITING.md": "sha256:4e856ce9bb753939c862eb1a807d2040248c579636f2756a3f6d17bf30c040d0",
     "conventions/WORKING.md": "sha256:ff96611192c07aaedd2071ac8dee2d2eacbc241db85b58beef2498bb966044a4",
     "conventions/REPOSITORIES.md": "sha256:18b44917d8f88daaf5913a2fe31fb278e3eab14d32c3f1c21a8e20e0c73df524",
     "conventions/WRITER.md": "sha256:7dc91881160145f114ec04911598fc464a55960cfa3eeb19ff7593e2c88eacd0",
     "conventions/TRANSLATOR.md": "sha256:ab6cd9ce38e39452f57528f258bb9de593f1663c05ad21caa1c012bab75c69f0",
-    "conventions/GLOSSARY.md": "sha256:1f5910e58a1de3f7bc8240b136fc6bed6bea3fe9a8a070ea151de0bfe502ac23",
-    "conventions/AGENTS.md": "sha256:407fb50108e5e4bfd59e496a472ea6d0ce5faf98f2062ea3e40fdb881b8162d8",
+    "conventions/GLOSSARY.md": "sha256:f045112e7d220bfab25428adb5b8f7a5cdf9c50b919a1b9cb7d615a02d0bafbf",
+    "conventions/AGENTS.md": "sha256:3a695b70943951212e3d050604cbe26c1c1b112dbe6bf59e5563d9f8932b9779",
     "conventions/conventions-sync": "sha256:4a59e85eee756399cf76a9f332d262694549b08472b46d45f26ac3314a28f4c2",
     "conventions/conventions-check": "sha256:fd6b7520e9543a2ee6f0d7c374f4f9c3bcd098395e3e9a27467cfcd5118fb241"
   }
