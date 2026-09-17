@@ -20,6 +20,14 @@ exactly that; it is not approval to merge. A role invoked as a subagent, the wri
 `WRITER.md` or the translator of `TRANSLATOR.md`, edits files and reports; it never commits,
 and the session that invoked it proposes the message.
 
+A commit that exists may still be reworded while its branch is unpushed — a missing
+`Verified:` line, a fact the body got wrong — and whoever is driving the branch does that.
+What a commit contains is a different thing. A finding against a task already committed is a
+finding like any other: it comes back as a new commit through review, never folded into the
+old one, because a commit rewritten after it was read is no longer the commit that was read.
+Once a branch is pushed and a pull request is open someone may already have it, so it is
+rewritten only when the owner says so, with `--force-with-lease` and never `--force`.
+
 ## Pull requests
 
 Every change reaches the default branch through a pull request with one green status check.

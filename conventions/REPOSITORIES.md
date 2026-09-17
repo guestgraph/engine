@@ -14,6 +14,7 @@ carries after `# `, and a tripwire in `conventions-check` holds each member to i
 | robertblust/robertblust.github.io | blust.ch | blust.ch, the profile page and two talks | main | ~/git/robertblust/robertblust.github.io |
 | robertblust/mental-model | Robert Blust — Mental Model | Robert Blust described in CompanyGraph, the reference instance | main | ~/git/robertblust/mental-model |
 | robertblust/field-notes | Robert Blust — Field Notes | problems that took real work to understand, one file each | main | ~/git/robertblust/field-notes |
+| robertblust/mcp-blust-ch | mcp.blust.ch | mcp.blust.ch, the reference instance served over MCP from a pinned commit of the model | main | ~/git/robertblust/mcp-blust-ch |
 | guestgraph/guestgraph.github.io | guestgraph.io | guestgraph.io, the landing page and the intro talk | main | ~/git/guestgraph/guestgraph.github.io |
 | guestgraph/engine | GuestGraph — Engine | identity resolution, guest graph and REST API, the open core | main | ~/git/guestgraph/engine |
 | guestgraph/connector-apaleo | GuestGraph — Apaleo Connector | the Apaleo connector: reservations and bookings into the guest graph, a client of the engine's API | main | ~/git/guestgraph/connector-apaleo |
@@ -21,6 +22,7 @@ carries after `# `, and a tripwire in `conventions-check` holds each member to i
 | guestgraph/.github | GuestGraph — Organization | the organization profile GitHub shows, and nothing else | main | ~/git/guestgraph/.github |
 | companygraph/companygraph.github.io | companygraph.io | companygraph.io, the landing page, the model and example pages, the intro talk | main | ~/git/companygraph/companygraph.github.io |
 | companygraph/meta-model | CompanyGraph — Meta Model | the meta-model: core vocabulary, packs and the conventions that make a graph of Markdown checkable | main | ~/git/companygraph/meta-model |
+| companygraph/mcp-server | CompanyGraph — MCP Server | a read-only MCP server for any instance: the model's facts, queryable by an agent from one pinned commit | main | ~/git/companygraph/mcp-server |
 | companygraph/.github | CompanyGraph — Organization | the organization profile GitHub shows, and nothing else | main | ~/git/companygraph/.github |
 
 ## The list is the scope
@@ -39,7 +41,9 @@ writes the fenced copies. blust.ch pins `robertblust/mental-model` and companygr
 `companygraph/meta-model` by commit in `source.json`, and each builds its model pages from
 that commit. blust.ch also depends on `companygraph/meta-model` by tag for the instance
 parser. mental-model vendors meta-model's `core/` at a release named in its own manifest.
-Every member pins this repository by tag in `conventions.json`.
+The MCP server depends on `companygraph/meta-model` by tag for the same parser; its
+deployment pins `robertblust/mental-model` by commit in `source.json` and the server by tag in
+`package.json`. Every member pins this repository by tag in `conventions.json`.
 
 A pin is an editorial line, moved on purpose. Which release each member is on is read from
 the pin, never from this file, so this file does not repeat versions.
@@ -47,9 +51,11 @@ the pin, never from this file, so this file does not repeat versions.
 ## Re-syncing after a release
 
 In this order, one pull request each: design, then the three sites, then mental-model and
-meta-model, then service-conventions, then the engine, then the connector, then field-notes,
-then the two `.github` repositories. Design first because a site's suite runs design's checks;
-the models before the engine because the sites' model pages are built from them;
-service-conventions before the engine and the connector because both vendor it; the connector
-after the engine because it is a client of the engine's API and its specification lives there.
+meta-model, then service-conventions, then the engine, then the connector, then the MCP server
+and its deployment, then field-notes, then the two `.github` repositories. Design first because
+a site's suite runs design's checks; the models before the engine because the sites' model
+pages are built from them; service-conventions before the engine and the connector because
+both vendor it; the connector after the engine because it is a client of the engine's API and
+its specification lives there; the MCP server after the models because it parses them, and its
+deployment after the server because it pins a release of it.
 Nothing here opens those pull requests for you.

@@ -33,4 +33,5 @@ invoked it does both when the owner asks. It never uses an adjective that sells.
 The first sentence of every section carries the point. Each sentence carries one idea. Every
 claim has a source in the brief or the repository, or is named in the reply as unsourced. The
 marks are the English section's: spaced em-dash, curly quotes, no serial comma, May 4, 2012.
-Every family term is in the form `GLOSSARY.md` gives it.
+Every family term is in the form `GLOSSARY.md` gives it. Every digit and number word is fixed by a
+closed period or is a floor that stays true; a count of something that still changes is gone.

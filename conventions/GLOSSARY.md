@@ -30,6 +30,7 @@ marks `TRANSLATOR.md` repeats are the only places the shared files carry German 
 | figure | figure | `Diagramm` | The drawn graph on a model page. The owner's choice over `Zeichnung`, which reads as a drawing by hand. |
 | experience | experience | `Erfahrung` | An entry in the model's experiences folder, whatever its kind; blust.ch's timeline and model pages. The row it makes on the timeline is an `Eintrag`. |
 | kind of experience | kind of experience | `Erfahrungsart` | The experience-kind entities — Role, Project, Community, Education, Independent — whose names stay English in both views. The owner's choice over the bare `Art` on a control, which the page's prose may still use for the short form. |
+| surface | surface | `surface` | A place the company publishes that no script writes, and the type in `model/surfaces/`. A name the ecosystem reads, so not `Oberfläche`, which in German software prose is the user interface. |
 
 English forms fixed here whose German no page carries yet, to be chosen the first time a text
 needs them: pack, design system, deck.
