@@ -63,6 +63,14 @@ Claim only what is measured or verifiable. A number is quoted after it was count
 estimated; a behavior is described after it was observed, not inferred from the source. Where
 something was not checked, the text says so.
 
+A number that still moves is not written down. A count or a version of something that keeps
+changing — a release, a type, an entity, a page, a tool — is true on the day it is written, and
+no check fails when it stops being true, so it goes stale without a sound; refreshing it only
+resets the clock. Say where the number is read instead — the manifest, the folder, the list the
+sentence sits beside — or say the thing without it. Two forms stay: a number fixed by a closed
+period, the size of a team in a role that has ended, and a floor that stays true, “over 25
+years”.
+
 No adjective that sells. Nothing here is powerful, seamless, robust or elegant. If it is any of
 those, the sentence that shows it is better than the word.
 
