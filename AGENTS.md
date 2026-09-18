@@ -1,4 +1,4 @@
-<!-- conventions · v1.15.0 -->
+<!-- conventions · v1.17.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in
 `conventions/`, vendored from robertblust/conventions at the release `conventions.json`
 names. Read them before writing or committing anything here.
