@@ -99,6 +99,17 @@ row.
 Sentence case in headings and titles; a proper noun keeps its capitals. The first sentence of
 a section carries the point; the rest is its support.
 
+Markdown has one form, whichever tool wrote it last. An editor that rewrites a table in a
+form of its own makes a diff that is not a change, and a table padded to line its columns up
+turns an edit to one cell into an edit to its whole column. So a table is compact: one space
+inside each pipe, `| --- |` under the header whatever the column's width, its alignment colons
+kept, and no padding. Emphasis is `*`, strong is `**`, a list item is `-`, and a file ends in
+one newline with no run of blank lines and no trailing space beyond a line break.
+`conventions/markdown.markdownlint-cli2.jsonc` is this paragraph as rules, with the one rule
+markdownlint does not ship in `conventions/markdown-rules.cjs`; `conventions-format` holds a
+repository to them and `fix` writes them, and an editor plugin that writes Markdown bundles the
+same rules rather than a form of its own.
+
 Release notes are this register aimed at a consumer: what changed for them, what breaks and
 how to take it, in that order.
 

@@ -133,7 +133,7 @@ arrives by the sync and is never edited in place.
 ## Design Decisions Carried From Phase 0
 
 | # | Decision | Where |
-|---|---|---|
+| --- | --- | --- |
 | R1 | A guestgraph repository vendored at a pin, the `conventions/` shape; no publish step | [research.md](research.md) |
 | R2 | The shared files: parent POM by path, ruleset, one ArchUnit class, diagram script, workflow, two scripts, agent block | [research.md](research.md), [data-model.md](data-model.md) |
 | R3 | The service check reads files; behavior is each suite's to prove | [research.md](research.md), [contracts/service-conventions.md](contracts/service-conventions.md) |

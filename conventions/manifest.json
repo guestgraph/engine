@@ -1,15 +1,18 @@
 {
   "repo": "robertblust/conventions",
-  "tag": "v1.17.0",
+  "tag": "v1.19.0",
   "files": {
-    "conventions/WRITING.md": "sha256:6c507657ea6215de85a6bdb740fac6153ecbe20eee4d479f5b9fa09c1d15ee3a",
-    "conventions/WORKING.md": "sha256:78f1e40d7ff61752ef3a26cb5bf48d502bca64319170cecc2e27a86feb5d08ce",
-    "conventions/REPOSITORIES.md": "sha256:c0d3a58a2c8e5af36d7523c26317d525500b03b1d69867e2f5b7da29e35e4f78",
+    "conventions/WRITING.md": "sha256:c035e8e40122ae6be87ab1a1797a054937da4a9d25d910dd8ce9ac7dba741469",
+    "conventions/WORKING.md": "sha256:8775ca29437d1f9a07bc3cd6c89847a4fb96df0d5a5cef43f7b8fe10cc916a22",
+    "conventions/REPOSITORIES.md": "sha256:682471a88cfa9404a1dc44a35dbacb04abd2cf5c2594a05562be6bc916ac5170",
     "conventions/WRITER.md": "sha256:f808e9bb7806e04882bd08369c97de453c10354ebaa920670264c7d12c10557c",
     "conventions/TRANSLATOR.md": "sha256:ab6cd9ce38e39452f57528f258bb9de593f1663c05ad21caa1c012bab75c69f0",
-    "conventions/GLOSSARY.md": "sha256:bf3353cd7be7f2d4a3d5beda507e2d12d2f2e830c2a815ba6afa81f7ddb4d616",
-    "conventions/AGENTS.md": "sha256:e107368a918138721e476032e58b8f383f487b865c03290216a8d825033f600e",
-    "conventions/conventions-sync": "sha256:4a59e85eee756399cf76a9f332d262694549b08472b46d45f26ac3314a28f4c2",
-    "conventions/conventions-check": "sha256:fd6b7520e9543a2ee6f0d7c374f4f9c3bcd098395e3e9a27467cfcd5118fb241"
+    "conventions/GLOSSARY.md": "sha256:2fba5d925ceaf950fcc00e2ddc8d2e8c598d7bff76113c7c449244179f54fd6d",
+    "conventions/AGENTS.md": "sha256:9b9962ad79ae09da2030f04a9b276a32cdfcd7c49a90cb8306131a871261302b",
+    "conventions/conventions-sync": "sha256:4c6a021d2dff6bfd4ba33985a7f709e4e6c32cce7bb712153733d1d7889479d2",
+    "conventions/conventions-check": "sha256:fd6b7520e9543a2ee6f0d7c374f4f9c3bcd098395e3e9a27467cfcd5118fb241",
+    "conventions/conventions-format": "sha256:a969117a383dc2ed1b381c29ba11674eb68784be475183873ef3aa0b81f35704",
+    "conventions/markdown.markdownlint-cli2.jsonc": "sha256:7f12e256bec2a95e39f7e264ed9bcc1f695ccb53595dbe73e870cd64ce950083",
+    "conventions/markdown-rules.cjs": "sha256:020ff2584a1b16ea4e267e6b09f136f0d612150b5e0c9f4335e46e477d6189ed"
   }
 }

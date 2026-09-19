@@ -11,7 +11,7 @@ such as `Organisation` would be a hit. This table, the German paragraph of `WRIT
 marks `TRANSLATOR.md` repeats are the only places the shared files carry German on purpose.
 
 | Term | English | German | Note |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | CompanyGraph | CompanyGraph | `CompanyGraph` | A name; one word, two capitals, in both languages. |
 | GuestGraph | GuestGraph | `GuestGraph` | A name, as above. |
 | meta-model | meta-model | `Meta-Modell` | Hyphen and lower case in English; hyphen and two capitals in German. Every site carries this form. |

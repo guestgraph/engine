@@ -109,7 +109,7 @@ contract already is.
 ## Design Decisions Carried From Phase 0
 
 | # | Decision | Where |
-|---|---|---|
+| --- | --- | --- |
 | R1 | The reconciliation already never recreates; the work is in the status, not in a guard | [research.md](research.md) |
 | R2 | A removal is forgotten on restart, said plainly rather than made untrue by a migration | [research.md](research.md) |
 | R3 | Restoring is a second act on the same path, not a restart | [research.md](research.md) |

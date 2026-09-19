@@ -24,7 +24,7 @@ members without the family's `type`.
 ## `io.guestgraph.service`
 
 | Class | Surface |
-|---|---|
+| --- | --- |
 | `Problems` | `static ProblemDetail of(HttpStatus status, String slug, String title, String detail)`; `static void write(HttpServletResponse response, ProblemDetail problem)`; `static final String BASE = "https://guestgraph.io/problems/#"` |
 | `ServiceException` | `ServiceException(HttpStatus status, String slug, String title, String detail)`; `ServiceException withProperty(String name, Object value)`; extends `org.springframework.web.ErrorResponseException` |
 | `ServiceExceptionHandler` | `@RestControllerAdvice @Order(LOWEST_PRECEDENCE)`; one `@ExceptionHandler(Exception.class)` answering `internal-error` after logging at error with the stack trace |
@@ -90,7 +90,7 @@ A service's own `application.yaml` sets `service.schema` and nothing the default
 One new item, and two items that learn the shared package:
 
 | Item | Passes when |
-|---|---|
+| --- | --- |
 | `error-shape` | in the service's own sources, outside `io/guestgraph/service/`: no `ResponseStatusException`; no `ProblemDetail.forStatus`; no `application/problem+json` literal; no `@ControllerAdvice` or `@RestControllerAdvice`; no `getWriter()` in a class that extends a filter |
 | `root` | `io/guestgraph/service/` beside the root is not a stray root |
 | `api` | controllers and filters under `io/guestgraph/service/` are not expected under `<root>.api` |

@@ -30,7 +30,7 @@ compares. The types are fixed — the enum and a CHECK constraint on both identi
 same five names, so a sixth type is a migration and not a configuration.
 
 | Type | Normalized to | When the value is unusable |
-|---|---|---|
+| --- | --- | --- |
 | `EMAIL` | trimmed, lowercased | no identifier, reason recorded |
 | `PHONE` | E.164 | no identifier, reason recorded |
 | `LOYALTY_ID` | trimmed | — |
@@ -106,7 +106,7 @@ merge every time. A per-tenant rule marks a value, or a whole email domain, with
 effects:
 
 | Effect | What it does |
-|---|---|
+| --- | --- |
 | `IGNORE` | the identifier connects nothing — it is skipped when candidates are found |
 | `PERFECT_MATCH` | may merge only when the two names agree exactly after folding, otherwise review |
 | `MASKED_ALIAS` | email domains only: no deterministic merge, and the address is marked in the profile |

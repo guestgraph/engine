@@ -8,7 +8,7 @@ everywhere. The `Title` column is the member's README title in full, the string 
 carries after `# `, and a tripwire in `conventions-check` holds each member to its own row.
 
 | Repository | Title | Purpose | Default branch | Local path |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | robertblust/conventions | Robert Blust — Conventions | how the family writes and works, vendored by every member | main | ~/git/robertblust/conventions |
 | robertblust/design | Robert Blust — Design | the design system shared by the three sites: tokens, chrome, page checks | main | ~/git/robertblust/design |
 | robertblust/robertblust.github.io | blust.ch | blust.ch, the profile page and two talks | main | ~/git/robertblust/robertblust.github.io |
@@ -23,6 +23,7 @@ carries after `# `, and a tripwire in `conventions-check` holds each member to i
 | companygraph/companygraph.github.io | companygraph.io | companygraph.io, the landing page, the model and example pages, the intro talk | main | ~/git/companygraph/companygraph.github.io |
 | companygraph/meta-model | CompanyGraph — Meta Model | the meta-model: core vocabulary, packs and the conventions that make a graph of Markdown checkable | main | ~/git/companygraph/meta-model |
 | companygraph/mcp-server | CompanyGraph — MCP Server | a read-only MCP server for any instance: the model's facts, queryable by an agent from one pinned commit | main | ~/git/companygraph/mcp-server |
+| companygraph/obsidian-plugin | CompanyGraph — Obsidian Plugin | an Obsidian plugin for any instance: the meta-model's checks while a file is edited, and completion for what its schemas declare | main | ~/git/companygraph/obsidian-plugin |
 | companygraph/.github | CompanyGraph — Organization | the organization profile GitHub shows, and nothing else | main | ~/git/companygraph/.github |
 
 ## The list is the scope
@@ -43,7 +44,9 @@ that commit. blust.ch also depends on `companygraph/meta-model` by tag for the i
 parser. mental-model vendors meta-model's `core/` at a release named in its own manifest.
 The MCP server depends on `companygraph/meta-model` by tag for the same parser; its
 deployment pins `robertblust/mental-model` by commit in `source.json` and the server by tag in
-`package.json`. Every member pins this repository by tag in `conventions.json`.
+`package.json`. The Obsidian plugin depends on `companygraph/meta-model` by tag for the parser
+and the checks, and bundles them into what it releases. Every member pins this repository by tag
+in `conventions.json`.
 
 A pin is an editorial line, moved on purpose. Which release each member is on is read from
 the pin, never from this file, so this file does not repeat versions.
@@ -52,10 +55,12 @@ the pin, never from this file, so this file does not repeat versions.
 
 In this order, one pull request each: design, then the three sites, then mental-model and
 meta-model, then service-conventions, then the engine, then the connector, then the MCP server
-and its deployment, then field-notes, then the two `.github` repositories. Design first because
+and its deployment, then the Obsidian plugin, then field-notes, then the two `.github`
+repositories. Design first because
 a site's suite runs design's checks; the models before the engine because the sites' model
 pages are built from them; service-conventions before the engine and the connector because
 both vendor it; the connector after the engine because it is a client of the engine's API and
-its specification lives there; the MCP server after the models because it parses them, and its
-deployment after the server because it pins a release of it.
+its specification lives there; the MCP server after the models because it parses them, its
+deployment after the server because it pins a release of it, and the Obsidian plugin after the
+models for the server's reason, since it parses them with the same package.
 Nothing here opens those pull requests for you.

@@ -21,7 +21,7 @@ produces none.
 ## The record
 
 | Ingest field | Reservation | Booking |
-|---|---|---|
+| --- | --- | --- |
 | `sourceSystem` | `apaleo` (configurable) | same |
 | `externalKey` | `{id}:primaryGuest:{modified}` · `{id}:additionalGuests[{i}]:{modified}` | `{id}:booker:{modified}` |
 | `recordTimestamp` | the reservation's `modified` | the booking's `modified` |
@@ -43,7 +43,7 @@ Top level, the person's own fields under the names the engine extracts, present 
 supplies them:
 
 | Payload field | From the person entry |
-|---|---|
+| --- | --- |
 | `firstName` | `firstName` |
 | `lastName` | `lastName` |
 | `email` | `email` |

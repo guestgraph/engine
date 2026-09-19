@@ -93,7 +93,7 @@ value and read by the two components that need it; everything else follows the c
 ## Design Decisions Carried From Phase 0
 
 | # | Decision | Where |
-|---|---|---|
+| --- | --- | --- |
 | R1 | Pool schema and Flyway default schema from one value; no URL parameter | [research.md](research.md) |
 | R2 | A role that owns the schema; two statements of guidance | [research.md](research.md), [data-model.md](data-model.md) |
 | R3 | The ER script creates the schema and reads it | [research.md](research.md) |

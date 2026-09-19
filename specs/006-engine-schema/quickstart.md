@@ -37,7 +37,7 @@ Expected green, including:
 ## Success-criteria spot checks
 
 | Criterion | Check |
-|---|---|
+| --- | --- |
 | SC-001 | Step 2, and `SchemaIsolationTest`. |
 | SC-002 | `./mvnw verify` and `regen-er.sh` with no diff. |
 | SC-003 | Step 4, and `SchemaIsolationTest`. |

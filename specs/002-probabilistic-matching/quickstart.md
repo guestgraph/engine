@@ -81,7 +81,7 @@ Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`,
 ## Success-criteria spot checks
 
 | Spec SC | How to verify |
-|---|---|
+| --- | --- |
 | SC-001/002 corpus + zero silent merges | `./mvnw test -Dtest='FuzzyScenario*'` green incl. invariant test |
 | SC-003 splits stick | walk 2 above |
 | SC-004 masked emails | walk 3 above |

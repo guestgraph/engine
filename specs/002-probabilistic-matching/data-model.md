@@ -8,7 +8,7 @@ except two new `tenant` columns with defaults — slice-1 data needs no migratio
 ## record_block_key  *(immutable companion of source_record, like record_identifier)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | source_record_id | uuid | FK → source_record, NOT NULL |
@@ -30,7 +30,7 @@ Key derivations (all after `NameNormalizer` diacritic folding + lowercasing):
 ## negative_match_rule  *(steward splits that stick — R2-1/FR-009..012)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | record_a | uuid | FK → source_record, NOT NULL |
@@ -49,7 +49,7 @@ confirms a review that a rule had downgraded (FR-011).
 ## identifier_quality_rule  *(per-tenant identifier trust — FR-013..016)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | identifier_type | text | NOT NULL — slice-1 IdentifierType enum (EMAIL for domain rules) |
@@ -76,7 +76,7 @@ Effects (evaluated at matching time, R2-4):
 ## tenant  *(two new columns)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | auto_merge_threshold | numeric(4,3) | NOT NULL DEFAULT 1.000 — fuzzy auto-merge band; 1.0 = off (FR-006) |
 | review_floor | numeric(4,3) | NOT NULL DEFAULT 0.750 — below → discard |
 

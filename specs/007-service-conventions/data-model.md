@@ -13,7 +13,7 @@ service vendors, the pin that binds them, and the list the check reads.
 member and its own Markdown is held by the prose check.
 
 | Path | Purpose |
-|---|---|
+| --- | --- |
 | `SERVICE.md` | the list every service meets, whatever its stack (research R9) |
 | `spring/pom.xml` | the parent POM of the Spring stack (research R2) |
 | `spring/pmd-ruleset.xml` | the source-level rules |
@@ -33,7 +33,7 @@ least a minor release, a change that asks a service to do more than re-sync is a
 ## What a service holds
 
 | Path in the service | Origin | Rule |
-|---|---|---|
+| --- | --- | --- |
 | `service-conventions.json` | the service's own | the pin: `{"repo": "guestgraph/service-conventions", "tag": "v0.1.0", "stack": "spring", "root": "io.guestgraph.engine", "scope": "tenantId", "schema": "engine"}` |
 | `service-conventions/*` | vendored | equals the pinned release's `<stack>/*`; edited only in the shared repository |
 | `.github/workflows/verify.yml` | vendored, written by the sync | equals `service-conventions/verify.yml` |
@@ -57,7 +57,7 @@ in the connector; `schema` is the database schema the diagram is drawn from, the
 The items the service check reads, and where each service stands on Sep 11, 2026:
 
 | Item | Engine | Connector | Closed by |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | parent POM by path | own POM | own POM | both adopt the parent |
 | root package `io.guestgraph.<service>` | `io.guestgraph` | yes | the engine's move |
 | endpoints and filters under `api` | `api`, `auth` | `ops`, `events` | the engine folds `auth` into `api`; the connector moves both |
