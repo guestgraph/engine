@@ -37,7 +37,7 @@ Opaque to review, a binary in git, and no better held than source; rejected.
 **Decision**: Six classes, and what each replaces:
 
 | Class | What it does | Replaces |
-|---|---|---|
+| --- | --- | --- |
 | `Problems` | builds a `ProblemDetail` with the family's type URI, a title, a status and a detail, and writes one to a servlet response as `application/problem+json`; the one place the shape is written | the engine's two `problem(...)` helpers, the connector's two JSON strings |
 | `ServiceException` | extends Spring's `ErrorResponseException`, so the framework's own problem-details handler answers it with the status, type and title it carries; a subclass adds named members through `withProperty` | the engine's eight exceptions' handlers, the connector's status exceptions |
 | `ServiceExceptionHandler` | a controller advice at the lowest precedence with one handler: any exception nobody foresaw is logged in full and answered as the family's `internal-error` problem with a detail that says nothing | the engine's `ApiExceptionHandler`, which had this and the eight handlers |
@@ -86,7 +86,7 @@ for ten sentences; rejected.
 own sources, the shared package excluded:
 
 | Read | Fails when |
-|---|---|
+| --- | --- |
 | `ResponseStatusException` | thrown or imported anywhere in the service's own code |
 | `ProblemDetail.forStatus` | called outside the shared package |
 | `application/problem+json` | written as a literal outside the shared package |

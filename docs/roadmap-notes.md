@@ -324,7 +324,6 @@ than a constraint: a stored guest id may be retired by a merge or a split; readi
 several, which the connector escalates rather than guesses. Every sub-resource under a retired
 id refuses with the current ids, so a connector that skips the read still fails loudly.
 
-
 ### R4-1: externalKey convention for mutable, multi-person source objects (Apaleo pattern) — contract published by specs/003-timeline-journey; amended by specs/005-apaleo-connector
 
 *Amended by slice 5*: the booker is a role on the **booking** object, not on the reservation. In

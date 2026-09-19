@@ -10,7 +10,7 @@ who may see them.
 ## Namespace
 
 | Object | Before | After |
-|---|---|---|
+| --- | --- | --- |
 | every table of V1 to V4, their indexes, triggers and the `guard_append_only` function | `public` | `engine` (configurable) |
 | Flyway's history table | `public` | `engine` |
 | the role the engine connects as | the database owner in local setups; unspecified in deployments | a role that owns `engine` and nothing else |
@@ -18,7 +18,7 @@ who may see them.
 The schema name is one configuration value:
 
 | Property | Meaning |
-|---|---|
+| --- | --- |
 | `DATABASE_SCHEMA` | default `engine`; feeds the pool's connection schema and Flyway's default schema (research R1) |
 
 ## Rules

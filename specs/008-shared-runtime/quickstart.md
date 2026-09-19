@@ -46,7 +46,7 @@ sh conventions/conventions-check
 ## Success-criteria spot checks
 
 | Criterion | Check |
-|---|---|
+| --- | --- |
 | SC-001 | Step 1, and `ErrorShapeTest` in each service. |
 | SC-002 | Step 2. |
 | SC-003 | Step 3, and the shared repository's fixtures. |

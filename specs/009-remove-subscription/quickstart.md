@@ -53,7 +53,7 @@ sh conventions/conventions-check              # this spec is prose too
 ## Success-criteria spot checks
 
 | Criterion | Check |
-|---|---|
+| --- | --- |
 | SC-001 | Step 1, and the integration test for a removal |
 | SC-002 | Step 1, against Apaleo itself rather than the connector's own record |
 | SC-003 | Step 4, and the integration test that reconciles after a removal |

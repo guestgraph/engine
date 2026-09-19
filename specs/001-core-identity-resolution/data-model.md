@@ -34,7 +34,7 @@ relationships only, on purpose: relationships are stable, field lists drift.
 ## tenant
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | slug | text | UNIQUE, lowercase kebab |
 | name | text | NOT NULL |
@@ -44,7 +44,7 @@ relationships only, on purpose: relationships are stable, field lists drift.
 ## api_key
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | FK → tenant, NOT NULL |
 | key_hash | text | NOT NULL, UNIQUE — SHA-256 of the key; plaintext never stored (R6) |
@@ -55,7 +55,7 @@ relationships only, on purpose: relationships are stable, field lists drift.
 ## source_system
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | FK → tenant, NOT NULL |
 | code | text | NOT NULL — e.g. `opera-pms`; UNIQUE (tenant_id, code) |
@@ -65,7 +65,7 @@ relationships only, on purpose: relationships are stable, field lists drift.
 ## source_record  *(immutable — Constitution II)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | FK → tenant, NOT NULL |
 | source_system_id | uuid | FK → source_system, NOT NULL |
@@ -86,7 +86,7 @@ Only `needs_review`/`needs_review_reasons` may be cleared by a future review flo
 What a record contributed to matching — survives unmerge, drives threshold counting.
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | source_record_id | uuid | FK → source_record, NOT NULL |
@@ -99,7 +99,7 @@ INDEX (tenant_id, type, value_normalized) — candidate lookup + threshold count
 ## guest
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | FK → tenant, NOT NULL |
 | profile | jsonb | NOT NULL — derived golden profile (R7); recomputed on every link change, never hand-edited |
@@ -113,7 +113,7 @@ retains their ids for the audit trail.
 ## identifier  *(guest-level, drives matching)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | guest_id | uuid | FK → guest, NOT NULL |
@@ -128,7 +128,7 @@ linked records' `record_identifier`s on merge/unmerge.
 ## resolution_link
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | source_record_id | uuid | FK → source_record, NOT NULL, UNIQUE — a record belongs to exactly one guest |
@@ -139,7 +139,7 @@ linked records' `record_identifier`s on merge/unmerge.
 ## merge_event  *(append-only audit — Constitution IV)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | kind | text | NOT NULL — enum: CREATE, ATTACH, MERGE, UNMERGE, REVIEW_CONFIRM, REVIEW_REJECT |
@@ -158,7 +158,7 @@ for the guest plus, transitively, events of `absorbed_guest_ids`.
 ## match_review  *(Constitution IV; primary channel for slice-2 probabilistic)*
 
 | Column | Type | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL |
 | status | text | NOT NULL — PENDING → CONFIRMED \| REJECTED (one transition, enforced; FR-018) |

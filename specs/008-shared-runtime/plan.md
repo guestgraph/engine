@@ -127,7 +127,7 @@ its own logic.
 ## Design Decisions Carried From Phase 0
 
 | # | Decision | Where |
-|---|---|---|
+| --- | --- | --- |
 | R1 | Shared as source under `io.guestgraph.service`; taking it is the 0.x minor step the rules call a major | [research.md](research.md) |
 | R2 | Six classes; `ServiceException` extends `ErrorResponseException`, so the advice keeps the catch-all only | [research.md](research.md), [contracts/shared-runtime.md](contracts/shared-runtime.md) |
 | R3 | Types as fragments of one page on the family's site; frozen contracts amended forward | [research.md](research.md), [data-model.md](data-model.md) |

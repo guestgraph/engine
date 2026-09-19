@@ -1,4 +1,4 @@
-<!-- conventions · v1.17.0 -->
+<!-- conventions · v1.20.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in
 `conventions/`, vendored from robertblust/conventions at the release `conventions.json`
 names. Read them before writing or committing anything here.
@@ -11,8 +11,9 @@ names. Read them before writing or committing anything here.
 
 Everything below this block is this repository's own. `sh conventions/conventions-sync check`
 says whether the copy matches the release, `sync` brings it to the release the pin names, and
-`sh conventions/conventions-check` holds this repository's own Markdown to `WRITING.md`. Edit
-a shared file in robertblust/conventions, never here.
+`sh conventions/conventions-check` holds this repository's own Markdown to `WRITING.md`, and
+`sh conventions/conventions-format` to its one form, which `fix` writes. Edit a shared file in
+robertblust/conventions, never here.
 <!-- end conventions -->
 <!-- service-conventions · v0.9.0 -->
 The code-level rules of every guestgraph service on the Spring stack live in
@@ -105,7 +106,7 @@ Every fact has **one owning file**; everywhere else links to it. The ambiguity a
 what is what causes drift, so the map is explicit:
 
 | Fact | Owner |
-|---|---|
+| --- | --- |
 | Constants, thresholds, algorithms | the code |
 | Matching behavior | `docs/matching.md`, sectioned per matcher version |
 | What a guest's profile says | `docs/profile.md`, sectioned per survivorship version |
@@ -125,9 +126,10 @@ why the README describes the weighted feature vector without naming a single wei
 
 **Specs are frozen history.** A merged spec records what was decided *then*. Never retro-edit
 one; corrections and amendments go forward into `docs/roadmap-notes.md` or the owning doc —
-slice 3 amended R4-1 there rather than rewriting slice 2's spec. Spelling is the one exception:
-a British form brought to `conventions/WRITING.md` changes no decision, and the prose check
-reads merged specs like everything else.
+slice 3 amended R4-1 there rather than rewriting slice 2's spec. Spelling and form are the two
+exceptions: a British form brought to `conventions/WRITING.md`, and a table's padding or a blank
+line brought to the family's Markdown form, change no decision, and the conventions job reads
+merged specs and the append-only documents below like everything else.
 
 **Three of the six concept documents are append-only**, `docs/matching.md`, `docs/profile.md`
 and `docs/identifiers.md`, for one reason: a merge event permanently records the `matcherName`

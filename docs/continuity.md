@@ -21,7 +21,7 @@ what counts as identity, [matching.md](matching.md) how the score is reached —
 was, the outcome lands in one row.
 
 | Kind | What it records |
-|---|---|
+| --- | --- |
 | `CREATE` | a record matched no existing guest, so a guest was opened for it |
 | `ATTACH` | a record joined a guest that already existed |
 | `MERGE` | one guest absorbed another; the absorbed id is on the event |

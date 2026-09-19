@@ -18,7 +18,7 @@ confidence model**, where each layer decides only what it is entitled to decide 
 rest upward — and where every layer's decisions are explainable and reversible.
 
 | Layer | Decides | Confidence | Reversible by |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Deterministic identifiers** | shared email, phone, loyalty id, ID document → merge | 1.0 | unmerge |
 | **Probabilistic scoring** | merges only above a threshold the tenant chose; otherwise queues | < 1.0, always | unmerge |
 | **An agent** *(planned)* | the queue's high-confidence cases; escalates the rest | its own score | unmerge, and a human's split |
@@ -56,7 +56,7 @@ Two things can stop a deterministic merge:
 - **An identifier quality rule** — per tenant, and shipped with built-in defaults:
 
   | Effect | Meaning |
-  |---|---|
+  | --- | --- |
   | `IGNORE` | the identifier connects nothing (a shared agency phone, a property email) |
   | `PERFECT_MATCH` | may connect guests only when the names agree exactly, otherwise review |
   | `MASKED_ALIAS` | OTA relay addresses (`…@guest.booking.com`) — never merges on its own |
@@ -82,7 +82,7 @@ candidate discovery needs a function that collapses similar records onto the *sa
 ingest each record derives blocking keys, stored immutably beside it:
 
 | Key | Derivation | Catches |
-|---|---|---|
+| --- | --- | --- |
 | `NAME_PHONETIC_BIRTHYEAR` | Double Metaphone of the last name + birth **year** | spelling variants: Müller / Mueller / Miller → `MLR:1985` |
 | `NAME_INITIALS_BIRTHDATE` | sorted initials + full birthdate | swapped first/last name order |
 | `PHONE_SUFFIX7` | last 7 digits of an E.164 phone | differing country/area prefixes |
@@ -102,7 +102,7 @@ The name signal takes the better of the two name orderings, so "Anna Müller" an
 score as the same person.
 
 | Signal | Weight | How it is measured |
-|---|---|---|
+| --- | --- | --- |
 | name | 0.45 | Jaro-Winkler, diacritic-folded, max over normal and swapped order |
 | birthdate | 0.25 | exact match: 1.0 or 0.0 |
 | phone suffix | 0.15 | last-7 digits equal: 1.0 or 0.0 |
@@ -139,7 +139,7 @@ all — not a low one. Scoring on a single common name would flood the queue wit
 ### Stage 3: banding — what happens to the score
 
 | Band | Condition | Outcome |
-|---|---|---|
+| --- | --- | --- |
 | auto-merge | `score ≥ auto_merge_threshold` | merges, recorded with the score as confidence |
 | review | `score ≥ review_floor` | parked in the review queue with its breakdown |
 | discard | below `review_floor` | nothing happens |
@@ -164,7 +164,7 @@ it is reversible.
 Real values, from the algorithms as implemented:
 
 | Pair | Metaphone | Jaro-Winkler | What happens |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Müller / Mueller | `MLR` = `MLR` | 0.917 | same block, scores high — same person |
 | Schmidt / Schmitt | `XMT` = `XMT` | 0.943 | same block, scores high |
 | Müller / **Miller** | `MLR` = `MLR` | 0.900 | same block, similar score — **the birthdate decides** |

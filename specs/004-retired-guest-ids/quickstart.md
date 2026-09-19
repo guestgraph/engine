@@ -81,7 +81,7 @@ Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`,
 ## Success-criteria spot checks
 
 | Criterion | Check |
-|---|---|
+| --- | --- |
 | SC-001 | After every merge in the integration suite, the absorbed id answers 200 with the survivor. |
 | SC-002 | For every `currentGuestIds` entry the suite reads it back and asserts `status: ACTIVE`. |
 | SC-003 | Seed a ten-merge chain; `GET` on its first id under 1 s. Assert in `RetiredGuestIdApiTest`. |

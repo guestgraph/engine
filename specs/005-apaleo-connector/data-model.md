@@ -41,7 +41,7 @@ that every other table can reference a stable id and so the status can list conn
 not run yet.
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | id | text | PK — the connection's name from configuration, stable across restarts |
 | tenant_label | text | NOT NULL — the engine tenant's name, for the status only |
 | apaleo_account | text | NOT NULL — Apaleo's account id, for the status only |
@@ -56,7 +56,7 @@ The last version the connector submitted for a reservation or a booking, and the
 decides whether the next one is submitted (research R4).
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | connection_id | text | PK part, FK → `connection` |
 | object_type | text | PK part — `reservation` or `booking` |
 | object_id | text | PK part — Apaleo's id for the object |
@@ -77,7 +77,7 @@ does not move `last_modified` backwards.
 Every webhook delivery, by Apaleo's event id, so the second delivery is a no-op (FR-010).
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | connection_id | text | PK part, FK → `connection` — the connection whose secret routed the delivery |
 | event_id | text | PK part — the `id` of the delivery |
 | event_type | text | NOT NULL — e.g. `reservation/changed`, `booking/changed` |
@@ -98,7 +98,7 @@ final: a failed event stays retryable and the status counts it as pending retry 
 Per connection and property, how far the connector has submitted (research R6).
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | connection_id | text | PK part, FK → `connection` |
 | property_id | text | PK part |
 | modified_through | timestamptz | NOT NULL — the greatest reservation `modified` fully processed |
@@ -110,7 +110,7 @@ Per connection and property, how far the connector has submitted (research R6).
 One row per full sync or reconciliation, for the status and for `GET /runs/{id}` (research R9).
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | connection_id | text | NOT NULL, FK → `connection`, indexed |
 | kind | text | NOT NULL CHECK IN (`FULL`, `RECONCILE`, `REFRESH`) |
@@ -131,7 +131,7 @@ The guest each person on the latest submitted version resolved to, and its refre
 (research R8, FR-018, FR-019).
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | connection_id | text | PK part, FK → `connection` |
 | object_type | text | PK part — `reservation` or `booking` |
 | object_id | text | PK part |
@@ -187,7 +187,7 @@ reaches the database (FR-015a).
 Per instance:
 
 | Property | Meaning |
-|---|---|
+| --- | --- |
 | `CONNECTOR_PUBLIC_URL` | the HTTPS base Apaleo can reach; a connection's endpoint is `{base}/apaleo/events/{secret}` |
 | `CONNECTOR_OPS_TOKEN` | bearer token for `/status` and `/connections/*` |
 | `CONNECTOR_CONNECTIONS_FILE` | path to a YAML file listing the connections below |
@@ -197,7 +197,7 @@ Per instance:
 Per connection, in that file, under the connection's name:
 
 | Property | Meaning |
-|---|---|
+| --- | --- |
 | `tenantLabel` | the engine tenant's name, for the status |
 | `engineBaseUrl`, `engineApiKey` | the engine and that tenant's agent-registered key |
 | `apaleoAccount`, `apaleoClientId`, `apaleoClientSecret` | the client-credentials client, one account |
