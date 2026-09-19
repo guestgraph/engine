@@ -9,8 +9,9 @@
 #   sh conventions/conventions-format fix      rewrite every hit into the form, in place
 #
 # Needs sh, find, sort and sed, and Node 22 or later for npx; the tool is fetched by npx on
-# first use and cached after. The files are the ones conventions-check reads: every Markdown
-# file but .git, node_modules at any depth and the folders under "exclude" in conventions.json.
+# first use and cached after. The files are every Markdown file but .git, node_modules at any
+# depth and the folders under "format-exclude" in conventions.json, or under "exclude" where a
+# member names no "format-exclude", so that a member that has not decided reads as it did.
 # CONVENTIONS_ROOT overrides the directory, which is how the tests point it at a fixture.
 set -eu
 
@@ -30,10 +31,15 @@ cd "$ROOT"
 ROOT=.
 PIN=$ROOT/conventions.json
 
-# The exclude list, read exactly as conventions-check reads it, one entry per line.
+# The folders not held to the form, one entry per line. "exclude" is the prose check's list, and
+# some of what it leaves out is prose that quotes the words it scans for, which is no reason to
+# leave its tables unformatted; "format-exclude" is this check's own list, for what is someone
+# else's to format, a vendored copy or a fixture. Read as conventions-check reads its list.
 excludes=""
 if [ -f "$PIN" ]; then
-  excludes=$(tr -d '\n' < "$PIN" | sed -n 's/.*"exclude" *: *\[\([^]]*\)\].*/\1/p' | tr ',' '\n' | sed -n 's/^[^"]*"\([^"]*\)".*/\1/p')
+  key=exclude
+  if tr -d '\n' < "$PIN" | grep -q '"format-exclude" *:'; then key=format-exclude; fi
+  excludes=$(tr -d '\n' < "$PIN" | sed -n "s/.*\"$key\" *: *\[\([^]]*\)\].*/\1/p" | tr ',' '\n' | sed -n 's/^[^"]*"\([^"]*\)".*/\1/p')
 fi
 
 set -- "$ROOT" -path "$ROOT/.git" -prune -o -name node_modules -prune -o

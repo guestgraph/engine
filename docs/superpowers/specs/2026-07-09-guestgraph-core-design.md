@@ -21,7 +21,7 @@ GuestGraph is an open-source **guest identity graph** for hospitality. Guest dat
 ## Decisions (fixed)
 
 | Decision | Choice | Rationale |
-|---|---|---|
+| --- | --- | --- |
 | Core concept | Identity resolution engine that emits a guest graph | The hard, defensible problem; graph store alone is a commodity; timeline depends on resolution |
 | Stack | Java 25 (virtual threads/Loom), Spring Boot 4, PostgreSQL, Maven | Founder expertise; I/O-heavy workload fits Loom; enterprise-credible OSS category |
 | Shape | Single Spring Boot service with REST API | API-first from day 1; SaaS later hosts the same service; single module until slice 2 forces modularization |
