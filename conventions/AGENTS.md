@@ -1,4 +1,4 @@
-<!-- conventions · v1.19.0 -->
+<!-- conventions · v1.20.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in
 `conventions/`, vendored from robertblust/conventions at the release `conventions.json`
 names. Read them before writing or committing anything here.
@@ -36,5 +36,6 @@ to release.
 The tests are `sh test/run.sh`, which runs the scripts against temporary members with this
 checkout as the source, and `sh conventions/conventions-check` and
 `sh conventions/conventions-format` over this checkout itself, with
-`docs/superpowers/` excluded because a spec or plan quotes the very list it scans for.
-`.superpowers/` is excluded too, as tooling scratch that is not prose.
+`docs/superpowers/` excluded from the prose check because a spec or plan quotes the very list it
+scans for, and held to the form like everything else. `.superpowers/` is excluded from both, as
+tooling scratch that is not prose.

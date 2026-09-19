@@ -19,7 +19,7 @@ identifier-quality-rules family.
 ## Decisions (fixed)
 
 | Decision | Choice | Rationale |
-|---|---|---|
+| --- | --- | --- |
 | Matching approach | Rule-based fuzzy scoring, in-JVM (`fuzzy-rules-v1`) | No new infrastructure or training data; fully explainable scores; ML replaces it later behind the same `ResolutionStrategy` interface |
 | Merge policy | Three score bands per tenant: ≥ `auto_merge_threshold` auto-merge, ≥ `review_floor` review queue, below ignored. **Auto-merge band ships empty** (`auto_merge_threshold = 1.0`) | Wrong merges are privacy incidents; tenants opt into automation per config once they trust the scores. Review queue is the primary channel, as slice 1 planned |
 | Candidate generation | Blocking keys in Postgres (`record_block_key`, exact index lookups), not pg_trgm or tenant scans | Same shape as slice-1 identifier lookup: tenant-scoped, indexed, explainable ("candidate because shared PHONE_SUFFIX7"). Known trade-off: blocking can miss candidates; the deferred backfill scan is the future recall-catcher |
