@@ -99,7 +99,7 @@ Set once: `H='-H "X-API-Key: demo-key" -H "Content-Type: application/json"'` —
 ## Success-criteria spot checks
 
 | Spec SC | How to verify |
-|---|---|
+| --- | --- |
 | SC-001 grouping correctness | `./mvnw test -Dtest='ResolutionScenario*'` — reference corpus green |
 | SC-002 sync ingest < 1 s | single-record curl above returns guestId in-request |
 | SC-003/004 explain & reversibility | walk 3 above; originals still byte-identical via `/records` |

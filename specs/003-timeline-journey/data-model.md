@@ -14,7 +14,7 @@ An optional immutable companion of `source_record`, following the pattern alread
 lawful erasure.
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | PK |
 | tenant_id | uuid | NOT NULL — Constitution I |
 | source_record_id | uuid | NOT NULL, UNIQUE, FK → `source_record` (1:1 optional) |
@@ -51,7 +51,7 @@ lawful erasure.
 ## Changed table: `merge_event` (additive)
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | actor_type | text | NULL CHECK IN (`SYSTEM`, `HUMAN`, `AGENT`) — NULL means recorded before this slice; renders as unattributed (FR-015) |
 | actor_id | text | NULL — the credential's actor name, or the individual named by `X-Actor-Id` |
 
@@ -61,7 +61,7 @@ name already carried in `matcher_name` (FR-012).
 ## Changed table: `negative_match_rule`
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | actor_type | text | NULL CHECK IN (`SYSTEM`, `HUMAN`, `AGENT`) — who created the split |
 | actor_id | text | NULL |
 | lifted_at | timestamptz | NULL — set when the rule stops gating. NULL means active |
@@ -91,7 +91,7 @@ currently deletes the rule outright, so today nothing records that a split was e
 ## Changed table: `api_key` (additive)
 
 | Column | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | actor_type | text | NOT NULL DEFAULT `HUMAN` CHECK IN (`HUMAN`, `AGENT`) — the trust boundary: a request can never record a type its credential does not grant (FR-014) |
 | actor_name | text | NOT NULL, backfilled once from `label`, then independent — `label` is key administration, `actor_name` is who the key acts as |
 
@@ -113,7 +113,7 @@ on the object (FR-002). Never stored — see research R1.
 Derived per guest by `AssociationDeriver`:
 
 | Field | Derivation |
-|---|---|
+| --- | --- |
 | sourceSystem, objectType, objectId | from the observation's `record_object` |
 | role, position | from the current-roster observation for this guest |
 | status | `CURRENT` when the current roster contains an observation with this role resolving to this guest; `ENDED` when the guest appears only in older versions (FR-003, FR-007) |
@@ -134,7 +134,7 @@ Derived per guest by `AssociationDeriver`:
 ### Actor
 
 | Field | Source |
-|---|---|
+| --- | --- |
 | type | the authenticated credential's `actor_type`; `SYSTEM` for engine-initiated events |
 | id | `X-Actor-Id` header when present, else the credential's `actor_name` |
 
@@ -151,7 +151,7 @@ unchanged — it stays an opaque duplicate-detection token the service never par
 one (FR-018).
 
 | Field | Required within the block | Maps to |
-|---|---|---|
+| --- | --- | --- |
 | type | yes | `object_type` |
 | id | yes | `object_id` |
 | role | yes | `object_role` |

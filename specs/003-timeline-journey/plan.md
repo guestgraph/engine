@@ -191,7 +191,7 @@ the ArchUnit rules (`@Query`-only repositories, tenant-scoped methods, JPA confi
 ## Design Decisions Carried From Phase 0
 
 | # | Decision | Where |
-|---|---|---|
+| --- | --- | --- |
 | R1 | Associations derived on read, never materialized | [research.md](research.md) |
 | R2 | `record_object` companion table, not columns on `source_record` | [research.md](research.md) |
 | R3 | Two tenant-scoped queries + pure-JVM `AssociationDeriver` | [research.md](research.md) |

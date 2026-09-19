@@ -147,7 +147,7 @@ follow the existing layout; the ArchUnit rules constrain them with no rule chang
 ## Design Decisions Carried From Phase 0
 
 | # | Decision | Where |
-|---|---|---|
+| --- | --- | --- |
 | R1 | Walk the events; no retirement table, no backfill | [research.md](research.md) |
 | R2 | Latest-candidate retirement, successors per kind, outcome-based status, breadth-first walk | [research.md](research.md), [data-model.md](data-model.md) |
 | R3 | One partial GIN for the merge hop, a btree forward scan for the split hop, in `V4` | [research.md](research.md) |

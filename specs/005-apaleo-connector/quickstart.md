@@ -115,7 +115,7 @@ Engine at `$E` with key `$K`; connector at `$C` with ops token `$T`.
 ## Success-criteria spot checks
 
 | Criterion | Check |
-|---|---|
+| --- | --- |
 | SC-001 | Full sync of the sandbox account within the hour budget scaled to its size; source objects in the engine equal reservations, roster entries equal persons. |
 | SC-002 | Step 7. |
 | SC-003 | Step 8, timed from the sandbox edit. |

@@ -11,7 +11,7 @@ written since slice 1; the only migration adds two indexes so that read stays fa
 ## Changed table: `merge_event` (indexes only)
 
 | Index | Definition | Serves |
-|---|---|---|
+| --- | --- | --- |
 | `merge_event_absorbed_gin` | `USING gin (absorbed_guest_ids jsonb_path_ops) WHERE absorbed_guest_ids <> '[]'::jsonb` | "which event absorbed guest X" — the merge hop. Partial, so only merge rows maintain it (research R3) |
 | `merge_event_tenant_time_idx` | `(tenant_id, created_at, id)` btree | the tenant's events from an instant forward — the split hop's bounded scan |
 
@@ -29,7 +29,7 @@ The answer to "where is the person this id referred to". Computed per request by
 `GuestIdResolver` (research R2) and returned by `GET /guests/{guestId}` for a retired id.
 
 | Field | Type | Rule |
-|---|---|---|
+| --- | --- | --- |
 | id | uuid | the id that was read |
 | status | `MERGED` \| `SPLIT` \| `RETIRED` | from the outcome: one current guest, several, or none (research R2) |
 | currentGuestIds | uuid[] | every active guest the walk ended at, each once, in first-reached order |
@@ -44,7 +44,7 @@ An active guest is not a `GuestIdResolution`; it is the existing guest document 
 One retirement on the way from the read id to a current guest.
 
 | Field | Type | Rule |
-|---|---|---|
+| --- | --- | --- |
 | retiredGuestId | uuid | the guest this hop retired |
 | kind | `MERGE` \| `SPLIT` | `MERGE` for a `MERGE` or `REVIEW_CONFIRM` event, `SPLIT` for an `UNMERGE` that emptied the guest |
 | eventId | uuid | the retiring event, so a reader can find it in the current guest's explain (Constitution IV) |
@@ -59,7 +59,7 @@ that is active appears in `currentGuestIds`.
 The 410 problem details every sub-resource of a retired id answers with (research R4).
 
 | Member | Type | Rule |
-|---|---|---|
+| --- | --- | --- |
 | type | uri | `https://guestgraph.io/problems/guest-retired` |
 | title | string | `Guest id retired` |
 | status | 410 | |
@@ -98,7 +98,7 @@ Stated once here; the resolver implements them and the scenario tests pin them.
 ## `GraphPort` additions
 
 | Method | Returns | Backed by |
-|---|---|---|
+| --- | --- | --- |
 | `guestExists(tenantId, guestId)` | boolean | `GuestRepo.findGuest` — the timeline already uses the same query through `GuestQueryService` |
 | `eventsAbsorbing(tenantId, guestId)` | events whose absorbed list contains the guest, oldest first | native containment query, `merge_event_absorbed_gin` |
 | `eventsSince(tenantId, from, afterId, limit)` | one page of the tenant's events in `(createdAt, id)` order: with a null `afterId` every event at or after `from`, because the replay events an unmerge writes share its transaction and may share its timestamp while a random id can sort before the unmerge's own; with one, strictly after `(from, afterId)` | two native queries, `findFrom` and `findAfter`, over `merge_event_tenant_time_idx` |

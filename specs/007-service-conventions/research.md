@@ -35,7 +35,7 @@ without publishing.
 a service's `service-conventions/` (R9):
 
 | File | What it holds | Today |
-|---|---|---|
+| --- | --- | --- |
 | `pom.xml` | the parent POM every service's `pom.xml` names by `relativePath`: the Spring Boot parent and its version, the Java release, the versions of Testcontainers, ArchUnit, WireMock and the other shared dependencies in `dependencyManagement`, and the compiler, surefire, PMD and Spotless plugins with their configuration | in each service's own `pom.xml`, the two differ in nothing but the connector's WireMock |
 | `pmd-ruleset.xml` | the source-level rules | in each service's `config/`, differing in the ruleset's name only |
 | `ServiceRulesTest.java` | the architecture rules every service holds, as one test class in the default package, reading the service's root package and its scope parameter from `service-conventions.json` | `PersistenceRulesTest` in each service, the same six rules with two names and one parameter changed |
@@ -73,7 +73,7 @@ library, which needs a publish step; that is the limit of this slice, recorded a
 root, that reads files and answers one ✗ line per missing item, exit 1 when any is missing:
 
 | Item | What is read |
-|---|---|
+| --- | --- |
 | parent | `pom.xml` names `io.guestgraph:service-parent` at the pinned version by `relativePath` |
 | root package | `src/main/java/` holds exactly one root under `io/guestgraph/`, and it is the one `service-conventions.json` names |
 | api package | `<root>/api/` exists and holds the classes annotated as controllers and filters; none sits outside it |
@@ -196,4 +196,3 @@ own files and its own reading of the same list, and no second repository or mech
 **Rationale**: The list is the family's idea of a service; the files are how one stack meets it.
 Keeping them apart means a new stack starts from the list rather than from Spring, and the
 services of one stack keep vendoring one directory. Nothing is built for the second stack now.
-

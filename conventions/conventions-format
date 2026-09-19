@@ -1,0 +1,85 @@
+#!/bin/sh
+# conventions-format — hold a member's Markdown to the one form WRITING.md gives it, whatever
+# editor wrote it last. The form is the rule set in conventions/markdown.markdownlint-cli2.jsonc,
+# with the one rule markdownlint does not ship in conventions/markdown-rules.cjs, and the tool is
+# markdownlint-cli2 at the version below, the same library an editor plugin can bundle, so a file
+# a tool reformatted and a file a person wrote come out byte for byte the same.
+#
+#   sh conventions/conventions-format          check: exit 1 with one line per hit, file:line
+#   sh conventions/conventions-format fix      rewrite every hit into the form, in place
+#
+# Needs sh, find, sort and sed, and Node 22 or later for npx; the tool is fetched by npx on
+# first use and cached after. The files are the ones conventions-check reads: every Markdown
+# file but .git, node_modules at any depth and the folders under "exclude" in conventions.json.
+# CONVENTIONS_ROOT overrides the directory, which is how the tests point it at a fixture.
+set -eu
+
+VERSION=0.23.2
+ROOT=${CONVENTIONS_ROOT:-.}
+PIN=$ROOT/conventions.json
+RULES=conventions/markdown.markdownlint-cli2.jsonc
+
+cmd=${1:-check}
+case $cmd in check|fix) ;; *) echo "usage: sh conventions/conventions-format [check|fix]" >&2; exit 2 ;; esac
+
+[ -f "$ROOT/$RULES" ] || { echo "✗ conventions: no $RULES under $ROOT — run sync" >&2; exit 1; }
+command -v npx > /dev/null 2>&1 || { echo "✗ conventions: the Markdown form needs Node 22 or later, and npx is not on the PATH" >&2; exit 1; }
+
+# The tool is run from the root, so the paths it prints are the paths a member sees.
+cd "$ROOT"
+ROOT=.
+PIN=$ROOT/conventions.json
+
+# The exclude list, read exactly as conventions-check reads it, one entry per line.
+excludes=""
+if [ -f "$PIN" ]; then
+  excludes=$(tr -d '\n' < "$PIN" | sed -n 's/.*"exclude" *: *\[\([^]]*\)\].*/\1/p' | tr ',' '\n' | sed -n 's/^[^"]*"\([^"]*\)".*/\1/p')
+fi
+
+set -- "$ROOT" -path "$ROOT/.git" -prune -o -name node_modules -prune -o
+oldifs=$IFS
+IFS='
+'
+for e in $excludes; do
+  set -- "$@" -path "$ROOT/${e%/}" -prune -o
+done
+IFS=$oldifs
+set -- "$@" -name '*.md' -type f -print
+
+files=$(find "$@" 2> /dev/null | LC_ALL=C sort || true)
+if [ -z "$files" ]; then
+  echo "✗ conventions: no Markdown file was formatted under $ROOT" >&2
+  exit 1
+fi
+
+# The tool reads its arguments as globs; a leading colon makes each path literal, so a file
+# name with brackets or parentheses in it is the file and not a pattern.
+set -- --config "$RULES"
+while IFS= read -r f; do
+  set -- "$@" ":$f"
+done <<EOF
+$files
+EOF
+
+lint() { npx --yes "markdownlint-cli2@$VERSION" "$@" 2>&1; }
+
+# Two fixes on one line are applied one per pass, and a padded table's delimiter row takes two,
+# the spacing and the length, so fix runs again while hits remain, three passes at most.
+if [ "$cmd" = fix ]; then
+  passes=0
+  while [ "$passes" -lt 3 ] && ! lint --fix "$@" > /dev/null; do passes=$((passes + 1)); done
+fi
+
+if out=$(lint "$@"); then
+  if [ "$cmd" = fix ]; then echo "✓ every Markdown file is in the family's form, fixed where it was not"
+  else echo "✓ every Markdown file is in the family's form"; fi
+  exit 0
+fi
+# The tool reports a table once per pipe; a reader wants the line once per rule.
+printf '%s\n' "$out" | sed -n 's/^\(.*\.md:[0-9][0-9]*\)[:0-9]* error \([A-Za-z0-9/-]*\).*/✗ \1: \2/p' | uniq
+if [ "$cmd" = fix ]; then
+  echo "✗ conventions: the hits above have no automatic fix; edit them by hand" >&2
+else
+  echo "✗ conventions: sh conventions/conventions-format fix rewrites these into the form" >&2
+fi
+exit 1

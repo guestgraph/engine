@@ -12,7 +12,7 @@ what a service keeps of its own.
 What a guestgraph service answers when it refuses, as `application/problem+json`:
 
 | Member | Value | Rule |
-|---|---|---|
+| --- | --- | --- |
 | `type` | `https://guestgraph.io/problems/#<slug>` | one of the family's slugs; resolves to the page's section |
 | `title` | a short noun phrase | fixed per slug |
 | `status` | the HTTP status | the same as the response's |
@@ -23,7 +23,7 @@ What a guestgraph service answers when it refuses, as `application/problem+json`
 The slugs and their statuses:
 
 | Slug | Status | Title | Answered by |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `invalid-request` | 400 | Invalid request | both |
 | `unauthorized` | 401 | Unauthorized | both, from a filter |
 | `not-found` | 404 | Resource not found | both |
@@ -44,7 +44,7 @@ keep the framework's shape, which is the same members without the family's `type
 service's `src/main/java/io/guestgraph/service/`:
 
 | Class | Configuration it reads |
-|---|---|
+| --- | --- |
 | `Problems` | none |
 | `ServiceException` | none |
 | `ServiceExceptionHandler` | none |
@@ -64,7 +64,7 @@ classes and not the pom.
 ## What a service keeps
 
 | Service | Keeps | Extends the base with |
-|---|---|---|
+| --- | --- | --- |
 | engine | `ApiKeyFilter`, refusing through `Problems` | `NotFoundException`, `ConflictException`, `BadRequestException`, `InvalidUnmergeException`, `ReviewNotFoundException`, `ReviewAlreadyDecidedException`, `InvalidActorClaimException`, `RetiredGuestException` with its members |
 | connector | its endpoints, throwing the base's subclasses | `NoSuchConnectionException`, `NoSuchRunException`, `RunInProgressException`, `NotAnEventException` |
 

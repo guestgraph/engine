@@ -15,7 +15,7 @@ One line in the service's root, the pin:
 ```
 
 | Field | Meaning | Rule |
-|---|---|---|
+| --- | --- | --- |
 | `repo` | the shared repository | fixed |
 | `tag` | the release vendored | a tag of that repository; moved on purpose |
 | `stack` | the directory of the shared repository vendored | `spring` today; a later stack is its own directory |
@@ -58,7 +58,7 @@ Reads the service from its root and answers one line per finding:
 Exit 0 with no output when nothing is missing; 1 otherwise. The items, in the order checked:
 
 | Item | Passes when |
-|---|---|
+| --- | --- |
 | `parent` | `pom.xml` names `io.guestgraph:service-parent` at the pinned `tag`'s version with `relativePath` `service-conventions/pom.xml` |
 | `root` | exactly one directory under `src/main/java/io/guestgraph/`, and it is `root`'s path |
 | `api` | `<root>/api/` exists; every class annotated `@RestController`, `@Controller` or extending a servlet filter is under it |
@@ -80,7 +80,7 @@ Exit 0 with no output when nothing is missing; 1 otherwise. The items, in the or
 service's ruleset requires them by these ids beside `conventions / conventions`:
 
 | Job | Runs |
-|---|---|
+| --- | --- |
 | `verify` | `./mvnw -B verify` |
 | `er-drift` | `sh service-conventions/regen-er`, then fails when `docs/er-schema.mmd` changed |
 | `service-conventions` | `sh service-conventions/service-conventions-sync check`, then `sh service-conventions/service-conventions-check` |

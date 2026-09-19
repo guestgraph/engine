@@ -12,7 +12,7 @@ connector's memory, for as long as the connector runs. Research R2 gives the rea
 gains one field, and `active` stays for what it says.
 
 | Field | Meaning |
-|---|---|
+| --- | --- |
 | `state` | `ACTIVE`, `MISSING`, `REMOVED` or `UNKNOWN` — see below |
 | `active` | `state == ACTIVE`; kept because the status document already publishes it |
 | `id` | Apaleo's id for the subscription, when there is one |
@@ -23,7 +23,7 @@ gains one field, and `active` stays for what it says.
 ### The four states
 
 | State | Means | Set by |
-|---|---|---|
+| --- | --- | --- |
 | `ACTIVE` | Apaleo holds a subscription pointing at this connection's endpoint | `ensure`, `check` |
 | `MISSING` | Apaleo holds none and nobody asked for that | `ensure` failing, `check` finding none |
 | `REMOVED` | Apaleo holds none because an operator asked | the removal |

@@ -93,7 +93,10 @@ one only together with its ruleset.
 Every member's ruleset requires the `conventions` job beside the job that runs its own
 suite; a repository without a suite requires it alone. That job holds the vendored copy against
 its release and the repository's own Markdown against `WRITING.md`, and it is the same job
-everywhere because it is called from one place.
+everywhere because it is called from one place. The Markdown form is the one part of it that
+is not shell: `conventions-format` runs markdownlint at the version it pins, on Node, because
+that is a library an editor plugin can bundle too, and a form held by one tool in CI and
+another in the editor is two forms.
 
 CI never writes what the repository commits. Rendered cards, exported PDFs and generated
 pages are built locally and committed; CI checks that the committed copy matches what would

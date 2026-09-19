@@ -174,7 +174,7 @@ regeneration.
 ## Design Decisions Carried From Phase 0
 
 | # | Decision | Where |
-|---|---|---|
+| --- | --- | --- |
 | R1 | The engine's stack and guardrails, PostgreSQL state, a separate repository | [research.md](research.md) |
 | R2 | Client credentials; reservations sorted by update, paged at 500; the booker read from the booking; backoff on 429 | [research.md](research.md) |
 | R3 | Mapping for two objects: six extracted fields at the top, everything else nested, booking dates derived, no payment data | [contracts/mapping.md](contracts/mapping.md) |

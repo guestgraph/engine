@@ -53,7 +53,7 @@ the local profile start test and every existing test unchanged.
 ## Success-criteria spot checks
 
 | Criterion | Check |
-|---|---|
+| --- | --- |
 | SC-001 | Step 1. |
 | SC-002 | Step 2, and the shared repository's fixture test. |
 | SC-003 | Step 3, and the shared repository's fixture tests, one per item. |

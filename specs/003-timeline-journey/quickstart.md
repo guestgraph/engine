@@ -89,7 +89,7 @@ Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`,
 ## Success-criteria spot checks
 
 | Criterion | Check |
-|---|---|
+| --- | --- |
 | SC-003 | One `GET /guests/{id}/timeline` answers "what does this guest currently have" — no client-side post-processing of `/records`. |
 | SC-006 | Seed a guest with 500 associations; first page under 1 s. Assert in `TimelineApiTest`. |
 | SC-007 | Replay an unchanged month of submissions: zero new observations, zero timeline changes, zero new merge events. |
