@@ -1,0 +1,9 @@
+{
+  // What conventions-sync writes as .vscode/extensions.json where a member has none. Every member
+  // keeps .vscode/ out of git, so this is a convenience and not a rule: nothing checks it, and a
+  // member is free to add the extensions of its own language beside this one.
+  //
+  // The form is markdownlint's, so the editor that writes it is markdownlint's too. The rules
+  // are .markdownlint-cli2.jsonc at the root, which this extension discovers on its own.
+  "recommendations": ["DavidAnson.vscode-markdownlint"]
+}
