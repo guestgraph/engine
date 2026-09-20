@@ -1,0 +1,11 @@
+{
+  // The extensions the family asks for, and the whole of this file when a member has none:
+  // conventions-sync writes it where .vscode/extensions.json is missing and never touches one
+  // that is there, because a member recommending the extensions of its own language is a member
+  // doing the right thing. What conventions owns is that every id below is recommended;
+  // conventions-format fails where one is missing and says nothing about the rest.
+  //
+  // The form is markdownlint's, so the editor that writes it is markdownlint's too. The rules
+  // are .markdownlint-cli2.jsonc at the root, which this extension discovers on its own.
+  "recommendations": ["DavidAnson.vscode-markdownlint"]
+}

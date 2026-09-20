@@ -1,0 +1,23 @@
+{
+  // The family's part of a member's VS Code settings, and the whole of this file when a member
+  // has none: conventions-sync writes it where .vscode/settings.json is missing and never
+  // touches one that is there, because settings.json is the member's file and a repository with
+  // its own language has its own settings to keep in it. What conventions owns is this one key,
+  // and conventions-format fails where a member's copy of it does not match this.
+  //
+  // Markdown is formatted on save by the library conventions-format runs in CI, reading the
+  // .markdownlint-cli2.jsonc the script reads, so the editor and the shared job hold one form
+  // between them rather than one each. The key is scoped to Markdown because what formats
+  // another language is the member's own business.
+  //
+  // The one rule markdownlint does not ship is JavaScript, and VS Code runs no JavaScript from a
+  // workspace that has not been trusted, so a fresh clone answers that prompt before a padded
+  // table is rewritten on save. Everything else in the form applies either way.
+  //
+  // files.trimTrailingWhitespace is deliberately not set. Two spaces at the end of a line are a
+  // line break MD009 allows, and trimming them would rewrite prose the form accepts.
+  "[markdown]": {
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    "editor.formatOnSave": true
+  }
+}

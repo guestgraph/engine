@@ -1,30 +1,39 @@
 #!/bin/sh
 # conventions-format — hold a member's Markdown to the one form WRITING.md gives it, whatever
-# editor wrote it last. The form is the rule set in conventions/markdown.markdownlint-cli2.jsonc,
-# with the one rule markdownlint does not ship in conventions/markdown-rules.cjs, and the tool is
-# markdownlint-cli2 at the version below, the same library an editor plugin can bundle, so a file
-# a tool reformatted and a file a person wrote come out byte for byte the same.
+# editor wrote it last, and hold the editor to writing it. The form is the rule set in
+# .markdownlint-cli2.jsonc at the member's root, with the one rule markdownlint does not ship in
+# conventions/markdown-rules.cjs, and the tool is markdownlint-cli2 at the version below, the
+# same library an editor plugin can bundle, so a file a tool reformatted and a file a person
+# wrote come out byte for byte the same. The rules sit at
+# the root under that name because it is the name an editor plugin discovers without being told,
+# which is how the same form reaches a writer before they push and not only afterwards. The two
+# files under .vscode/ that carry that arrangement are the member's own, and what the family owns
+# of them — one settings key, one recommended extension — is checked here against the copies
+# under conventions/.
 #
 #   sh conventions/conventions-format          check: exit 1 with one line per hit, file:line
 #   sh conventions/conventions-format fix      rewrite every hit into the form, in place
 #
-# Needs sh, find, sort and sed, and Node 22 or later for npx; the tool is fetched by npx on
-# first use and cached after. The files are every Markdown file but .git, node_modules at any
-# depth and the folders under "format-exclude" in conventions.json, or under "exclude" where a
-# member names no "format-exclude", so that a member that has not decided reads as it did.
+# Needs sh, find, sort and sed, and Node 22 or later, for npx and for the editor check below;
+# the tool is fetched by npx on first use and cached after. git is used where it is there, to
+# leave out what it ignores. The files are every Markdown file but .git, node_modules at any
+# depth, what .gitignore names, and the folders under "format-exclude" in conventions.json, or
+# under "exclude" where a member names no "format-exclude", so that a member that has not
+# decided reads as it did.
 # CONVENTIONS_ROOT overrides the directory, which is how the tests point it at a fixture.
 set -eu
 
 VERSION=0.23.2
 ROOT=${CONVENTIONS_ROOT:-.}
 PIN=$ROOT/conventions.json
-RULES=conventions/markdown.markdownlint-cli2.jsonc
+RULES=.markdownlint-cli2.jsonc
 
 cmd=${1:-check}
 case $cmd in check|fix) ;; *) echo "usage: sh conventions/conventions-format [check|fix]" >&2; exit 2 ;; esac
 
 [ -f "$ROOT/$RULES" ] || { echo "✗ conventions: no $RULES under $ROOT — run sync" >&2; exit 1; }
 command -v npx > /dev/null 2>&1 || { echo "✗ conventions: the Markdown form needs Node 22 or later, and npx is not on the PATH" >&2; exit 1; }
+command -v node > /dev/null 2>&1 || { echo "✗ conventions: the editor check needs Node 22 or later, and node is not on the PATH" >&2; exit 1; }
 
 # The tool is run from the root, so the paths it prints are the paths a member sees.
 cd "$ROOT"
@@ -53,6 +62,20 @@ IFS=$oldifs
 set -- "$@" -name '*.md' -type f -print
 
 files=$(find "$@" 2> /dev/null | LC_ALL=C sort || true)
+
+# What git ignores is scratch, not the repository's Markdown: a build folder, a tool's working
+# directory, a vault's cache. It is absent from the shared job, which checks out tracked files
+# only, so without this a local run fails on files the job can never see while the job stays
+# green. A file that is merely new is still read, because it is on its way to being committed.
+# Where git is missing or this is no repository the walk is unchanged, so a plain directory
+# still formats.
+# core.quotePath is off because git C-quotes a path with a non-ASCII byte in it — a de-CH file
+# name with an umlaut — and a quoted path matches nothing in the list it came from.
+if command -v git > /dev/null 2>&1 && git rev-parse --git-dir > /dev/null 2>&1; then
+  ignored=$(printf '%s\n' "$files" | git -c core.quotePath=false check-ignore --stdin 2> /dev/null) || ignored=""
+  [ -z "$ignored" ] || files=$(printf '%s\n' "$files" | grep -vxF "$ignored" || true)
+fi
+
 if [ -z "$files" ]; then
   echo "✗ conventions: no Markdown file was formatted under $ROOT" >&2
   exit 1
@@ -76,16 +99,117 @@ if [ "$cmd" = fix ]; then
   while [ "$passes" -lt 3 ] && ! lint --fix "$@" > /dev/null; do passes=$((passes + 1)); done
 fi
 
+markdown=0
 if out=$(lint "$@"); then
   if [ "$cmd" = fix ]; then echo "✓ every Markdown file is in the family's form, fixed where it was not"
   else echo "✓ every Markdown file is in the family's form"; fi
-  exit 0
-fi
-# The tool reports a table once per pipe; a reader wants the line once per rule.
-printf '%s\n' "$out" | sed -n 's/^\(.*\.md:[0-9][0-9]*\)[:0-9]* error \([A-Za-z0-9/-]*\).*/✗ \1: \2/p' | uniq
-if [ "$cmd" = fix ]; then
-  echo "✗ conventions: the hits above have no automatic fix; edit them by hand" >&2
 else
-  echo "✗ conventions: sh conventions/conventions-format fix rewrites these into the form" >&2
+  markdown=1
+  # The tool reports a table once per pipe; a reader wants the line once per rule.
+  printf '%s\n' "$out" | sed -n 's/^\(.*\.md:[0-9][0-9]*\)[:0-9]* error \([A-Za-z0-9/-]*\).*/✗ \1: \2/p' | uniq
+  if [ "$cmd" = fix ]; then
+    echo "✗ conventions: the hits above have no automatic fix; edit them by hand" >&2
+  else
+    echo "✗ conventions: sh conventions/conventions-format fix rewrites these into the form" >&2
+  fi
 fi
+
+CANON_SETTINGS=$ROOT/conventions/vscode-settings.json
+CANON_EXTENSIONS=$ROOT/conventions/vscode-extensions.json
+editor=0
+if [ -f "$CANON_SETTINGS" ] && [ -f "$CANON_EXTENSIONS" ]; then
+  if ! node - "$ROOT" << 'NODE'
+const fs = require("fs");
+const { execFileSync } = require("child_process");
+const root = process.argv[2];
+
+// A member whose .gitignore covers .vscode/ has said the editor half is not its repository's
+// business, and the shared job, which checks out tracked files only, never sees those files at
+// all: held to them, such a member would fail every run with no edit that could satisfy it. So
+// what git ignores is skipped here for the reason the walk below skips it. Not a repository, or
+// no git, is not ignored.
+const ignoredByGit = (rel) => {
+  try {
+    execFileSync("git", ["check-ignore", "-q", "--", rel], { cwd: root, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// Both files carry comments, so the comments go before JSON.parse does. The first alternative
+// matches a whole string, which keeps a // or /* inside one from starting a comment.
+const strip = (t) =>
+  t.replace(/"(?:\\.|[^"\\])*"|\/\/.*|\/\*[\s\S]*?\*\//g, (m) => (m[0] === '"' ? m : ""));
+const parse = (p) => JSON.parse(strip(fs.readFileSync(p, "utf8")));
+
+// Values are compared, not text, so a member may lay its file out however it likes. Keys are
+// sorted on the way in, so two objects that differ only in order are the same object.
+const stable = (v) => {
+  if (v === null || typeof v !== "object") return JSON.stringify(v);
+  if (Array.isArray(v)) return "[" + v.map(stable).join(",") + "]";
+  const keys = Object.keys(v).sort();
+  return "{" + keys.map((k) => JSON.stringify(k) + ":" + stable(v[k])).join(",") + "}";
+};
+
+let fail = 0;
+const hit = (m) => {
+  console.error("\u2717 conventions: " + m);
+  fail = 1;
+};
+
+const readOwn = (rel) => {
+  if (ignoredByGit(rel)) return null;
+  const at = root + "/" + rel;
+  if (!fs.existsSync(at)) {
+    hit(rel + " is missing — run sync, which writes it where a member has none");
+    return null;
+  }
+  try {
+    return parse(at);
+  } catch (e) {
+    hit(rel + " is not readable as JSON: " + e.message);
+    return null;
+  }
+};
+
+const wantSettings = parse(root + "/conventions/vscode-settings.json")["[markdown]"];
+const settings = readOwn(".vscode/settings.json");
+if (settings && stable(settings["[markdown]"]) !== stable(wantSettings)) {
+  hit(
+    '.vscode/settings.json: its "[markdown]" is not the release\'s — set it to ' +
+      JSON.stringify(wantSettings) +
+      ", keeping every other key"
+  );
+}
+
+const wantIds = parse(root + "/conventions/vscode-extensions.json").recommendations;
+const extensions = readOwn(".vscode/extensions.json");
+if (extensions) {
+  // A string answers to includes() by matching a substring, so an id with anything appended
+  // would pass on a file VS Code reads nothing from. The shape is checked before the contents.
+  const have = extensions.recommendations;
+  if (!Array.isArray(have)) {
+    hit('.vscode/extensions.json: "recommendations" is not a list, so nothing in it is recommended');
+  } else {
+    for (const id of wantIds) {
+      if (!have.includes(id)) {
+        hit('.vscode/extensions.json: "' + id + '" is not recommended — add it, keeping the rest');
+      }
+    }
+  }
+}
+
+process.exitCode = fail;
+NODE
+  then
+    echo "✗ conventions: the editor does not hold the form this repository does" >&2
+    editor=1
+  fi
+fi
+
+
+# The Markdown and the editor are reported together and fail together, so one run says everything
+# there is to do rather than stopping at the first half that is wrong.
+if [ "$markdown" -eq 0 ] && [ "$editor" -eq 0 ]; then exit 0; fi
 exit 1

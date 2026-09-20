@@ -104,11 +104,21 @@ form of its own makes a diff that is not a change, and a table padded to line it
 turns an edit to one cell into an edit to its whole column. So a table is compact: one space
 inside each pipe, `| --- |` under the header whatever the column's width, its alignment colons
 kept, and no padding. Emphasis is `*`, strong is `**`, a list item is `-`, and a file ends in
-one newline with no run of blank lines and no trailing space beyond a line break.
-`conventions/markdown.markdownlint-cli2.jsonc` is this paragraph as rules, with the one rule
+one newline with no run of blank lines and no trailing space beyond a line break. A heading, a
+list, a fenced block and a table each stand clear of the text around them by a blank line,
+because a list crowded against the line that introduces it is a list some readers never see as
+one. Every rule of the form is one the tool can write, so `fix` and a save in the editor settle
+all of them and leave nothing to do by hand; a rule that could only report would be a rule that
+nags, and it is left out however right it reads.
+`.markdownlint-cli2.jsonc` at a repository's root is this paragraph as rules, with the one rule
 markdownlint does not ship in `conventions/markdown-rules.cjs`; `conventions-format` holds a
-repository to them and `fix` writes them, and an editor plugin that writes Markdown bundles the
-same rules rather than a form of its own.
+repository to them and `fix` writes them. The rules sit at the root because that is where an
+editor looks for them without being told, and a form a writer meets only after pushing is a form
+they write against all day: `.vscode/` asks VS Code to format Markdown on save with the same
+library the shared job runs, and an editor plugin that writes Markdown elsewhere bundles the
+same rules rather than a form of its own. Those two `.vscode/` files belong to the repository,
+which has its own language to configure and one file to do it in; what the family owns of them
+is the Markdown setting and the one recommended extension, and nothing else in them is read.
 
 Release notes are this register aimed at a consumer: what changed for them, what breaks and
 how to take it, in that order.
