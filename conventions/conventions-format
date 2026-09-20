@@ -1,24 +1,32 @@
 #!/bin/sh
 # conventions-format — hold a member's Markdown to the one form WRITING.md gives it, whatever
-# editor wrote it last. The form is the rule set in conventions/markdown.markdownlint-cli2.jsonc,
-# with the one rule markdownlint does not ship in conventions/markdown-rules.cjs, and the tool is
-# markdownlint-cli2 at the version below, the same library an editor plugin can bundle, so a file
-# a tool reformatted and a file a person wrote come out byte for byte the same.
+# editor wrote it last. The form is the rule set in
+# .markdownlint-cli2.jsonc at the member's root, with the one rule markdownlint does not ship in
+# conventions/markdown-rules.cjs, and the tool is markdownlint-cli2 at the version below, the
+# same library an editor plugin can bundle, so a file a tool reformatted and a file a person
+# wrote come out byte for byte the same. The rules sit at
+# the root under that name because it is the name an editor plugin discovers without being told,
+# which is how the same form reaches a writer before they push and not only afterwards. What the
+# editor is then asked to do with them lives in .vscode/, which every member keeps out of git, so
+# nothing here reads it: conventions-sync writes those two files and no check holds a member to
+# them.
 #
 #   sh conventions/conventions-format          check: exit 1 with one line per hit, file:line
 #   sh conventions/conventions-format fix      rewrite every hit into the form, in place
 #
 # Needs sh, find, sort and sed, and Node 22 or later for npx; the tool is fetched by npx on
-# first use and cached after. The files are every Markdown file but .git, node_modules at any
-# depth and the folders under "format-exclude" in conventions.json, or under "exclude" where a
-# member names no "format-exclude", so that a member that has not decided reads as it did.
+# first use and cached after. git is used where it is there, to
+# leave out what it ignores. The files are every Markdown file but .git, node_modules at any
+# depth, what .gitignore names, and the folders under "format-exclude" in conventions.json, or
+# under "exclude" where a member names no "format-exclude", so that a member that has not
+# decided reads as it did.
 # CONVENTIONS_ROOT overrides the directory, which is how the tests point it at a fixture.
 set -eu
 
 VERSION=0.23.2
 ROOT=${CONVENTIONS_ROOT:-.}
 PIN=$ROOT/conventions.json
-RULES=conventions/markdown.markdownlint-cli2.jsonc
+RULES=.markdownlint-cli2.jsonc
 
 cmd=${1:-check}
 case $cmd in check|fix) ;; *) echo "usage: sh conventions/conventions-format [check|fix]" >&2; exit 2 ;; esac
@@ -53,6 +61,20 @@ IFS=$oldifs
 set -- "$@" -name '*.md' -type f -print
 
 files=$(find "$@" 2> /dev/null | LC_ALL=C sort || true)
+
+# What git ignores is scratch, not the repository's Markdown: a build folder, a tool's working
+# directory, a vault's cache. It is absent from the shared job, which checks out tracked files
+# only, so without this a local run fails on files the job can never see while the job stays
+# green. A file that is merely new is still read, because it is on its way to being committed.
+# Where git is missing or this is no repository the walk is unchanged, so a plain directory
+# still formats.
+# core.quotePath is off because git C-quotes a path with a non-ASCII byte in it — a de-CH file
+# name with an umlaut — and a quoted path matches nothing in the list it came from.
+if command -v git > /dev/null 2>&1 && git rev-parse --git-dir > /dev/null 2>&1; then
+  ignored=$(printf '%s\n' "$files" | git -c core.quotePath=false check-ignore --stdin 2> /dev/null) || ignored=""
+  [ -z "$ignored" ] || files=$(printf '%s\n' "$files" | grep -vxF "$ignored" || true)
+fi
+
 if [ -z "$files" ]; then
   echo "✗ conventions: no Markdown file was formatted under $ROOT" >&2
   exit 1
@@ -76,16 +98,19 @@ if [ "$cmd" = fix ]; then
   while [ "$passes" -lt 3 ] && ! lint --fix "$@" > /dev/null; do passes=$((passes + 1)); done
 fi
 
+markdown=0
 if out=$(lint "$@"); then
   if [ "$cmd" = fix ]; then echo "✓ every Markdown file is in the family's form, fixed where it was not"
   else echo "✓ every Markdown file is in the family's form"; fi
-  exit 0
-fi
-# The tool reports a table once per pipe; a reader wants the line once per rule.
-printf '%s\n' "$out" | sed -n 's/^\(.*\.md:[0-9][0-9]*\)[:0-9]* error \([A-Za-z0-9/-]*\).*/✗ \1: \2/p' | uniq
-if [ "$cmd" = fix ]; then
-  echo "✗ conventions: the hits above have no automatic fix; edit them by hand" >&2
 else
-  echo "✗ conventions: sh conventions/conventions-format fix rewrites these into the form" >&2
+  markdown=1
+  # The tool reports a table once per pipe; a reader wants the line once per rule.
+  printf '%s\n' "$out" | sed -n 's/^\(.*\.md:[0-9][0-9]*\)[:0-9]* error \([A-Za-z0-9/-]*\).*/✗ \1: \2/p' | uniq
+  if [ "$cmd" = fix ]; then
+    echo "✗ conventions: the hits above have no automatic fix; edit them by hand" >&2
+  else
+    echo "✗ conventions: sh conventions/conventions-format fix rewrites these into the form" >&2
+  fi
 fi
-exit 1
+
+exit "$markdown"

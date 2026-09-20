@@ -1,4 +1,4 @@
-<!-- conventions · v1.20.0 -->
+<!-- conventions · v1.22.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in
 `conventions/`, vendored from robertblust/conventions at the release `conventions.json`
 names. Read them before writing or committing anything here.
@@ -24,9 +24,14 @@ same in both. The block is plain words and names no agent vendor; `CLAUDE.md` is
 adapter, four lines that import the entry file and `WRITING.md`, `WORKING.md` and
 `REPOSITORIES.md` in that vendor's syntax, and a member carries the same four lines; the two
 briefs and the glossary are read by the agent adapters the README names, not by every session.
-The one file members receive that does not sit under `conventions/` in the source is this
-`AGENTS.md`, which the script fetches from the root and vendors as `conventions/AGENTS.md` so
-that `check` can compare a member's block against the release without a network.
+Three kinds of file break that mirror. This `AGENTS.md` sits at the root here and is vendored as
+`conventions/AGENTS.md`, so that `check` can compare a member's block against the release without
+a network. `.markdownlint-cli2.jsonc` goes the other way: it sits at the root here and at a
+member's root too, because markdownlint-cli2 finds it there and nowhere else, and this repository
+carries it for itself as every member does. `conventions/vscode-settings.json` and
+`conventions/vscode-extensions.json` are neither: they are what `sync` writes into a member's
+`.vscode/` where it finds none, and `.vscode/` is ignored here as it is everywhere, so this
+repository's own copies are untracked like any member's and no check reads them.
 
 Releasing is a tag and a GitHub Release with notes. Before tagging, set the version in the
 first line of this file to the new tag: the script rewrites it to the pin on sync, so a stale

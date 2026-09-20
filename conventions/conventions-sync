@@ -2,13 +2,14 @@
 # conventions-sync — vendor the family's shared conventions at a pinned release, and say
 # whether the copy still matches it.
 #
-#   sh conventions/conventions-sync sync    write conventions/ and the AGENTS.md block from the pin
+#   sh conventions/conventions-sync sync    write conventions/, the root files and the AGENTS.md
+#                                           block from the pin
 #   sh conventions/conventions-sync check   exit 1 with one ✗ line per thing that differs
 #
 # The pin is conventions.json in the member's root: {"repo": "robertblust/conventions", "tag": "v1.0.0"}.
 # Files come from https://raw.githubusercontent.com/<repo>/<tag>; CONVENTIONS_SOURCE overrides
 # that with another base URL or a local directory, which is how the tests run offline.
-# Needs sh, curl, awk, sed, and shasum or sha256sum. Nothing else.
+# Needs sh, curl, awk, sed, cp, and shasum or sha256sum, and no language runtime.
 set -eu
 
 usage() { echo "usage: sh conventions/conventions-sync sync|check" >&2; exit 2; }
@@ -18,7 +19,25 @@ case $cmd in sync|check) ;; *) usage ;; esac
 
 PIN=conventions.json
 DIR=conventions
-FILES="WRITING.md WORKING.md REPOSITORIES.md WRITER.md TRANSLATOR.md GLOSSARY.md AGENTS.md conventions-sync conventions-check conventions-format markdown.markdownlint-cli2.jsonc markdown-rules.cjs"
+FILES="WRITING.md WORKING.md REPOSITORIES.md WRITER.md TRANSLATOR.md GLOSSARY.md AGENTS.md conventions-sync conventions-check conventions-format markdown-rules.cjs vscode-settings.json vscode-extensions.json"
+
+# What a member receives at its own root rather than under conventions/, because something other
+# than this family reads it there: markdownlint-cli2 and the editor plugins built on it discover
+# the rule set by that name at the root and nowhere else. It is fetched from the same path in the
+# source, which carries it for itself as a member does, and held to the release like the rest.
+ROOT_FILES=".markdownlint-cli2.jsonc"
+
+# Files a member owns, written here only where it has none. VS Code reads one settings file and
+# one recommendation file per repository and merges nothing, so a member with its own language
+# has no second place to put its own settings: a copy held byte for byte would take that place
+# away. The copy under conventions/ is what the family owns of each, and conventions-format
+# holds a member's file to it — the settings key, the recommended ids — and to nothing else.
+SEEDS="conventions/vscode-settings.json:.vscode/settings.json conventions/vscode-extensions.json:.vscode/extensions.json"
+
+# What an earlier release vendored and this one does not. sync deletes them, so a member that
+# upgrades is left with one copy of a rule rather than two, and check names one still lying
+# around, which is a member that has not synced.
+RETIRED="$DIR/markdown.markdownlint-cli2.jsonc"
 OPEN_RE='^<!-- conventions · v[^ ]* -->$'
 CLOSE='<!-- end conventions -->'
 
@@ -93,6 +112,21 @@ sync() {
     esac
     mv "$DIR/$f.new" "$DIR/$f"
   done
+  for f in $ROOT_FILES; do
+    d=${f%/*}
+    [ "$d" = "$f" ] || mkdir -p "$d"
+    fetch "$f" "$f.new"
+    mv "$f.new" "$f"
+  done
+  for pair in $SEEDS; do
+    dst=${pair#*:}
+    if [ ! -f "$dst" ]; then
+      d=${dst%/*}
+      [ "$d" = "$dst" ] || mkdir -p "$d"
+      cp "${pair%%:*}" "$dst"
+    fi
+  done
+  for f in $RETIRED; do rm -f "$f"; done
   chmod +x "$DIR/conventions-sync"
   chmod +x "$DIR/conventions-check"
   chmod +x "$DIR/conventions-format"
@@ -105,9 +139,14 @@ sync() {
       first=0
       printf '    "%s/%s": "sha256:%s"' "$DIR" "$f" "$(sha "$DIR/$f")"
     done
+    for f in $ROOT_FILES; do
+      [ "$first" -eq 1 ] || printf ',\n'
+      first=0
+      printf '    "%s": "sha256:%s"' "$f" "$(sha "$f")"
+    done
     printf '\n  }\n}\n'
   } > "$DIR/manifest.json"
-  echo "✓ conventions: $DIR/ and the AGENTS.md block are at $REPO@$TAG"
+  echo "✓ conventions: $DIR/, the root files and the AGENTS.md block are at $REPO@$TAG"
 }
 
 check() {
@@ -125,13 +164,26 @@ check() {
       echo "✗ conventions: $DIR/$f differs from $REPO@$TAG — edit it there, not here, or run sync"; fail=1
     fi
   done
+  for f in $ROOT_FILES; do
+    want=$(sed -n "s|.*\"$f\" *: *\"sha256:\([0-9a-f]*\)\".*|\1|p" "$DIR/manifest.json")
+    if [ ! -f "$f" ]; then
+      echo "✗ conventions: $f is missing — run sync"; fail=1
+    elif [ "$(sha "$f")" != "$want" ]; then
+      echo "✗ conventions: $f differs from $REPO@$TAG — edit it there, not here, or run sync"; fail=1
+    fi
+  done
+  for f in $RETIRED; do
+    if [ -f "$f" ]; then
+      echo "✗ conventions: $f is what an earlier release vendored and $TAG does not — run sync"; fail=1
+    fi
+  done
   have=""
   [ -f AGENTS.md ] && have=$(block_of AGENTS.md)
   want=$(block_of "$DIR/AGENTS.md")
   if [ "$have" != "$want" ]; then
     echo "✗ conventions: the block in AGENTS.md is not the release's — run sync"; fail=1
   fi
-  [ "$fail" -eq 0 ] && echo "✓ conventions: $DIR/ and the AGENTS.md block match $REPO@$TAG"
+  [ "$fail" -eq 0 ] && echo "✓ conventions: $DIR/, the root files and the AGENTS.md block match $REPO@$TAG"
   exit "$fail"
 }
 
