@@ -1,1 +1,1 @@
-{ "repo": "robertblust/conventions", "tag": "v1.25.0", "exclude": ["target", ".specify", ".claude", "docs/superpowers"], "format-exclude": ["target", ".specify", ".claude"] }
+{ "repo": "robertblust/conventions", "tag": "v1.26.0", "exclude": ["target", ".specify", ".claude", "docs/superpowers"], "format-exclude": ["target", ".specify", ".claude"] }

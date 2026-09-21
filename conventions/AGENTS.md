@@ -1,4 +1,4 @@
-<!-- conventions · v1.25.0 -->
+<!-- conventions · v1.26.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in `conventions/`, vendored from robertblust/conventions at the release `conventions.json` names. Read them before writing or committing anything here.
 
 - `conventions/WRITING.md` — how we write: one voice, three registers, English and German.
