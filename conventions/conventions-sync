@@ -22,10 +22,19 @@ DIR=conventions
 FILES="WRITING.md WORKING.md REPOSITORIES.md WRITER.md TRANSLATOR.md GLOSSARY.md AGENTS.md conventions-sync conventions-check conventions-format markdown-rules.cjs vscode-settings.json vscode-extensions.json"
 
 # What a member receives at its own root rather than under conventions/, because something other
-# than this family reads it there: markdownlint-cli2 and the editor plugins built on it discover
-# the rule set by that name at the root and nowhere else. It is fetched from the same path in the
-# source, which carries it for itself as a member does, and held to the release like the rest.
-ROOT_FILES=".markdownlint-cli2.jsonc"
+# than this family reads it there. markdownlint-cli2 and the editor plugins built on it discover
+# the rule set by that name at the root and nowhere else, and an agent harness reads CLAUDE.md
+# there for what it should load before it does anything. Each is fetched from the same path in
+# the source, which carries it for itself as a member does, and held to the release like the rest.
+#
+# CLAUDE.md is one line naming this repository's own files, so a member that lacks it loads its
+# own rules and none of the family's, silently and while every check passes. That is what
+# happened: an instance written by a tool that knows nothing about this repository kept the
+# single-import line that tool writes, joined the family, and went green for a dozen entities
+# before a person reading the file noticed. Holding it here rather than checking it is the choice
+# the identical copy in every member argues for — there is nothing for a member to own in a file
+# that only says which shared rules to read.
+ROOT_FILES=".markdownlint-cli2.jsonc CLAUDE.md"
 
 # Files a member owns, written here only where it has none. VS Code reads one settings file and
 # one recommendation file per repository and merges nothing, so a member with its own language
