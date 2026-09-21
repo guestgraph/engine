@@ -22,6 +22,10 @@ Every change reaches the default branch through a pull request with one green st
 
 Merging is a decision the owner makes. An agent opens the pull request, reports the check, and stops; it merges when told to, and the word for that is the owner's, not inferred from an earlier one.
 
+Pull requests that depend on one another are linked as a stack, GitHub's own, with `gh stack link` from the bottom up. Each then shows only its own layer, the default branch's rules and checks hold for every layer and not only the lowest, and the one above re-targets to the default branch by itself when the one below merges; re-targeted by hand, a wrong order closes the pull request. A stack is merged from the bottom with `gh stack merge --merge`, because GitHub refuses the ordinary command for a pull request in a stack, and the merge commit rule holds there as everywhere.
+
+When a layer merges, GitHub rebases the branches above it onto the merge and replaces them on its side. That rewrites a pushed branch without the owner's word, and it is the one rewrite that passes: the content is byte for byte what it was, the author, the committer and the message are kept, and only the commit's name changes, so nothing a reviewer read is different and no identity is laundered. Whoever drives the branch resets their worktree to the remote before adding to it. The cascade a person starts, `gh stack sync` or `gh stack rebase`, is not that. It is a rewrite like any other, and it waits for the owner's word.
+
 ## Identity
 
 A commit is authored by the person who made it, under the address they mean to be known by, and the merge commit carries that address to the default branch unchanged. That is the whole rule, and it holds for a contributor from outside exactly as it holds for the owner; nothing here asks a contributor to be anyone but themselves.
