@@ -1,20 +1,12 @@
 # GuestGraph — Probabilistic Matching: Design
 
-**Date:** 2026-07-10
-**Status:** Approved
-**Scope:** Slice 2 of the GuestGraph roadmap — fuzzy matching behind the slice-1 strategy
-interface, plus the steward controls that make it safe.
+**Date:** 2026-07-10 **Status:** Approved **Scope:** Slice 2 of the GuestGraph roadmap — fuzzy matching behind the slice-1 strategy interface, plus the steward controls that make it safe.
 
 ## Goal
 
-Slice 1 resolves only on exact strong identifiers; real guest data is dirtier than that
-(typos, name variants, missing identifiers, per-channel aliases). Slice 2 adds a
-**rule-based fuzzy matcher** that scores candidate matches into the existing
-confidence/review machinery — wrong merges stay impossible to make silently, and every
-score is explainable.
+Slice 1 resolves only on exact strong identifiers; real guest data is dirtier than that (typos, name variants, missing identifiers, per-channel aliases). Slice 2 adds a **rule-based fuzzy matcher** that scores candidate matches into the existing confidence/review machinery — wrong merges stay impossible to make silently, and every score is explainable.
 
-Consumes from `docs/roadmap-notes.md`: **R2-1** (negative match rules) and the
-identifier-quality-rules family.
+Consumes from `docs/roadmap-notes.md`: **R2-1** (negative match rules) and the identifier-quality-rules family.
 
 ## Decisions (fixed)
 
@@ -58,13 +50,11 @@ tenant                  + auto_merge_threshold numeric NOT NULL DEFAULT 1.0
                         + review_floor        numeric NOT NULL DEFAULT 0.75
 ```
 
-Source records, guests, identifiers, links, merge events, match reviews: unchanged.
-The slice-1 promise holds — no migration of existing resolution data.
+Source records, guests, identifiers, links, merge events, match reviews: unchanged. The slice-1 promise holds — no migration of existing resolution data.
 
 ## Engine
 
-Strategy chain replaces the single matcher: **deterministic first (unchanged,
-confidence 1.0), fuzzy second** over candidates the deterministic pass didn't decide.
+Strategy chain replaces the single matcher: **deterministic first (unchanged, confidence 1.0), fuzzy second** over candidates the deterministic pass didn't decide.
 
 Per candidate, `FuzzyMatcher` computes a feature vector and a weighted score in [0,1]:
 
@@ -74,26 +64,18 @@ Per candidate, `FuzzyMatcher` computes a feature vector and a weighted score in 
 - email similarity (real emails; masked aliases only as the weak EMAIL_MASKED signal)
 - address locality hint when present
 
-Banding: `score ≥ auto_merge_threshold` → MATCH (confidence = score);
-`≥ review_floor` → REVIEW; below → dropped. The review reason and MergeEvent evidence
-carry the **per-signal breakdown** — a steward sees why a pair scored 0.87
-(Constitution IV).
+Banding: `score ≥ auto_merge_threshold` → MATCH (confidence = score); `≥ review_floor` → REVIEW; below → dropped. The review reason and MergeEvent evidence carry the **per-signal breakdown** — a steward sees why a pair scored 0.87 (Constitution IV).
 
-Two gates run in the engine after scoring, before execution, against **every** decision
-(deterministic included):
+Two gates run in the engine after scoring, before execution, against **every** decision (deterministic included):
 
 1. **Negative rule gate** — a rule spanning the two clusters downgrades MATCH → REVIEW.
 2. **Quality rule gate** — `IGNORE`d identifiers never generated the candidate in the
    first place (removed at extraction/candidate stage); `PERFECT_MATCH` identifiers
    downgrade merges without exact normalized-name agreement to REVIEW.
 
-Writers of negative rules: `UnmergeOperation` (detached records × remaining records)
-and review REJECT (reviewed record × candidate cluster's records at decision time).
-Rules are visible and deletable via the API — lifting one is a steward act.
+Writers of negative rules: `UnmergeOperation` (detached records × remaining records) and review REJECT (reviewed record × candidate cluster's records at decision time). Rules are visible and deletable via the API — lifting one is a steward act.
 
-Masked-email survivorship guard: a masked address never overwrites a real email in the
-golden profile; it fills the field only when no real address exists, marked
-`emailMasked: true` in the profile.
+Masked-email survivorship guard: a masked address never overwrites a real email in the golden profile; it fills the field only when no real address exists, marked `emailMasked: true` in the profile.
 
 ## API (v1 surface additions)
 
@@ -107,14 +89,11 @@ GET  /api/v1/negative-rules             list (origin, records, created)
 DELETE /api/v1/negative-rules/{id}      lift a rule (steward act, audited)
 ```
 
-Ingest, guests, explain, unmerge, match-reviews: unchanged contracts. Fuzzy shows up as
-new matcher names, sub-1.0 confidences, and richer reasons/evidence — exactly what the
-probabilistic-ready model reserved space for.
+Ingest, guests, explain, unmerge, match-reviews: unchanged contracts. Fuzzy shows up as new matcher names, sub-1.0 confidences, and richer reasons/evidence — exactly what the probabilistic-ready model reserved space for.
 
 ## Testing
 
-TDD on all matcher and gate logic (Constitution VI), pure JVM via the slice-1
-`InMemoryGraph` harness:
+TDD on all matcher and gate logic (Constitution VI), pure JVM via the slice-1 `InMemoryGraph` harness:
 
 - **Golden-pair corpus**: same-person variants (umlauts/diacritics, name order swapped,
   typos, nickname vs full form, missing birthdate) and different-person near-misses
@@ -132,12 +111,8 @@ TDD on all matcher and gate logic (Constitution VI), pure JVM via the slice-1
 
 ## Out of scope for this slice
 
-ML/model-based scoring (future implementation of the same interface, possibly a
-sidecar), duplicate-scan backfill over existing data, trusted-stable alias domains,
-per-source survivorship trust ranking (rest of R-X2), timeline (slice 3), connectors
-(slice 4).
+ML/model-based scoring (future implementation of the same interface, possibly a sidecar), duplicate-scan backfill over existing data, trusted-stable alias domains, per-source survivorship trust ranking (rest of R-X2), timeline (slice 3), connectors (slice 4).
 
 ## Workflow
 
-Spec-driven with spec-kit, as slice 1: this design feeds `/speckit-specify` →
-`/speckit-plan` → `/speckit-tasks` → `/speckit-implement` on a `002-*` feature branch.
+Spec-driven with spec-kit, as slice 1: this design feeds `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement` on a `002-*` feature branch.

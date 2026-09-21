@@ -7,15 +7,9 @@ description: "Task list for 005-apaleo-connector"
 
 **Input**: Design documents from `/specs/005-apaleo-connector/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
-[data-model.md](data-model.md), [contracts/mapping.md](contracts/mapping.md),
-[contracts/connector-api.yaml](contracts/connector-api.yaml)
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/mapping.md](contracts/mapping.md), [contracts/connector-api.yaml](contracts/connector-api.yaml)
 
-**Tests**: Test tasks are included and are not optional here. No engine code changes, so
-Constitution Principle VI does not compel them; the plan schedules them anyway because the
-connector's correctness lives in two pure functions, the mapper and the roster hash, and in
-protocol handling that only recorded interactions can pin. Tasks marked ⚠ MUST be written and seen
-failing before the implementation task that follows them.
+**Tests**: Test tasks are included and are not optional here. No engine code changes, so Constitution Principle VI does not compel them; the plan schedules them anyway because the connector's correctness lives in two pure functions, the mapper and the roster hash, and in protocol handling that only recorded interactions can pin. Tasks marked ⚠ MUST be written and seen failing before the implementation task that follows them.
 
 **Organization**: Grouped by user story so each is independently implementable and testable.
 
@@ -28,18 +22,13 @@ failing before the implementation task that follows them.
 
 ## Path Conventions
 
-Every path below is relative to the root of `guestgraph/connector-apaleo`, a new repository,
-unless it starts with `engine/`, which means this repository. Main code under
-`src/main/java/io/guestgraph/connector/apaleo/`, tests under
-`src/test/java/io/guestgraph/connector/apaleo/`, migrations under
-`src/main/resources/db/migration/`, recorded Apaleo documents under `src/test/resources/apaleo/`.
+Every path below is relative to the root of `guestgraph/connector-apaleo`, a new repository, unless it starts with `engine/`, which means this repository. Main code under `src/main/java/io/guestgraph/connector/apaleo/`, tests under `src/test/java/io/guestgraph/connector/apaleo/`, migrations under `src/main/resources/db/migration/`, recorded Apaleo documents under `src/test/resources/apaleo/`.
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: The repository exists, carries the family's conventions and guardrails, and has a
-test harness with recorded upstream documents.
+**Purpose**: The repository exists, carries the family's conventions and guardrails, and has a test harness with recorded upstream documents.
 
 - [X] T001 👤 Release robertblust/conventions with `REPOSITORIES.md` gaining the row `guestgraph/connector-apaleo — the Apaleo connector: reservations and bookings into the guest graph — main — ~/git/guestgraph/connector-apaleo` and the re-sync order gaining it after the engine; then create the repository in the guestgraph organization, Apache-2.0, default branch `main`, protected by a ruleset requiring the job ids `verify` and `conventions / conventions`
 - [X] T002 Scaffold the repository: `pom.xml` on Java 25 and Spring Boot 4 with web, JPA, Flyway, Actuator, the PostgreSQL driver, and test dependencies JUnit 5, AssertJ, Testcontainers and WireMock; `AGENTS.md` opening with the family's block and `CLAUDE.md` as the four-line vendor adapter, `conventions/` vendored at the release T001 made and `conventions.json` pinning it; `compose.yaml` with `postgres:18`; `.github/workflows/verify.yml` with a job id `verify` running `./mvnw verify`, and the conventions job called from robertblust/conventions at the pinned tag (research R1)
@@ -69,13 +58,9 @@ test harness with recorded upstream documents.
 
 ## Phase 3: User Story 1 - A Property's Reservations Become Observations (Priority: P1) 🎯 MVP
 
-**Goal**: A full sync turns every reservation and booking of the account into observations under
-the mapping contract, submits a version only when its persons changed, and a second run submits
-nothing.
+**Goal**: A full sync turns every reservation and booking of the account into observations under the mapping contract, submits a version only when its persons changed, and a second run submits nothing.
 
-**Independent Test**: With WireMock serving two list pages, three reservations and their two
-bookings, run a full sync; verify every person was submitted once with the right key, role,
-version and payload shape; run it again and verify nothing was submitted.
+**Independent Test**: With WireMock serving two list pages, three reservations and their two bookings, run a full sync; verify every person was submitted once with the right key, role, version and payload shape; run it again and verify nothing was submitted.
 
 ### Tests for User Story 1 ⚠
 
@@ -96,13 +81,9 @@ version and payload shape; run it again and verify nothing was submitted.
 
 ## Phase 4: User Story 2 - Changes Arrive Within a Minute (Priority: P2)
 
-**Goal**: Webhooks are received safely and processed once, reconciliation covers what they miss,
-and a long gap triggers a full sync.
+**Goal**: Webhooks are received safely and processed once, reconciliation covers what they miss, and a long gap triggers a full sync.
 
-**Independent Test**: Deliver a reservation event and a booking event to the endpoint; verify
-each is answered 202 before any fetch, processed once, and that only changed persons are
-submitted; deliver the same event twice and verify one processing; simulate a gap and verify the
-reconciliation and the gap rule.
+**Independent Test**: Deliver a reservation event and a booking event to the endpoint; verify each is answered 202 before any fetch, processed once, and that only changed persons are submitted; deliver the same event twice and verify one processing; simulate a gap and verify the reconciliation and the gap rule.
 
 ### Tests for User Story 2 ⚠
 
@@ -125,8 +106,7 @@ reconciliation and the gap rule.
 
 **Goal**: A status document, run endpoints, health, and logs that carry no secret and no person.
 
-**Independent Test**: Read the status after a full sync and after a failed Apaleo call; start
-runs through the endpoints; search a captured log for every credential and person value used.
+**Independent Test**: Read the status after a full sync and after a failed Apaleo call; start runs through the endpoints; search a captured log for every credential and person value used.
 
 ### Tests for User Story 3 ⚠
 
@@ -146,9 +126,7 @@ runs through the endpoints; search a captured log for every credential and perso
 
 **Goal**: Held guest ids follow the integrator rule on a nightly refresh and on request.
 
-**Independent Test**: With held ids in state, stub the engine to answer ACTIVE, MERGED, SPLIT and
-RETIRED for four of them; run a refresh; verify each row's outcome and that the split is surfaced
-in the status with nothing chosen.
+**Independent Test**: With held ids in state, stub the engine to answer ACTIVE, MERGED, SPLIT and RETIRED for four of them; run a refresh; verify each row's outcome and that the split is surfaced in the status with nothing chosen.
 
 ### Tests for User Story 4 ⚠
 

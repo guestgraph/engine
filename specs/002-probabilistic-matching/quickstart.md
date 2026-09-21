@@ -1,13 +1,10 @@
 # Quickstart & Validation: Probabilistic Matching
 
-**Feature**: 002-probabilistic-matching
-**Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) (new endpoints; slice-1 surface unchanged)
-**Model**: [data-model.md](data-model.md)
+**Feature**: 002-probabilistic-matching **Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) (new endpoints; slice-1 surface unchanged) **Model**: [data-model.md](data-model.md)
 
 ## Prerequisites
 
-As slice 1: JDK 25, Docker, `./mvnw`. Local run: `./mvnw spring-boot:run
--Dspring-boot.run.profiles=local` (tenant `demo` / key `demo-key`).
+As slice 1: JDK 25, Docker, `./mvnw`. Local run: `./mvnw spring-boot:run -Dspring-boot.run.profiles=local` (tenant `demo` / key `demo-key`).
 
 ## Run the test suite (primary validation)
 
@@ -28,8 +25,7 @@ Expected green, including the new suites:
 
 ## End-to-end smoke walk (maps to the spec's user stories)
 
-Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`,
-`Content-Type: application/json`.
+Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`, `Content-Type: application/json`.
 
 1. **US1 — fuzzy candidate surfaces for review**
 

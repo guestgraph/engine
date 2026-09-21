@@ -6,47 +6,31 @@
 
 ## Summary
 
-Six classes under one package of the family's, `io.guestgraph.service`, held in the shared
-rules repository as source and vendored into every service by the sync slice 7 built: the
-problem writer, the advice with the one catch-all, the base exception every service-specific
-exception extends, the size filter, the document controller and a bearer guard. Every refusal a
-guestgraph service answers then has one shape, with a type that resolves to a page on the
-family's site, and the service check reads a service's own code for the ways that shape was
-broken before. Both services drop their own copies and extend the base; no contract line and no
-existing assertion changes.
+Six classes under one package of the family's, `io.guestgraph.service`, held in the shared rules repository as source and vendored into every service by the sync slice 7 built: the problem writer, the advice with the one catch-all, the base exception every service-specific exception extends, the size filter, the document controller and a bearer guard. Every refusal a guestgraph service answers then has one shape, with a type that resolves to a page on the family's site, and the service check reads a service's own code for the ways that shape was broken before. Both services drop their own copies and extend the base; no contract line and no existing assertion changes.
 
 ## Technical Context
 
 **Language/Version**: Java 25, unchanged; the shared sources compile against the same parent.
 
-**Primary Dependencies**: Spring's `ErrorResponseException` and its problem-details handler,
-already enabled in both services; nothing new.
+**Primary Dependencies**: Spring's `ErrorResponseException` and its problem-details handler, already enabled in both services; nothing new.
 
 **Storage**: none; no migration.
 
-**Testing**: unit tests on the shared classes in the shared repository's runtime module;
-fixtures for the check's new item; one `ErrorShapeTest` per service; every existing test
-unchanged.
+**Testing**: unit tests on the shared classes in the shared repository's runtime module; fixtures for the check's new item; one `ErrorShapeTest` per service; every existing test unchanged.
 
 **Target Platform**: Linux server, unchanged.
 
-**Project Type**: a source module in the shared repository, plus changes in two web services and
-one page in the family's site; a defaults document every service loads beneath its own.
+**Project Type**: a source module in the shared repository, plus changes in two web services and one page in the family's site; a defaults document every service loads beneath its own.
 
 **Performance Goals**: none.
 
-**Constraints**: no publish step (R1); the shared package is never edited in a service; the
-engine's tenant and actor resolution stays its own; the connector's webhook statuses stay as
-Apaleo expects them.
+**Constraints**: no publish step (R1); the shared package is never edited in a service; the engine's tenant and actor resolution stays its own; the connector's webhook statuses stay as Apaleo expects them.
 
-**Scale/Scope**: 6 shared classes with tests; in the engine 8 exceptions rebased, 3 classes
-removed, 1 filter's refusals rerouted, 1 test added; in the connector 4 exceptions added, 3
-classes removed, 1 test added; 1 check item; 1 site page; 1 release of the shared repository that asks the services to replace their own classes.
+**Scale/Scope**: 6 shared classes with tests; in the engine 8 exceptions rebased, 3 classes removed, 1 filter's refusals rerouted, 1 test added; in the connector 4 exceptions added, 3 classes removed, 1 test added; 1 check item; 1 site page; 1 release of the shared repository that asks the services to replace their own classes.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
@@ -120,9 +104,7 @@ guestgraph/guestgraph.github.io/
 └── problems/index.html                          # one section per slug (R3)
 ```
 
-**Structure Decision**: One package of the family's, present in every service by the sync,
-edited in one place. Each service keeps its own exceptions and its own guard where the guard is
-its own logic.
+**Structure Decision**: One package of the family's, present in every service by the sync, edited in one place. Each service keeps its own exceptions and its own guard where the guard is its own logic.
 
 ## Design Decisions Carried From Phase 0
 
@@ -140,10 +122,7 @@ its own logic.
 
 No Constitution Check violations — the table is intentionally empty.
 
-One choice worth naming: **a Maven module inside the shared repository that is never vendored
-as a module.** It exists so the shared sources compile, format and test where they are written;
-a service takes the classes, not the module, because a service is one Maven module by the
-constitution and the family has no repository to publish a second one to.
+One choice worth naming: **a Maven module inside the shared repository that is never vendored as a module.** It exists so the shared sources compile, format and test where they are written; a service takes the classes, not the module, because a service is one Maven module by the constitution and the family has no repository to publish a second one to.
 
 ## Follow-ons Not In This Slice
 

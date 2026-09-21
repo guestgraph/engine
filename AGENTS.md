@@ -15,10 +15,7 @@ The code-level rules of every guestgraph service on the Spring stack live in `se
 
 # GuestGraph — working conventions
 
-Open-source (Apache-2.0) guest identity graph. Spec-driven with spec-kit; the
-constitution at `.specify/memory/constitution.md` is non-negotiable (tenant isolation,
-immutable source records, never drop parseable data, explainable/reversible resolution,
-API-first RFC 9457, TDD on the resolution engine).
+Open-source (Apache-2.0) guest identity graph. Spec-driven with spec-kit; the constitution at `.specify/memory/constitution.md` is non-negotiable (tenant isolation, immutable source records, never drop parseable data, explainable/reversible resolution, API-first RFC 9457, TDD on the resolution engine).
 
 ## Build & verify
 
@@ -58,13 +55,7 @@ sh conventions/conventions-check                     # the prose
 
 ## Architecture in one paragraph
 
-The resolution engine (`resolution` package: `ResolutionEngine`, strategies, gates,
-operations) is pure JVM behind the `GraphPort` seam — table-driven scenario tests run it
-against `InMemoryGraph`, production wires `PostgresGraph` (JPA + MapStruct, immutable
-entities, bulk-update-only mutations). Everything is tenant-scoped; merges are recorded
-as append-only `merge_event`s with matcher name + confidence + evidence and are
-reversible (unmerge) with steward splits persisted as negative match rules. New matchers
-implement `ResolutionStrategy` — do not redesign the engine.
+The resolution engine (`resolution` package: `ResolutionEngine`, strategies, gates, operations) is pure JVM behind the `GraphPort` seam — table-driven scenario tests run it against `InMemoryGraph`, production wires `PostgresGraph` (JPA + MapStruct, immutable entities, bulk-update-only mutations). Everything is tenant-scoped; merges are recorded as append-only `merge_event`s with matcher name + confidence + evidence and are reversible (unmerge) with steward splits persisted as negative match rules. New matchers implement `ResolutionStrategy` — do not redesign the engine.
 
 ## Non-obvious pitfalls (all bitten before)
 
@@ -86,8 +77,7 @@ implement `ResolutionStrategy` — do not redesign the engine.
 
 ## Documentation ownership (prevents drift)
 
-Every fact has **one owning file**; everywhere else links to it. The ambiguity about who owns
-what is what causes drift, so the map is explicit:
+Every fact has **one owning file**; everywhere else links to it. The ambiguity about who owns what is what causes drift, so the map is explicit:
 
 | Fact | Owner |
 | --- | --- |
@@ -104,31 +94,13 @@ what is what causes drift, so the map is explicit:
 | API surface | `specs/*/contracts/openapi.yaml`, the records; served as the one generated `src/main/resources/api/openapi.yaml`, held to them by regeneration in CI |
 | Why a reader should care | `README.md` — concepts, never values |
 
-**The edit test.** Before writing a number, threshold, or algorithm name into prose, ask: *if
-this changes, how many files must I touch?* More than one → link instead of restating. This is
-why the README describes the weighted feature vector without naming a single weight.
+**The edit test.** Before writing a number, threshold, or algorithm name into prose, ask: *if this changes, how many files must I touch?* More than one → link instead of restating. This is why the README describes the weighted feature vector without naming a single weight.
 
-**Specs are frozen history.** A merged spec records what was decided *then*. Never retro-edit
-one; corrections and amendments go forward into `docs/roadmap-notes.md` or the owning doc —
-slice 3 amended R4-1 there rather than rewriting slice 2's spec. Spelling and form are the two
-exceptions: a British form brought to `conventions/WRITING.md`, and a table's padding or a blank
-line brought to the family's Markdown form, change no decision, and the conventions job reads
-merged specs and the append-only documents below like everything else.
+**Specs are frozen history.** A merged spec records what was decided *then*. Never retro-edit one; corrections and amendments go forward into `docs/roadmap-notes.md` or the owning doc — slice 3 amended R4-1 there rather than rewriting slice 2's spec. Spelling and form are the two exceptions: a British form brought to `conventions/WRITING.md`, and a table's padding or a blank line brought to the family's Markdown form, change no decision, and the conventions job reads merged specs and the append-only documents below like everything else.
 
-**Three of the six concept documents are append-only**, `docs/matching.md`, `docs/profile.md`
-and `docs/identifiers.md`, for one reason: a merge event permanently records the `matcherName`
-that decided it, a profile was computed under one survivorship rule, and a value was stored under
-one normalization rule, so old data stays interpretable only while the rule that produced it
-stays readable. Each new version gets its own section and the old one remains. The other three,
-`docs/records.md`, `docs/timeline.md` and `docs/continuity.md`, describe invariants rather than a
-rule that is superseded, so they are written forward and edited in place.
+**Three of the six concept documents are append-only**, `docs/matching.md`, `docs/profile.md` and `docs/identifiers.md`, for one reason: a merge event permanently records the `matcherName` that decided it, a profile was computed under one survivorship rule, and a value was stored under one normalization rule, so old data stays interpretable only while the rule that produced it stays readable. Each new version gets its own section and the old one remains. The other three, `docs/records.md`, `docs/timeline.md` and `docs/continuity.md`, describe invariants rather than a rule that is superseded, so they are written forward and edited in place.
 
-**A second repository links, never restates**, and that holds in both directions. The org
-profile at `guestgraph/.github` once drifted to "Core in development" while two slices had
-shipped, because it restated a roadmap living here. No CI in one repo can catch that. The two
-facts a visitor needs before opening any repository — which phases shipped, and which services
-run and what they talk to — are owned there now and linked from this README; restating either
-one here would be the same fault the other way round.
+**A second repository links, never restates**, and that holds in both directions. The org profile at `guestgraph/.github` once drifted to "Core in development" while two slices had shipped, because it restated a roadmap living here. No CI in one repo can catch that. The two facts a visitor needs before opening any repository — which phases shipped, and which services run and what they talk to — are owned there now and linked from this README; restating either one here would be the same fault the other way round.
 
 ## Process
 
@@ -138,11 +110,4 @@ one here would be the same fault the other way round.
 
 ## Checks
 
-Four jobs, all required by the ruleset on `main`: `verify`, `er-drift` and `service-conventions`
-from the vendored workflow, the last holding the vendored copy to its release and the engine to
-the list every guestgraph service meets, and `conventions`, called from robertblust/conventions
-at the pinned tag and shown by GitHub as `conventions / conventions`. The prose check leaves out `target`, build output;
-`.specify` and `.claude`, spec-kit's templates and skills, which are tooling and not this
-repository's prose; and `docs/superpowers`, whose specs quote the very words it scans for. The
-feature specs under `specs/` are this repository's own writing and are scanned. Everything
-about how to write and how to work with git is in `conventions/`.
+Four jobs, all required by the ruleset on `main`: `verify`, `er-drift` and `service-conventions` from the vendored workflow, the last holding the vendored copy to its release and the engine to the list every guestgraph service meets, and `conventions`, called from robertblust/conventions at the pinned tag and shown by GitHub as `conventions / conventions`. The prose check leaves out `target`, build output; `.specify` and `.claude`, spec-kit's templates and skills, which are tooling and not this repository's prose; and `docs/superpowers`, whose specs quote the very words it scans for. The feature specs under `specs/` are this repository's own writing and are scanned. Everything about how to write and how to work with git is in `conventions/`.

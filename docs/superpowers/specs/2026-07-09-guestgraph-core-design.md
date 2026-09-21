@@ -1,8 +1,6 @@
 # GuestGraph — Core Identity Resolution Service: Design
 
-**Date:** 2026-07-09
-**Status:** Approved
-**Scope:** Slice 1 of the GuestGraph roadmap — the OSS core service.
+**Date:** 2026-07-09 **Status:** Approved **Scope:** Slice 1 of the GuestGraph roadmap — the OSS core service.
 
 ## Vision
 

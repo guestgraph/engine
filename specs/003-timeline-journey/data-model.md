@@ -2,16 +2,13 @@
 
 **Feature**: `003-timeline-journey` | **Date**: 2026-08-21 | Migration: `V3__timeline_and_actors.sql`
 
-Strictly additive. No slice-1 or slice-2 table changes shape; every new column is nullable or
-defaulted, so existing rows and existing submitters are unaffected (SC-008).
+Strictly additive. No slice-1 or slice-2 table changes shape; every new column is nullable or defaulted, so existing rows and existing submitters are unaffected (SC-008).
 
 ---
 
 ## New table: `record_object`
 
-An optional immutable companion of `source_record`, following the pattern already set by
-`record_identifier` and `record_block_key`: derived at ingest, never updated, deleted only under
-lawful erasure.
+An optional immutable companion of `source_record`, following the pattern already set by `record_identifier` and `record_block_key`: derived at ingest, never updated, deleted only under lawful erasure.
 
 | Column | Type | Notes |
 | --- | --- | --- |
@@ -55,8 +52,7 @@ lawful erasure.
 | actor_type | text | NULL CHECK IN (`SYSTEM`, `HUMAN`, `AGENT`) — NULL means recorded before this slice; renders as unattributed (FR-015) |
 | actor_id | text | NULL — the credential's actor name, or the individual named by `X-Actor-Id` |
 
-Append-only and immutable as before. Automatic resolution always writes `SYSTEM` plus the matcher
-name already carried in `matcher_name` (FR-012).
+Append-only and immutable as before. Automatic resolution always writes `SYSTEM` plus the matcher name already carried in `matcher_name` (FR-012).
 
 ## Changed table: `negative_match_rule`
 
@@ -68,25 +64,18 @@ name already carried in `matcher_name` (FR-012).
 | lifted_actor_type | text | NULL CHECK IN (`SYSTEM`, `HUMAN`, `AGENT`) — who lifted it |
 | lifted_actor_id | text | NULL |
 
-**Rules are lifted, never deleted** (FR-016a). Both the explicit deletion endpoint and the
-automatic lift that follows confirming a match across a rule stamp `lifted_at` plus the lifting
-actor; neither removes the row. The gate predicate gains `lifted_at IS NULL`.
+**Rules are lifted, never deleted** (FR-016a). Both the explicit deletion endpoint and the automatic lift that follows confirming a match across a rule stamp `lifted_at` plus the lifting actor; neither removes the row. The gate predicate gains `lifted_at IS NULL`.
 
-This is the one place V3 is not purely additive: the existing
-`UNIQUE (tenant_id, record_a, record_b)` is replaced by a partial unique index
+This is the one place V3 is not purely additive: the existing `UNIQUE (tenant_id, record_a, record_b)` is replaced by a partial unique index
 
 ```sql
 CREATE UNIQUE INDEX negative_match_rule_active_pair_idx
     ON negative_match_rule (tenant_id, record_a, record_b) WHERE lifted_at IS NULL;
 ```
 
-so a pair that is split, lifted, and split again can carry a second rule while the lifted one
-stays readable. Safe here because nothing is released and no consumer depends on the constraint.
+so a pair that is split, lifted, and split again can carry a second rule while the lifted one stays readable. Safe here because nothing is released and no consumer depends on the constraint.
 
-Recording the lifting actor is what makes the future carve-out — an agent may not override a
-human's explicit split — a single-row comparison rather than a cross-table join (FR-016; enforced
-in a later slice). It also closes an audit gap slice 2 left open: the automatic lift on confirm
-currently deletes the rule outright, so today nothing records that a split was ever overridden.
+Recording the lifting actor is what makes the future carve-out — an agent may not override a human's explicit split — a single-row comparison rather than a cross-table join (FR-016; enforced in a later slice). It also closes an audit gap slice 2 left open: the automatic lift on confirm currently deletes the rule outright, so today nothing records that a split was ever overridden.
 
 ## Changed table: `api_key` (additive)
 
@@ -95,8 +84,7 @@ currently deletes the rule outright, so today nothing records that a split was e
 | actor_type | text | NOT NULL DEFAULT `HUMAN` CHECK IN (`HUMAN`, `AGENT`) — the trust boundary: a request can never record a type its credential does not grant (FR-014) |
 | actor_name | text | NOT NULL, backfilled once from `label`, then independent — `label` is key administration, `actor_name` is who the key acts as |
 
-Existing credentials therefore become human-operated, which is the documented assumption and
-leaves no decision unattributed.
+Existing credentials therefore become human-operated, which is the documented assumption and leaves no decision unattributed.
 
 ---
 
@@ -104,9 +92,7 @@ leaves no decision unattributed.
 
 ### Roster
 
-All `record_object` rows sharing (tenant, source system, object type, object id) at one
-`object_version`. The highest version present is the **current roster** and alone determines who is
-on the object (FR-002). Never stored — see research R1.
+All `record_object` rows sharing (tenant, source system, object type, object id) at one `object_version`. The highest version present is the **current roster** and alone determines who is on the object (FR-002). Never stored — see research R1.
 
 ### Association (timeline entry)
 
@@ -138,17 +124,13 @@ Derived per guest by `AssociationDeriver`:
 | type | the authenticated credential's `actor_type`; `SYSTEM` for engine-initiated events |
 | id | `X-Actor-Id` header when present, else the credential's `actor_name` |
 
-A request carrying `X-Actor-Type` that disagrees with its credential is refused with RFC 9457 400
-and records nothing (FR-014).
+A request carrying `X-Actor-Type` that disagrees with its credential is refused with RFC 9457 400 and records nothing (FR-014).
 
 ---
 
 ## Ingest contract additions
 
-`POST /api/v1/records` gains an optional `sourceObject` block. `externalKey` semantics are
-unchanged — it stays an opaque duplicate-detection token the service never parses (FR-001a); the
-`{objectId}:{role}:{version}` convention remains the connector-side recipe for producing a unique
-one (FR-018).
+`POST /api/v1/records` gains an optional `sourceObject` block. `externalKey` semantics are unchanged — it stays an opaque duplicate-detection token the service never parses (FR-001a); the `{objectId}:{role}:{version}` convention remains the connector-side recipe for producing a unique one (FR-018).
 
 | Field | Required within the block | Maps to |
 | --- | --- | --- |
@@ -159,8 +141,7 @@ one (FR-018).
 | version | yes | `object_version` |
 | businessStart / businessEnd | no | `business_start` / `business_end` |
 
-`recordTimestamp` MUST equal `sourceObject.version` (FR-020); a mismatch is a `needs_review` reason,
-not a rejection.
+`recordTimestamp` MUST equal `sourceObject.version` (FR-020); a mismatch is a `needs_review` reason, not a rejection.
 
 ---
 

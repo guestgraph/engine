@@ -6,66 +6,35 @@
 
 ## Summary
 
-The first connector turns an Apaleo account's reservations and bookings into observations under
-the convention slice 3 published and keeps them current: webhooks announce changes on both
-objects, a reconciliation walks the reservation list behind them, a full sync walks everything on
-request and after a gap longer than Apaleo's retry window, and a version is submitted only when a
-person on the object changed. Two objects
-because Apaleo keeps the guests on the reservation and the booker on the booking, each with its
-own clock (spec Clarifications). The connector holds the guest id the engine answers for every person and
-applies the integrator rule slice 4 defined, replacing on MERGED and raising SPLIT for a person.
-It writes nothing into Apaleo.
+The first connector turns an Apaleo account's reservations and bookings into observations under the convention slice 3 published and keeps them current: webhooks announce changes on both objects, a reconciliation walks the reservation list behind them, a full sync walks everything on request and after a gap longer than Apaleo's retry window, and a version is submitted only when a person on the object changed. Two objects because Apaleo keeps the guests on the reservation and the booker on the booking, each with its own clock (spec Clarifications). The connector holds the guest id the engine answers for every person and applies the integrator rule slice 4 defined, replacing on MERGED and raising SPLIT for a person. It writes nothing into Apaleo.
 
-Technically: a standalone Spring Boot service in `guestgraph/connector-apaleo`, on the engine's
-stack and guardrails, with a small PostgreSQL state of its own — the last submitted version and
-roster hash per reservation, processed events, sync points, runs and held guest ids. Two clients,
-one for Apaleo's Booking and Webhook APIs and one for the engine's ingest and guest endpoints; a
-mapper and a roster hash as pure functions; a worker draining the event queue; a scheduler for
-reconciliation and refresh; and an operations surface of five endpoints. The engine is asked for
-nothing new.
+Technically: a standalone Spring Boot service in `guestgraph/connector-apaleo`, on the engine's stack and guardrails, with a small PostgreSQL state of its own — the last submitted version and roster hash per reservation, processed events, sync points, runs and held guest ids. Two clients, one for Apaleo's Booking and Webhook APIs and one for the engine's ingest and guest endpoints; a mapper and a roster hash as pure functions; a worker draining the event queue; a scheduler for reconciliation and refresh; and an operations surface of five endpoints. The engine is asked for nothing new.
 
 ## Technical Context
 
 **Language/Version**: Java 25 (virtual threads / Loom), the family's stack (research R1)
 
-**Primary Dependencies**: Spring Boot 4 — web, scheduling, a `RestClient` per upstream, Actuator
-health; Spring Data JPA + Hibernate; Flyway; Jackson. Tests: JUnit 5, AssertJ, Testcontainers,
-WireMock. No library the engine does not already carry except WireMock.
+**Primary Dependencies**: Spring Boot 4 — web, scheduling, a `RestClient` per upstream, Actuator health; Spring Data JPA + Hibernate; Flyway; Jackson. Tests: JUnit 5, AssertJ, Testcontainers, WireMock. No library the engine does not already carry except WireMock.
 
-**Storage**: PostgreSQL, one schema of its own — `apaleo_connector` — reached as one role,
-migration `V1__connector_state.sql` per [data-model.md](data-model.md); shared with the engine's
-database or separate, as the deployment decides. All of it a cache; loss costs a full sync.
+**Storage**: PostgreSQL, one schema of its own — `apaleo_connector` — reached as one role, migration `V1__connector_state.sql` per [data-model.md](data-model.md); shared with the engine's database or separate, as the deployment decides. All of it a cache; loss costs a full sync.
 
-**Testing**: Pure-JVM unit tests for the mapper and the roster hash on recorded Apaleo documents;
-Testcontainers integration tests with WireMock for both upstreams; one end-to-end walk by hand
-against a local engine and an Apaleo sandbox (research R10). ArchUnit, PMD and Spotless as in the
-engine.
+**Testing**: Pure-JVM unit tests for the mapper and the roster hash on recorded Apaleo documents; Testcontainers integration tests with WireMock for both upstreams; one end-to-end walk by hand against a local engine and an Apaleo sandbox (research R10). ArchUnit, PMD and Spotless as in the engine.
 
-**Target Platform**: Linux server, one instance serving many connections, each an engine tenant
-paired with an Apaleo account, reachable over HTTPS by Apaleo for the webhook (research R12)
+**Target Platform**: Linux server, one instance serving many connections, each an engine tenant paired with an Apaleo account, reachable over HTTPS by Apaleo for the webhook (research R12)
 
 **Project Type**: Web service — single Maven module, in a new repository
 
-**Performance Goals**: SC-001, a 10,000-reservation account in under an hour: 20 pages of 500,
-some 15,000 records in batches of 100, against the engine's 30–100 records per second per tenant.
-SC-003, a person change visible within two minutes, with Apaleo's one-minute delivery.
+**Performance Goals**: SC-001, a 10,000-reservation account in under an hour: 20 pages of 500, some 15,000 records in batches of 100, against the engine's 30–100 records per second per tenant. SC-003, a person change visible within two minutes, with Apaleo's one-minute delivery.
 
-**Constraints**: Every row and every query carries the connection, enforced by ArchUnit; secrets
-in configuration, never in the database (FR-015, FR-015a). Every key derived from Apaleo's state
-(FR-002). No person data and no credential in any log, status or error (FR-016). Never
-drop an event or a reservation (FR-006, FR-011). Never give up a sync on rate limiting (FR-017).
+**Constraints**: Every row and every query carries the connection, enforced by ArchUnit; secrets in configuration, never in the database (FR-015, FR-015a). Every key derived from Apaleo's state (FR-002). No person data and no credential in any log, status or error (FR-016). Never drop an event or a reservation (FR-006, FR-011). Never give up a sync on rate limiting (FR-017).
 
-**Scale/Scope**: 1 new repository; 2 source object types; 6 tables; 2 upstream clients, one
-instance each per connection; 1 webhook endpoint; 5 operations endpoints; 2 scheduled runs per
-connection; 0 engine changes.
+**Scale/Scope**: 1 new repository; 2 source object types; 6 tables; 2 upstream clients, one instance each per connection; 1 webhook endpoint; 5 operations endpoints; 2 scheduled runs per connection; 0 engine changes.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
-The constitution governs the engine. The connector is a client of it and is held to the
-principles as they reach a client.
+The constitution governs the engine. The connector is a client of it and is held to the principles as they reach a client.
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
@@ -164,12 +133,7 @@ src/test/java/io/guestgraph/connector/apaleo/
 └── architecture/PersistenceRulesTest.java    # @Query-only repositories, JPA confined to state
 ```
 
-**Structure Decision**: One module, packages by upstream and by run. The two pure functions the
-connector's correctness depends on, the mapper and the hash, take no Spring and no JPA so they
-are tested on documents alone; the clients, the runs and the endpoints are thin around them. The
-engine's contract is copied as three small records in `engine/model`, not generated from its
-OpenAPI, so a change in the engine's contract is a visible edit here rather than a silent
-regeneration.
+**Structure Decision**: One module, packages by upstream and by run. The two pure functions the connector's correctness depends on, the mapper and the hash, take no Spring and no JPA so they are tested on documents alone; the clients, the runs and the endpoints are thin around them. The engine's contract is copied as three small records in `engine/model`, not generated from its OpenAPI, so a change in the engine's contract is a visible edit here rather than a silent regeneration.
 
 ## Design Decisions Carried From Phase 0
 

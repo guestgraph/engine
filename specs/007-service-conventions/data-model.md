@@ -2,15 +2,13 @@
 
 **Feature**: `007-service-conventions` | **Date**: 2026-09-11 | Migration: none
 
-No table changes in either service. The model is files: what the shared repository holds, what a
-service vendors, the pin that binds them, and the list the check reads.
+No table changes in either service. The model is files: what the shared repository holds, what a service vendors, the pin that binds them, and the list the check reads.
 
 ---
 
 ## The shared repository
 
-`guestgraph/service-conventions`, a member of the family: it vendors `conventions/` like every
-member and its own Markdown is held by the prose check.
+`guestgraph/service-conventions`, a member of the family: it vendors `conventions/` like every member and its own Markdown is held by the prose check.
 
 | Path | Purpose |
 | --- | --- |
@@ -27,8 +25,7 @@ member and its own Markdown is held by the prose check.
 | `tests/` | fixtures and a runner for the two scripts |
 | `README.md`, `AGENTS.md`, `conventions/`, `conventions.json` | as every member has them |
 
-Releases are tags with notes in the prose register; a change to any file under `service-conventions/` is at
-least a minor release, a change that asks a service to do more than re-sync is a major.
+Releases are tags with notes in the prose register; a change to any file under `service-conventions/` is at least a minor release, a change that asks a service to do more than re-sync is a major.
 
 ## What a service holds
 
@@ -45,12 +42,7 @@ least a minor release, a change that asks a service to do more than re-sync is a
 | `application.yaml` | the service's own | the properties the list names |
 | `README.md` | the service's own | the sections the list names |
 
-The pin's fields: `repo` and `tag` name the release, as `conventions.json` does; `stack` names the
-directory vendored, `spring` for both services today; `root` is the
-service's package root, `io.guestgraph.` followed by the repository's name with hyphens as dots;
-`scope` is the parameter every repository method carries, `tenantId` in the engine, `connectionId`
-in the connector; `schema` is the database schema the diagram is drawn from, the same value
-`DATABASE_SCHEMA` defaults to.
+The pin's fields: `repo` and `tag` name the release, as `conventions.json` does; `stack` names the directory vendored, `spring` for both services today; `root` is the service's package root, `io.guestgraph.` followed by the repository's name with hyphens as dots; `scope` is the parameter every repository method carries, `tenantId` in the engine, `connectionId` in the connector; `schema` is the database schema the diagram is drawn from, the same value `DATABASE_SCHEMA` defaults to.
 
 ## The list
 

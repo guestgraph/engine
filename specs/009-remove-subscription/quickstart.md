@@ -2,13 +2,11 @@
 
 **Feature**: 009-remove-subscription
 
-**Contract**: [contracts/connector-subscription.yaml](contracts/connector-subscription.yaml) ·
-**Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
+**Contract**: [contracts/connector-subscription.yaml](contracts/connector-subscription.yaml) · **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
 
 ## Prerequisites
 
-JDK 25, Docker and `./mvnw` in the connector. The walk needs an Apaleo test account, a
-connections file naming it, and a tunnel, as slice 5's quickstart does; the suites need neither.
+JDK 25, Docker and `./mvnw` in the connector. The walk needs an Apaleo test account, a connections file naming it, and a tunnel, as slice 5's quickstart does; the suites need neither.
 
 ## Run the test suites (primary validation)
 

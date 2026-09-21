@@ -1,8 +1,6 @@
 # Specification Quality Checklist: Shared Runtime Code
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-09-11
-**Feature**: [spec.md](../spec.md)
+**Purpose**: Validate specification completeness and quality before proceeding to planning **Created**: 2026-09-11 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 

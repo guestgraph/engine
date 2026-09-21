@@ -7,13 +7,9 @@ description: "Task list for 006-engine-schema"
 
 **Input**: Design documents from `/specs/006-engine-schema/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
-[data-model.md](data-model.md)
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md)
 
-**Tests**: One test task, and it comes first. No engine logic changes, so Constitution Principle
-VI does not compel it; it is written first anyway because it is the whole proof of the slice —
-it fails against `public` and passes against `engine`. The task marked ⚠ MUST be written and seen
-failing before the properties that make it pass.
+**Tests**: One test task, and it comes first. No engine logic changes, so Constitution Principle VI does not compel it; it is written first anyway because it is the whole proof of the slice — it fails against `public` and passes against `engine`. The task marked ⚠ MUST be written and seen failing before the properties that make it pass.
 
 **Organization**: Grouped by user story so each is independently implementable and testable.
 
@@ -25,8 +21,7 @@ failing before the properties that make it pass.
 
 ## Path Conventions
 
-Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under
-`src/test/java/io/guestgraph/`, resources under `src/main/resources/`.
+Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under `src/test/java/io/guestgraph/`, resources under `src/main/resources/`.
 
 ---
 
@@ -44,11 +39,9 @@ Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under
 
 ## Phase 3: User Story 1 - One Database or Two Is the Deployment's Choice (Priority: P1) 🎯 MVP
 
-**Goal**: Every engine object lives in the `engine` schema, reached as a role that owns it; a
-second role in the same database cannot read a single engine table; the API is unchanged.
+**Goal**: Every engine object lives in the `engine` schema, reached as a role that owns it; a second role in the same database cannot read a single engine table; the API is unchanged.
 
-**Independent Test**: Start the engine against an empty database; verify every table sits in
-`engine` and none in `public`, and that a second role owning another schema is refused on each.
+**Independent Test**: Start the engine against an empty database; verify every table sits in `engine` and none in `public`, and that a second role owning another schema is refused on each.
 
 ### Tests for User Story 1 ⚠
 
@@ -68,8 +61,7 @@ second role in the same database cannot read a single engine table; the API is u
 
 **Goal**: The full suite passes unchanged and the ER drift gate stays green after the move.
 
-**Independent Test**: `./mvnw verify` green with no assertion changed; `./scripts/regen-er.sh`
-produces no diff.
+**Independent Test**: `./mvnw verify` green with no assertion changed; `./scripts/regen-er.sh` produces no diff.
 
 ### Implementation for User Story 2
 

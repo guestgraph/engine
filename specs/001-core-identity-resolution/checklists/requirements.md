@@ -1,8 +1,6 @@
 # Specification Quality Checklist: Core Identity Resolution Service
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-07-09
-**Feature**: [spec.md](../spec.md)
+**Purpose**: Validate specification completeness and quality before proceeding to planning **Created**: 2026-07-09 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 

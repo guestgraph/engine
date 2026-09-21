@@ -2,43 +2,28 @@
 
 **Feature**: `005-apaleo-connector` | **Date**: 2026-09-10 | Migration: `V1__connector_state.sql` in `guestgraph/connector-apaleo`
 
-The connector's own state, all of it a cache of Apaleo's and the engine's facts (spec assumptions).
-Nothing here is a source record; the engine holds those. One instance serves many connections,
-and every table carries `connection_id` as the first column of its primary key or as a NOT NULL
-column with an index; every repository method takes a `connectionId` parameter, and an ArchUnit
-rule refuses one that does not, the way the engine's refuses a query without a tenant (FR-015).
+The connector's own state, all of it a cache of Apaleo's and the engine's facts (spec assumptions). Nothing here is a source record; the engine holds those. One instance serves many connections, and every table carries `connection_id` as the first column of its primary key or as a NOT NULL column with an index; every repository method takes a `connectionId` parameter, and an ArchUnit rule refuses one that does not, the way the engine's refuses a query without a tenant (FR-015).
 
 ---
 
 ## One schema, one role
 
-The connector owns one PostgreSQL schema, `apaleo_connector` by default, and nothing outside it.
-Flyway creates the schema and keeps its history table inside it, the connection pins its search
-path to it, and no migration or query names a schema. That is what makes the database topology a
-deployment choice rather than a design one: the connector's schema can sit in the engine's
-database or in one of its own, with the same build and the same configuration keys.
+The connector owns one PostgreSQL schema, `apaleo_connector` by default, and nothing outside it. Flyway creates the schema and keeps its history table inside it, the connection pins its search path to it, and no migration or query names a schema. That is what makes the database topology a deployment choice rather than a design one: the connector's schema can sit in the engine's database or in one of its own, with the same build and the same configuration keys.
 
-The connector connects as a role that owns its schema and has no privilege on any other. In a
-shared database that role cannot read `guest` or `source_record`, which enforces what the design
-already says: the connector is a client of the engine's API, never of its tables. The code cannot
-create that role; the deployment does, and the README says how:
+The connector connects as a role that owns its schema and has no privilege on any other. In a shared database that role cannot read `guest` or `source_record`, which enforces what the design already says: the connector is a client of the engine's API, never of its tables. The code cannot create that role; the deployment does, and the README says how:
 
 ```sql
 create role apaleo_connector login password '…';
 create schema apaleo_connector authorization apaleo_connector;
 ```
 
-The engine's side of the same rule — its own schema and role, in place of `public` — is a change
-of its own in the engine repository, recorded in the roadmap.
+The engine's side of the same rule — its own schema and role, in place of `public` — is a change of its own in the engine repository, recorded in the roadmap.
 
 ---
 
 ## `connection`
 
-One row per configured connection, written from configuration at start and updated when the
-configuration changes; the secrets themselves never enter the table (FR-015a). The row exists so
-that every other table can reference a stable id and so the status can list connections that have
-not run yet.
+One row per configured connection, written from configuration at start and updated when the configuration changes; the secrets themselves never enter the table (FR-015a). The row exists so that every other table can reference a stable id and so the status can list connections that have not run yet.
 
 | Column | Type | Notes |
 | --- | --- | --- |
@@ -52,8 +37,7 @@ not run yet.
 
 ## `object_state`
 
-The last version the connector submitted for a reservation or a booking, and the hash that
-decides whether the next one is submitted (research R4).
+The last version the connector submitted for a reservation or a booking, and the hash that decides whether the next one is submitted (research R4).
 
 | Column | Type | Notes |
 | --- | --- | --- |
@@ -67,10 +51,7 @@ decides whether the next one is submitted (research R4).
 | last_submitted_at | timestamptz | NOT NULL |
 | last_status | text | NULL — a reservation's status on the last submitted version, for the status report only |
 
-A fetched object is submitted when no row exists or the computed hash differs from
-`roster_hash`; the row is then replaced. A version whose `modified` is older than `last_modified`
-is still submitted when its hash differs — the engine orders versions, not the connector — and
-does not move `last_modified` backwards.
+A fetched object is submitted when no row exists or the computed hash differs from `roster_hash`; the row is then replaced. A version whose `modified` is older than `last_modified` is still submitted when its hash differs — the engine orders versions, not the connector — and does not move `last_modified` backwards.
 
 ## `processed_event`
 
@@ -90,8 +71,7 @@ Every webhook delivery, by Apaleo's event id, so the second delivery is a no-op 
 | next_attempt_at | timestamptz | NULL — set while `PENDING` after a failure |
 | last_error | text | NULL — the reason, never a payload |
 
-`IGNORED` records an event for a property the connection does not serve. `FAILED` is never
-final: a failed event stays retryable and the status counts it as pending retry (FR-011).
+`IGNORED` records an event for a property the connection does not serve. `FAILED` is never final: a failed event stays retryable and the status counts it as pending retry (FR-011).
 
 ## `sync_point`
 
@@ -127,8 +107,7 @@ One row per full sync or reconciliation, for the status and for `GET /runs/{id}`
 
 ## `held_guest_id`
 
-The guest each person on the latest submitted version resolved to, and its refresh outcome
-(research R8, FR-018, FR-019).
+The guest each person on the latest submitted version resolved to, and its refresh outcome (research R8, FR-018, FR-019).
 
 | Column | Type | Notes |
 | --- | --- | --- |
@@ -143,9 +122,7 @@ The guest each person on the latest submitted version resolved to, and its refre
 | current_guest_ids | jsonb | NOT NULL DEFAULT '[]' — filled on `SPLIT` and `RETIRED`, for a person to resolve |
 | refreshed_at | timestamptz | NULL |
 
-The primary key is the object and slot, so a reassigned reservation or a corrected booker
-overwrites the slot with the new person's guest (spec US4 scenario 5). A `SPLIT` row is never resolved by the connector;
-it waits for a person, and the status counts it.
+The primary key is the object and slot, so a reassigned reservation or a corrected booker overwrites the slot with the new person's guest (spec US4 scenario 5). A `SPLIT` row is never resolved by the connector; it waits for a person, and the status counts it.
 
 ---
 
@@ -181,8 +158,7 @@ it waits for a person, and the status counts it.
 
 ## Configuration
 
-Read from the environment or a mounted file; none of it is logged, and none of the secrets
-reaches the database (FR-015a).
+Read from the environment or a mounted file; none of it is logged, and none of the secrets reaches the database (FR-015a).
 
 Per instance:
 

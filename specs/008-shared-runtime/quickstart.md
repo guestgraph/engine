@@ -1,12 +1,10 @@
 # Quickstart & Validation: Shared Runtime Code
 
-**Feature**: 008-shared-runtime
-**Contract**: [contracts/shared-runtime.md](contracts/shared-runtime.md) · **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
+**Feature**: 008-shared-runtime **Contract**: [contracts/shared-runtime.md](contracts/shared-runtime.md) · **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
 
 ## Prerequisites
 
-JDK 25, Docker, `./mvnw` in both services; four checkouts: the engine, the connector,
-`guestgraph/service-conventions` and `guestgraph/guestgraph.github.io`.
+JDK 25, Docker, `./mvnw` in both services; four checkouts: the engine, the connector, `guestgraph/service-conventions` and `guestgraph/guestgraph.github.io`.
 
 ## Run the test suites (primary validation)
 
@@ -55,8 +53,7 @@ sh conventions/conventions-check
 
 ## Walked
 
-Sep 11, 2026, with service-conventions at v0.8.0, the engine at 234 tests and the connector at
-82, both green.
+Sep 11, 2026, with service-conventions at v0.8.0, the engine at 234 tests and the connector at 82, both green.
 
 1. Every origin, one shape: `ErrorShapeTest` in each service provokes the five refusals and
    reads the shape; the engine's framework case, a body that is not JSON, answers

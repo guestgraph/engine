@@ -2,8 +2,7 @@
 
 **Feature**: `007-service-conventions` | **Date**: 2026-09-11
 
-This slice exposes no HTTP surface of its own. Its contract is what a service commits and what
-two scripts answer, so that a service written by anyone passes or fails for the same reasons.
+This slice exposes no HTTP surface of its own. Its contract is what a service commits and what two scripts answer, so that a service written by anyone passes or fails for the same reasons.
 
 ## `service-conventions.json`
 
@@ -33,9 +32,7 @@ Beside the documents the service serves, one entry per file, naming where it com
   "probe-api.yaml": "own" }
 ```
 
-A local path is a file in the same repository, a copy of a frozen record; `owner/repo@commit:path`
-is a file in another repository at that commit, fetched and compared; `own` is a document written
-here and nowhere else. Every `.yaml` under the folder is listed, or the check fails.
+A local path is a file in the same repository, a copy of a frozen record; `owner/repo@commit:path` is a file in another repository at that commit, fetched and compared; `own` is a document written here and nowhere else. Every `.yaml` under the folder is listed, or the check fails.
 
 ## `sh service-conventions/service-conventions-sync sync | check`
 
@@ -76,8 +73,7 @@ Exit 0 with no output when nothing is missing; 1 otherwise. The items, in the or
 
 ## Workflow
 
-`service-conventions/verify.yml`, written into `.github/workflows/verify.yml`, carries three jobs, and every
-service's ruleset requires them by these ids beside `conventions / conventions`:
+`service-conventions/verify.yml`, written into `.github/workflows/verify.yml`, carries three jobs, and every service's ruleset requires them by these ids beside `conventions / conventions`:
 
 | Job | Runs |
 | --- | --- |
@@ -87,8 +83,4 @@ service's ruleset requires them by these ids beside `conventions / conventions`:
 
 ## `new-service <stack> <name>`
 
-In the shared repository: writes a skeleton for `guestgraph/<name>` of that stack into a directory: the pin
-with `root` derived from the name, the vendored files, a `pom.xml` naming the parent, one
-`api` package with the API document controller, the size filter and a health-exposing
-`application.yaml`, a first migration, a README with the required sections and the agent file.
-The output passes both checks and `./mvnw verify` on its first run.
+In the shared repository: writes a skeleton for `guestgraph/<name>` of that stack into a directory: the pin with `root` derived from the name, the vendored files, a `pom.xml` naming the parent, one `api` package with the API document controller, the size filter and a health-exposing `application.yaml`, a first migration, a README with the required sections and the agent file. The output passes both checks and `./mvnw verify` on its first run.

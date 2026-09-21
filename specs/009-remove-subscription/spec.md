@@ -12,19 +12,11 @@
 
 ### User Story 1 - Tear a connection down without leaving a subscription behind (Priority: P1)
 
-An operator is finishing a sandbox session, decommissioning a connection, or taking down the
-tunnel that made the connector reachable. Before stopping anything, they ask the connector to
-remove that connection's subscription. The connector deletes it in the source system and reports
-that it is gone. Nothing is left posting to an address that will stop answering, and the operator
-did not have to hold the connection's credentials themselves to do it.
+An operator is finishing a sandbox session, decommissioning a connection, or taking down the tunnel that made the connector reachable. Before stopping anything, they ask the connector to remove that connection's subscription. The connector deletes it in the source system and reports that it is gone. Nothing is left posting to an address that will stop answering, and the operator did not have to hold the connection's credentials themselves to do it.
 
-**Why this priority**: It is the whole feature. Every other story here is a refinement of the
-same act, and without this one an operator has to reach for the source system's own API with
-credentials the connector already holds, which is what happens today.
+**Why this priority**: It is the whole feature. Every other story here is a refinement of the same act, and without this one an operator has to reach for the source system's own API with credentials the connector already holds, which is what happens today.
 
-**Independent Test**: With a subscription in place for a connection, ask the connector to remove
-it. Read the connector's status and confirm the connection reports no subscription; ask the
-source system directly and confirm none exists for that endpoint.
+**Independent Test**: With a subscription in place for a connection, ask the connector to remove it. Read the connector's status and confirm the connection reports no subscription; ask the source system directly and confirm none exists for that endpoint.
 
 **Acceptance Scenarios**:
 
@@ -43,16 +35,11 @@ source system directly and confirm none exists for that endpoint.
 
 ### User Story 2 - Know that a removal happened, and by whom (Priority: P2)
 
-An operator who removed a subscription, or a second operator arriving afterwards, needs to see
-that the connection is deliberately without one rather than broken. The connector's status says
-so, and the removal is in the log with the actor that asked for it.
+An operator who removed a subscription, or a second operator arriving afterwards, needs to see that the connection is deliberately without one rather than broken. The connector's status says so, and the removal is in the log with the actor that asked for it.
 
-**Why this priority**: A connection with no subscription looks identical to a connection whose
-subscription failed to create. Without this, the next person cannot tell a teardown from a fault,
-and the connector's own reconciliation would be the only thing that ever noticed.
+**Why this priority**: A connection with no subscription looks identical to a connection whose subscription failed to create. Without this, the next person cannot tell a teardown from a fault, and the connector's own reconciliation would be the only thing that ever noticed.
 
-**Independent Test**: Remove a subscription, then read the status and the log. The status
-distinguishes "removed on request" from "never created"; the log names the connection and the act.
+**Independent Test**: Remove a subscription, then read the status and the log. The status distinguishes "removed on request" from "never created"; the log names the connection and the act.
 
 **Acceptance Scenarios**:
 
@@ -65,17 +52,11 @@ distinguishes "removed on request" from "never created"; the log names the conne
 
 ### User Story 3 - A removal is not undone by the connector's own housekeeping (Priority: P2)
 
-The connector creates a subscription at start and confirms it during every reconciliation. An
-operator who removes one expects it to stay removed for as long as the connector runs, rather
-than reappearing at the next reconciliation a few minutes later.
+The connector creates a subscription at start and confirms it during every reconciliation. An operator who removes one expects it to stay removed for as long as the connector runs, rather than reappearing at the next reconciliation a few minutes later.
 
-**Why this priority**: Without it the feature is a fifteen-minute pause rather than a removal,
-and an operator tearing a tunnel down would be surprised by traffic resuming. It is separable
-from story 1 because a removal that survives until the next restart is already useful for the
-sandbox case that prompted this.
+**Why this priority**: Without it the feature is a fifteen-minute pause rather than a removal, and an operator tearing a tunnel down would be surprised by traffic resuming. It is separable from story 1 because a removal that survives until the next restart is already useful for the sandbox case that prompted this.
 
-**Independent Test**: Remove a subscription, then trigger a reconciliation. The subscription is
-still absent and the reconciliation reports success rather than recreating it.
+**Independent Test**: Remove a subscription, then trigger a reconciliation. The subscription is still absent and the reconciliation reports success rather than recreating it.
 
 **Acceptance Scenarios**:
 

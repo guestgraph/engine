@@ -17,9 +17,7 @@ Content-Type: application/problem+json
   "instance": "/api/v1/guests/3f2b…" }
 ```
 
-Named members follow when a problem has them, never under the names RFC 9457 owns. The
-framework's own problems, validation and unparseable bodies and unknown paths, carry the same
-members without the family's `type`.
+Named members follow when a problem has them, never under the names RFC 9457 owns. The framework's own problems, validation and unparseable bodies and unknown paths, carry the same members without the family's `type`.
 
 ## `io.guestgraph.service`
 
@@ -81,9 +79,7 @@ A service's own `application.yaml` sets `service.schema` and nothing the default
 
 ## The sync
 
-`service-conventions-sync` vendors the runtime's classes into
-`src/main/java/io/guestgraph/service/` and its two resources into `src/main/resources/`, and
-`check` names any that differs, as for every other vendored file.
+`service-conventions-sync` vendors the runtime's classes into `src/main/java/io/guestgraph/service/` and its two resources into `src/main/resources/`, and `check` names any that differs, as for every other vendored file.
 
 ## `service-conventions-check`
 
@@ -101,11 +97,8 @@ Failure lines name the file: `✗ service-conventions: error-shape: <path> throw
 
 ## The problems page
 
-`https://guestgraph.io/problems/`, one section per slug with the anchor of the slug, saying
-what the problem means and what a caller does. The slugs in the data model are the page's
-sections; a new slug is added to the page before a service answers it.
+`https://guestgraph.io/problems/`, one section per slug with the anchor of the slug, saying what the problem means and what a caller does. The slugs in the data model are the page's sections; a new slug is added to the page before a service answers it.
 
 ## `new-service`
 
-The scaffold vendors the shared package through the sync, writes `service.max-request-bytes` and
-no `api` classes of its own beyond what a feature adds, and passes the check on its first run.
+The scaffold vendors the shared package through the sync, writes `service.max-request-bytes` and no `api` classes of its own beyond what a feature adds, and passes the check on its first run.

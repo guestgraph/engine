@@ -9,13 +9,9 @@ description: "Task list for feature 001-core-identity-resolution"
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/openapi.yaml, quickstart.md
 
-**Tests**: INCLUDED — constitution Principle VI mandates TDD for the resolution engine
-(failing scenario tests before implementation) and the workflow gates require integration
-tests for every API endpoint. Test-first tasks are marked ⚠ and MUST be completed (and seen
-failing) before their implementation tasks.
+**Tests**: INCLUDED — constitution Principle VI mandates TDD for the resolution engine (failing scenario tests before implementation) and the workflow gates require integration tests for every API endpoint. Test-first tasks are marked ⚠ and MUST be completed (and seen failing) before their implementation tasks.
 
-**Organization**: Tasks are grouped by user story so each story is an independently testable
-increment.
+**Organization**: Tasks are grouped by user story so each story is an independently testable increment.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -36,8 +32,7 @@ increment.
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Schema, domain types, tenancy/auth, error contract, test harness — everything
-every story depends on
+**Purpose**: Schema, domain types, tenancy/auth, error contract, test harness — everything every story depends on
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
@@ -55,12 +50,9 @@ every story depends on
 
 ## Phase 3: User Story 1 - Ingest Records and Resolve Identities (Priority: P1) 🎯 MVP
 
-**Goal**: Register source systems, ingest records (immutably, never dropping parseable data),
-resolve deterministically on normalized strong identifiers with transitive merging, record
-MergeEvents with matcher name + confidence.
+**Goal**: Register source systems, ingest records (immutably, never dropping parseable data), resolve deterministically on normalized strong identifiers with transitive merging, record MergeEvents with matcher name + confidence.
 
-**Independent Test**: Register a source system, ingest records with overlapping identifiers,
-verify the expected number of distinct guests and correct record attachment (spec US1).
+**Independent Test**: Register a source system, ingest records with overlapping identifiers, verify the expected number of distinct guests and correct record attachment (spec US1).
 
 ### Tests for User Story 1 (TDD — write first, see them FAIL) ⚠
 
@@ -85,11 +77,9 @@ verify the expected number of distinct guests and correct record attachment (spe
 
 ## Phase 4: User Story 2 - Query Golden Profiles and Look Up Guests (Priority: P2)
 
-**Goal**: Read the resolved graph: golden profile + identifiers, verbatim source records,
-lookup by normalized identifier.
+**Goal**: Read the resolved graph: golden profile + identifiers, verbatim source records, lookup by normalized identifier.
 
-**Independent Test**: After ingesting records for a known guest, fetch profile/identifiers/
-records; look up by email and phone in unnormalized form and get the same guest (spec US2).
+**Independent Test**: After ingesting records for a known guest, fetch profile/identifiers/ records; look up by email and phone in unnormalized form and get the same guest (spec US2).
 
 ### Implementation for User Story 2
 
@@ -103,11 +93,9 @@ records; look up by email and phone in unnormalized form and get the same guest 
 
 ## Phase 5: User Story 3 - Explain and Reverse a Merge (Priority: P3)
 
-**Goal**: Full merge-decision chain per guest; unmerge detaches records, records an UNMERGE
-event with exclusions, replays resolution; originals untouched.
+**Goal**: Full merge-decision chain per guest; unmerge detaches records, records an UNMERGE event with exclusions, replays resolution; originals untouched.
 
-**Independent Test**: Trigger a merge, verify explain returns the complete chain; unmerge and
-verify records regroup correctly and the wrong merge is not silently recreated (spec US3).
+**Independent Test**: Trigger a merge, verify explain returns the complete chain; unmerge and verify records regroup correctly and the wrong merge is not silently recreated (spec US3).
 
 ### Tests for User Story 3 (TDD — write first, see them FAIL) ⚠
 
@@ -125,11 +113,9 @@ verify records regroup correctly and the wrong merge is not silently recreated (
 
 ## Phase 6: User Story 4 - Review Uncertain Matches (Priority: P4)
 
-**Goal**: Over-threshold identifier sharing parks candidate matches in a review queue;
-stewards confirm (merge executes, recorded) or reject (records stay separate) exactly once.
+**Goal**: Over-threshold identifier sharing parks candidate matches in a review queue; stewards confirm (merge executes, recorded) or reject (records stay separate) exactly once.
 
-**Independent Test**: With a low threshold, ingest past it, verify no auto-merge and a
-PENDING review; confirm one and reject another, verify outcomes (spec US4).
+**Independent Test**: With a low threshold, ingest past it, verify no auto-merge and a PENDING review; confirm one and reject another, verify outcomes (spec US4).
 
 ### Tests for User Story 4 (TDD — write first, see them FAIL) ⚠
 
@@ -184,9 +170,6 @@ PENDING review; confirm one and reject another, verify outcomes (spec US4).
 
 ## Implementation Strategy
 
-**MVP first**: Phases 1–3 (T001–T022) deliver the P1 story — records in, resolved guests out,
-audit trail recorded. Stop, run `./mvnw verify`, validate independently, demo.
+**MVP first**: Phases 1–3 (T001–T022) deliver the P1 story — records in, resolved guests out, audit trail recorded. Stop, run `./mvnw verify`, validate independently, demo.
 
-**Incremental delivery**: add US2 (readable graph — first full business value), then US3
-(safety machinery), then US4 (review queue). Each checkpoint is independently testable via
-its integration suite; commit after each task or logical group.
+**Incremental delivery**: add US2 (readable graph — first full business value), then US3 (safety machinery), then US4 (review queue). Each checkpoint is independently testable via its integration suite; commit after each task or logical group.

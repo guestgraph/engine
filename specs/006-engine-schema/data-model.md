@@ -2,8 +2,7 @@
 
 **Feature**: `006-engine-schema` | **Date**: 2026-09-10 | Migration: none
 
-No table, column, index or constraint changes. The move is where the existing objects live and
-who may see them.
+No table, column, index or constraint changes. The move is where the existing objects live and who may see them.
 
 ---
 
@@ -34,16 +33,11 @@ The schema name is one configuration value:
 
 ## Deployment guidance, the paragraph the README carries
 
-The engine creates every table in one schema, `engine` by default, and connects as a role that
-owns that schema and nothing else, so that a second service in the same database — the Apaleo
-connector, say — cannot read the engine's tables, and so that one database or two is the
-deployment's choice. Before the first start:
+The engine creates every table in one schema, `engine` by default, and connects as a role that owns that schema and nothing else, so that a second service in the same database — the Apaleo connector, say — cannot read the engine's tables, and so that one database or two is the deployment's choice. Before the first start:
 
 ```sql
 create role engine login password '…';
 create schema engine authorization engine;
 ```
 
-Point the engine at the database as that role. To use another schema name, set
-`DATABASE_SCHEMA`. If the schema is left for the engine to create, the role needs `CREATE` on the
-database for the first start only.
+Point the engine at the database as that role. To use another schema name, set `DATABASE_SCHEMA`. If the schema is left for the engine to create, the role needs `CREATE` on the database for the first start only.

@@ -15,38 +15,19 @@ Guest data in hospitality is scattered — PMS, POS, booking engines, loyalty pr
 
 ## How matching decides
 
-Identity resolution is a **layered confidence model**. Each layer decides only what it is
-entitled to decide and hands the rest upward, and every layer's decisions are explainable and
-reversible:
+Identity resolution is a **layered confidence model**. Each layer decides only what it is entitled to decide and hands the rest upward, and every layer's decisions are explainable and reversible:
 
 1. **Deterministic identifiers** — a shared email, phone, loyalty id, or ID document merges at full confidence
 2. **Probabilistic scoring** — merges only above a threshold the tenant chose; otherwise it queues for a human
 3. **A human steward** — the final word, and their splits stick: an unmerge writes a persistent do-not-merge rule that new evidence cannot silently cross
 
-Probabilistic matching works in two stages, because they need different kinds of answer.
-**Blocking** finds candidates that share no identifier at all — a database index can only answer
-*equal*, so name phonetics collapse spelling variants onto one key. **Scoring** then grades each
-candidate on a weighted feature vector — name, birthdate, phone, email, address — damped when
-few signals were observed and heavily penalized when birthdates conflict, because different
-birthdates are evidence of *different people* and that outweighs a strong name match.
+Probabilistic matching works in two stages, because they need different kinds of answer. **Blocking** finds candidates that share no identifier at all — a database index can only answer *equal*, so name phonetics collapse spelling variants onto one key. **Scoring** then grades each candidate on a weighted feature vector — name, birthdate, phone, email, address — damped when few signals were observed and heavily penalized when birthdates conflict, because different birthdates are evidence of *different people* and that outweighs a strong name match.
 
-**Automatic fuzzy merging ships off.** Out of the box no fuzzy score can reach the auto-merge
-threshold, so probabilistic matching is a suggestion engine: it surfaces the duplicates exact
-matching cannot see, shows a per-signal breakdown of why, and a human decides. Lowering the
-threshold is an explicit act of trust — and reversible.
+**Automatic fuzzy merging ships off.** Out of the box no fuzzy score can reach the auto-merge threshold, so probabilistic matching is a suggestion engine: it surfaces the duplicates exact matching cannot see, shows a per-signal breakdown of why, and a human decides. Lowering the threshold is an explicit act of trust — and reversible.
 
-Every value behind this — blocking keys, weights, thresholds, band semantics, worked examples,
-and the known recall limits — is in [`docs/matching.md`](docs/matching.md), which is the single
-place they are defined.
+Every value behind this — blocking keys, weights, thresholds, band semantics, worked examples, and the known recall limits — is in [`docs/matching.md`](docs/matching.md), which is the single place they are defined.
 
-Matching is one of six concepts with a reference document of its own, each answering the question
-a reader arrives with and each the single place its subject is defined: what makes an identifier
-strong enough to merge on ([`docs/identifiers.md`](docs/identifiers.md)), how two records become
-one person ([`docs/matching.md`](docs/matching.md)), where each field in a guest's profile came
-from ([`docs/profile.md`](docs/profile.md)), why a guest has several records of the same person
-([`docs/records.md`](docs/records.md)), why a timeline is shorter than the records behind it
-([`docs/timeline.md`](docs/timeline.md)), and what happens to a guest id you stored when guests
-merge ([`docs/continuity.md`](docs/continuity.md)).
+Matching is one of six concepts with a reference document of its own, each answering the question a reader arrives with and each the single place its subject is defined: what makes an identifier strong enough to merge on ([`docs/identifiers.md`](docs/identifiers.md)), how two records become one person ([`docs/matching.md`](docs/matching.md)), where each field in a guest's profile came from ([`docs/profile.md`](docs/profile.md)), why a guest has several records of the same person ([`docs/records.md`](docs/records.md)), why a timeline is shorter than the records behind it ([`docs/timeline.md`](docs/timeline.md)), and what happens to a guest id you stored when guests merge ([`docs/continuity.md`](docs/continuity.md)).
 
 ## How it fits together
 
@@ -96,29 +77,11 @@ curl -s -X POST localhost:8080/api/v1/records \
   -d '{"sourceSystem":"opera-pms","externalKey":"r-1","payload":{"firstName":"Anna","email":"anna@example.com"}}'
 ```
 
-API surface (`/api/v1`, per-tenant `X-API-Key`, errors are RFC 9457 problem details whose `type`
-leads to the section of [guestgraph.io/problems](https://guestgraph.io/problems/) that says what
-to do):
-`POST /source-systems` · `POST /records` · `GET /guests/{id}` · `GET /guests/{id}/records` ·
-`GET /guests/{id}/explain` · `POST /guests/{id}/unmerge` · `GET /guests?identifier=…` ·
-`GET /guests/{id}/timeline` · `GET /source-objects/{system}/{type}/{id}` ·
-`GET /match-reviews` · `POST /match-reviews/{id}` · `GET|PUT /config/matching` ·
-`GET|POST|DELETE /config/identifier-rules` · `GET|DELETE /negative-rules` — contracts in
-[`specs/001-core-identity-resolution/contracts/`](specs/001-core-identity-resolution/contracts/openapi.yaml),
-[`specs/002-probabilistic-matching/contracts/`](specs/002-probabilistic-matching/contracts/openapi.yaml)
-[`specs/003-timeline-journey/contracts/`](specs/003-timeline-journey/contracts/openapi.yaml)
-and [`specs/004-retired-guest-ids/contracts/`](specs/004-retired-guest-ids/contracts/openapi.yaml),
-walkthroughs in the matching `quickstart.md` files. A guest id survives merges: reading an id a
-merge absorbed or an unmerge emptied answers with the guest or guests that hold the person now,
-never a bare not-found, so other systems can store it as their reference. A running instance serves the
-complete merged document at `GET /api-docs` (no API key required), served from the one
-`src/main/resources/api/openapi.yaml` that `sh service-conventions/regen-api` generates from them
-and CI holds against a fresh generation.
+API surface (`/api/v1`, per-tenant `X-API-Key`, errors are RFC 9457 problem details whose `type` leads to the section of [guestgraph.io/problems](https://guestgraph.io/problems/) that says what to do): `POST /source-systems` · `POST /records` · `GET /guests/{id}` · `GET /guests/{id}/records` · `GET /guests/{id}/explain` · `POST /guests/{id}/unmerge` · `GET /guests?identifier=…` · `GET /guests/{id}/timeline` · `GET /source-objects/{system}/{type}/{id}` · `GET /match-reviews` · `POST /match-reviews/{id}` · `GET|PUT /config/matching` · `GET|POST|DELETE /config/identifier-rules` · `GET|DELETE /negative-rules` — contracts in [`specs/001-core-identity-resolution/contracts/`](specs/001-core-identity-resolution/contracts/openapi.yaml), [`specs/002-probabilistic-matching/contracts/`](specs/002-probabilistic-matching/contracts/openapi.yaml) [`specs/003-timeline-journey/contracts/`](specs/003-timeline-journey/contracts/openapi.yaml) and [`specs/004-retired-guest-ids/contracts/`](specs/004-retired-guest-ids/contracts/openapi.yaml), walkthroughs in the matching `quickstart.md` files. A guest id survives merges: reading an id a merge absorbed or an unmerge emptied answers with the guest or guests that hold the person now, never a bare not-found, so other systems can store it as their reference. A running instance serves the complete merged document at `GET /api-docs` (no API key required), served from the one `src/main/resources/api/openapi.yaml` that `sh service-conventions/regen-api` generates from them and CI holds against a fresh generation.
 
 ### Submitting mutable, multi-person source objects
 
-A PMS reservation is mutable, carries several people, and its webhooks retry. To make such
-observations order correctly, connectors follow one convention:
+A PMS reservation is mutable, carries several people, and its webhooks retry. To make such observations order correctly, connectors follow one convention:
 
 - **One observation per person per object version.** A three-person reservation version emits
   three records; `sourceObject.role` (plus `position` for indexed roles) distinguishes them so no
@@ -137,9 +100,7 @@ observations order correctly, connectors follow one convention:
   documented top-level person fields) so it never becomes a guest identifier. A persistent
   non-personal identifier on a reassigned reservation would transitively merge different people.
 
-Persons are never matched across versions — the newest version's roster simply *is* who is on the
-object. That is what lets sources with entity-less persons be handled without guessing, and why
-removing one of two additional guests does not report the other as their replacement.
+Persons are never matched across versions — the newest version's roster simply *is* who is on the object. That is what lets sources with entity-less persons be handled without guessing, and why removing one of two additional guests does not report the other as their replacement.
 
 ## Developing
 
@@ -150,39 +111,20 @@ sh service-conventions/regen-er      # regenerate docs/er-schema.mmd after schem
 sh service-conventions/service-conventions-check   # what of the list every guestgraph service has this one lacks
 ```
 
-Code conventions (imports over inline FQNs, guardrail layout, known pitfalls) are
-documented in [`AGENTS.md`](AGENTS.md), vendored from
-[service-conventions](https://github.com/guestgraph/service-conventions) with every other
-guestgraph service and held by the `service-conventions` job, and enforced by PMD (`service-conventions/pmd-ruleset.xml`),
-Spotless, and ArchUnit in `verify`.
+Code conventions (imports over inline FQNs, guardrail layout, known pitfalls) are documented in [`AGENTS.md`](AGENTS.md), vendored from [service-conventions](https://github.com/guestgraph/service-conventions) with every other guestgraph service and held by the `service-conventions` job, and enforced by PMD (`service-conventions/pmd-ruleset.xml`), Spotless, and ArchUnit in `verify`.
 
-Note for Eclipse/Spring Tools users: point the IDE build output away from `target/classes`
-(e.g. `bin/`), or stale IDE-compiled classes can break `./mvnw verify` with
-`NoClassDefFoundError` until a `./mvnw clean`.
+Note for Eclipse/Spring Tools users: point the IDE build output away from `target/classes` (e.g. `bin/`), or stale IDE-compiled classes can break `./mvnw verify` with `NoClassDefFoundError` until a `./mvnw clean`.
 
-The engine creates every table in one schema, `engine` by default, and connects as a role
-that owns that schema and nothing else, so that a second service in the same database — the
-Apaleo connector, say — cannot read the engine's tables, and so that one database or two is
-the deployment's choice. Before the first start:
+The engine creates every table in one schema, `engine` by default, and connects as a role that owns that schema and nothing else, so that a second service in the same database — the Apaleo connector, say — cannot read the engine's tables, and so that one database or two is the deployment's choice. Before the first start:
 
 ```sql
 create role engine login password '…';
 create schema engine authorization engine;
 ```
 
-Point the engine at the database as that role, through `SPRING_DATASOURCE_URL`,
-`SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD`. To use another schema name, set
-`DATABASE_SCHEMA`. If the schema is left for the engine to create, the role needs `CREATE` on
-the database for the first start only. No migration, query or mapping names the schema; the
-connection carries it, which is what lets one build run in a shared database and in a dedicated
-one.
+Point the engine at the database as that role, through `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD`. To use another schema name, set `DATABASE_SCHEMA`. If the schema is left for the engine to create, the role needs `CREATE` on the database for the first start only. No migration, query or mapping names the schema; the connection carries it, which is what lets one build run in a shared database and in a dedicated one.
 
-Until the first release, `V1__core_schema.sql` may still be edited in place; if your local
-dev database reports a Flyway checksum mismatch, recreate it with `docker compose down -v`.
-The same applies to a local database from before the engine moved into its own schema: its
-tables sit in `public`, and the engine would create a second, empty set in `engine` beside
-them rather than fail, so drop the volume. From the first tagged release on, migrations are
-additive-only.
+Until the first release, `V1__core_schema.sql` may still be edited in place; if your local dev database reports a Flyway checksum mismatch, recreate it with `docker compose down -v`. The same applies to a local database from before the engine moved into its own schema: its tables sit in `public`, and the engine would create a second, empty set in `engine` beside them rather than fail, so drop the volume. From the first tagged release on, migrations are additive-only.
 
 ## Design principles
 
@@ -193,11 +135,7 @@ additive-only.
 
 ## Roadmap
 
-Which phases have shipped and which come next is on the organization profile at
-[github.com/guestgraph](https://github.com/guestgraph), beside the diagram of what runs, because
-that is the page a reader sees before choosing a repository. The requirements captured for later
-slices, which each `/speckit-specify` run consumes, are in
-[`docs/roadmap-notes.md`](docs/roadmap-notes.md).
+Which phases have shipped and which come next is on the organization profile at [github.com/guestgraph](https://github.com/guestgraph), beside the diagram of what runs, because that is the page a reader sees before choosing a repository. The requirements captured for later slices, which each `/speckit-specify` run consumes, are in [`docs/roadmap-notes.md`](docs/roadmap-notes.md).
 
 ## License
 

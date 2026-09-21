@@ -6,62 +6,35 @@
 
 ## Summary
 
-Source business objects — reservations first — become **associations** on resolved guests, so the
-graph can answer "what does this guest currently have", not only "what did we ever observe about
-them". The unit of supersession is the object *version*: the newest version's complete person
-roster determines who is on a booking, and persons are never matched from one version to the next.
-That choice (spec Clarifications, and research R3) is what makes the Apaleo case — entity-less
-persons with no id to follow across edits — answerable rather than merely tolerated; it also makes
-guest *removal* detectable, which no positional-slot scheme handles honestly.
+Source business objects — reservations first — become **associations** on resolved guests, so the graph can answer "what does this guest currently have", not only "what did we ever observe about them". The unit of supersession is the object *version*: the newest version's complete person roster determines who is on a booking, and persons are never matched from one version to the next. That choice (spec Clarifications, and research R3) is what makes the Apaleo case — entity-less persons with no id to follow across edits — answerable rather than merely tolerated; it also makes guest *removal* detectable, which no positional-slot scheme handles honestly.
 
-Technically: one additive migration adds `record_object`, an optional immutable companion of
-`source_record` following the `record_identifier` / `record_block_key` precedent, plus actor
-columns on `merge_event`, `negative_match_rule`, and `api_key`. Associations are **derived on
-read** — two tenant-scoped JPQL queries feed a pure-JVM `AssociationDeriver`, so the subtle rules
-(current vs ended, successor naming, dedup, ordering) are unit-testable without a database and
-FR-010's recomputability is structural rather than maintained. Actor identity threads through as an
-explicit parameter on the steward operations; the engine always records `SYSTEM`, so automatic
-resolution has no path to being attributed to a person. Do-not-merge rules are lifted rather than
-deleted, so the actor who overrides a split is recorded next to the one who made it.
+Technically: one additive migration adds `record_object`, an optional immutable companion of `source_record` following the `record_identifier` / `record_block_key` precedent, plus actor columns on `merge_event`, `negative_match_rule`, and `api_key`. Associations are **derived on read** — two tenant-scoped JPQL queries feed a pure-JVM `AssociationDeriver`, so the subtle rules (current vs ended, successor naming, dedup, ordering) are unit-testable without a database and FR-010's recomputability is structural rather than maintained. Actor identity threads through as an explicit parameter on the steward operations; the engine always records `SYSTEM`, so automatic resolution has no path to being attributed to a person. Do-not-merge rules are lifted rather than deleted, so the actor who overrides a split is recorded next to the one who made it.
 
 ## Technical Context
 
 **Language/Version**: Java 25 (virtual threads / Loom), unchanged
 
-**Primary Dependencies**: Spring Boot 4, Spring Data JPA + Hibernate, MapStruct, Flyway. No new
-dependencies — the slice needs no library the repository does not already carry.
+**Primary Dependencies**: Spring Boot 4, Spring Data JPA + Hibernate, MapStruct, Flyway. No new dependencies — the slice needs no library the repository does not already carry.
 
-**Storage**: PostgreSQL. Migration `V3__timeline_and_actors.sql` — additive except for replacing
-`negative_match_rule`'s pair uniqueness constraint with a partial index over active rules
-(research R8); no slice-1/2 table loses a column or changes a type.
+**Storage**: PostgreSQL. Migration `V3__timeline_and_actors.sql` — additive except for replacing `negative_match_rule`'s pair uniqueness constraint with a partial index over active rules (research R8); no slice-1/2 table loses a column or changes a type.
 
-**Testing**: JUnit 5 + AssertJ; pure-JVM scenario tests for the deriver; Testcontainers-backed
-integration tests; ArchUnit (`PersistenceRulesTest`); the existing `OpenApiConformanceTest`
-auto-enrols this slice's contract because it unions every `specs/*/contracts/openapi.yaml`.
+**Testing**: JUnit 5 + AssertJ; pure-JVM scenario tests for the deriver; Testcontainers-backed integration tests; ArchUnit (`PersistenceRulesTest`); the existing `OpenApiConformanceTest` auto-enrols this slice's contract because it unions every `specs/*/contracts/openapi.yaml`.
 
 **Target Platform**: Linux server (single Spring Boot service), unchanged
 
 **Project Type**: Web service — single Maven module
 
-**Performance Goals**: SC-006 — first timeline page under 1 s for a guest holding 500
-associations. Sizing behind the read-derived design: ~2,500 observation rows for such a guest,
-fetched by two indexed queries (research R1).
+**Performance Goals**: SC-006 — first timeline page under 1 s for a guest holding 500 associations. Sizing behind the read-derived design: ~2,500 observation rows for such a guest, fetched by two indexed queries (research R1).
 
-**Constraints**: Every query tenant-scoped (Constitution I). `record_object` rows are insert-only.
-No `JdbcClient` outside `TenantLock` / `LocalDevSeeder` — the ArchUnit allowlist stands, so all new
-reads are `@Query` repository methods. JPA stays confined to `io.guestgraph.persistence`.
+**Constraints**: Every query tenant-scoped (Constitution I). `record_object` rows are insert-only. No `JdbcClient` outside `TenantLock` / `LocalDevSeeder` — the ArchUnit allowlist stands, so all new reads are `@Query` repository methods. JPA stays confined to `io.guestgraph.persistence`.
 
-**Scale/Scope**: 2 new endpoints, 1 new table, 4 altered tables, 1 new package
-(`io.guestgraph.timeline`), additive fields on ingest and on three existing responses, and a
-paging migration of the two existing offset-paged endpoints (research R9).
+**Scale/Scope**: 2 new endpoints, 1 new table, 4 altered tables, 1 new package (`io.guestgraph.timeline`), additive fields on ingest and on three existing responses, and a paging migration of the two existing offset-paged endpoints (research R9).
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
-**Initial evaluation — PASS.** **Post-design re-evaluation — PASS** (no design element changed a
-verdict; notes below reflect the final design).
+**Initial evaluation — PASS.** **Post-design re-evaluation — PASS** (no design element changed a verdict; notes below reflect the final design).
 
 - [x] **Tenant isolation (I)**: `record_object` carries `tenant_id`; both timeline queries and the
       source-object query are tenant-scoped, as is the actor read. No cross-tenant path is
@@ -181,12 +154,7 @@ specs/001-core-identity-resolution/contracts/openapi.yaml  # /match-reviews offs
 specs/002-probabilistic-matching/contracts/openapi.yaml    # /negative-rules offset → cursor (R9)
 ```
 
-**Structure Decision**: Single Maven module, unchanged. One new package `io.guestgraph.timeline`
-holding the derivation rules as pure JVM code with no Spring or JPA dependency — the same
-separation the resolution engine already has behind `GraphPort`, and what makes the deriver
-testable on fixtures. Persistence and API additions follow the existing package layout exactly;
-the ArchUnit rules (`@Query`-only repositories, tenant-scoped methods, JPA confined to
-`persistence`, `JdbcClient` allowlist) constrain the new code with no rule changes.
+**Structure Decision**: Single Maven module, unchanged. One new package `io.guestgraph.timeline` holding the derivation rules as pure JVM code with no Spring or JPA dependency — the same separation the resolution engine already has behind `GraphPort`, and what makes the deriver testable on fixtures. Persistence and API additions follow the existing package layout exactly; the ArchUnit rules (`@Query`-only repositories, tenant-scoped methods, JPA confined to `persistence`, `JdbcClient` allowlist) constrain the new code with no rule changes.
 
 ## Design Decisions Carried From Phase 0
 
