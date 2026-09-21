@@ -1,7 +1,6 @@
 # Quickstart & Validation: Core Identity Resolution Service
 
-**Feature**: 001-core-identity-resolution
-**Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) · **Model**: [data-model.md](data-model.md)
+**Feature**: 001-core-identity-resolution **Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) · **Model**: [data-model.md](data-model.md)
 
 ## Prerequisites
 
@@ -32,8 +31,7 @@ Dev seed (local profile only) provisions tenant `demo` with API key `demo-key`.
 
 ## End-to-end smoke walk (maps to the spec's user stories)
 
-Set once: `H='-H "X-API-Key: demo-key" -H "Content-Type: application/json"'` — base URL
-`http://localhost:8080/api/v1`.
+Set once: `H='-H "X-API-Key: demo-key" -H "Content-Type: application/json"'` — base URL `http://localhost:8080/api/v1`.
 
 1. **US1 — register + ingest + resolve**
 

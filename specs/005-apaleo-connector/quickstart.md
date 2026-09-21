@@ -1,23 +1,14 @@
 # Quickstart & Validation: Apaleo Connector
 
-**Feature**: 005-apaleo-connector
-**Contracts**: [contracts/mapping.md](contracts/mapping.md) (what is sent), [contracts/connector-api.yaml](contracts/connector-api.yaml) (the connector's own surface)
-**Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
+**Feature**: 005-apaleo-connector **Contracts**: [contracts/mapping.md](contracts/mapping.md) (what is sent), [contracts/connector-api.yaml](contracts/connector-api.yaml) (the connector's own surface) **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
 
-The connector lives in `guestgraph/connector-apaleo`; the commands below run there. The engine
-runs from this repository as in earlier quickstarts.
+The connector lives in `guestgraph/connector-apaleo`; the commands below run there. The engine runs from this repository as in earlier quickstarts.
 
 ## Prerequisites
 
-JDK 25, Docker, `./mvnw`. An Apaleo sandbox account with a client-credentials client granted
-`reservations.read`, and a way to reach the connector over HTTPS from Apaleo for the webhook
-walk — a tunnel is enough for a sandbox. An engine running locally with the demo tenant, and an
-API key registered as agent-operated and named `connector-apaleo`.
+JDK 25, Docker, `./mvnw`. An Apaleo sandbox account with a client-credentials client granted `reservations.read`, and a way to reach the connector over HTTPS from Apaleo for the webhook walk — a tunnel is enough for a sandbox. An engine running locally with the demo tenant, and an API key registered as agent-operated and named `connector-apaleo`.
 
-Configuration is the two tables at the end of [data-model.md](data-model.md): the instance's
-variables and a connections file with one entry for the sandbox account, named `sandbox`. Nothing
-in it is ever printed. `$C` is the connector, `$T` its ops token, and every operation below runs
-under `/connections/sandbox`.
+Configuration is the two tables at the end of [data-model.md](data-model.md): the instance's variables and a connections file with one entry for the sandbox account, named `sandbox`. Nothing in it is ever printed. `$C` is the connector, `$T` its ops token, and every operation below runs under `/connections/sandbox`.
 
 ## Run the test suite (primary validation)
 

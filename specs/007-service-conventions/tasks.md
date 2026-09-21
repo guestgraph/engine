@@ -7,19 +7,11 @@ description: "Task list for 007-service-conventions"
 
 **Input**: Design documents from `/specs/007-service-conventions/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
-[data-model.md](data-model.md), [contracts/service-conventions.md](contracts/service-conventions.md),
-[quickstart.md](quickstart.md)
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/service-conventions.md](contracts/service-conventions.md), [quickstart.md](quickstart.md)
 
-**Tests**: Test tasks are included and are not optional here. No engine logic changes, so
-Constitution Principle VI does not compel them; the plan schedules them because the slice's
-correctness lives in two shell scripts that fixtures can pin, and in four service items that only
-an integration test proves. Tasks marked ⚠ MUST be written and seen failing before the
-implementation task that follows them.
+**Tests**: Test tasks are included and are not optional here. No engine logic changes, so Constitution Principle VI does not compel them; the plan schedules them because the slice's correctness lives in two shell scripts that fixtures can pin, and in four service items that only an integration test proves. Tasks marked ⚠ MUST be written and seen failing before the implementation task that follows them.
 
-**Organization**: Grouped by user story so each is independently implementable and testable.
-The engine adopts before the connector (research R7), and each service's package move is the
-first change in that service (R5).
+**Organization**: Grouped by user story so each is independently implementable and testable. The engine adopts before the connector (research R7), and each service's package move is the first change in that service (R5).
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -30,11 +22,7 @@ first change in that service (R5).
 
 ## Path Conventions
 
-Paths starting with `shared/` are in `guestgraph/service-conventions`, a new repository, with
-`shared/` standing for its root; paths starting with `engine/` are in this repository; paths
-starting with `connector/` are in `guestgraph/connector-apaleo`; paths starting with
-`conventions/` are in `robertblust/conventions`. Every other path is relative to the repository
-the task names.
+Paths starting with `shared/` are in `guestgraph/service-conventions`, a new repository, with `shared/` standing for its root; paths starting with `engine/` are in this repository; paths starting with `connector/` are in `guestgraph/connector-apaleo`; paths starting with `conventions/` are in `robertblust/conventions`. Every other path is relative to the repository the task names.
 
 ---
 
@@ -51,8 +39,7 @@ the task names.
 
 ## Phase 2: Foundational (the package moves)
 
-**Purpose**: Both services carry their final package layout before any shared file names a root
-or a package, so nothing later is written against a name that then changes (research R5).
+**Purpose**: Both services carry their final package layout before any shared file names a root or a package, so nothing later is written against a name that then changes (research R5).
 
 **⚠️ CRITICAL**: No user story work in a service can begin until that service's move has landed.
 
@@ -65,11 +52,9 @@ or a package, so nothing later is written against a name that then changes (rese
 
 ## Phase 3: User Story 1 - One Rule, One Place, Every Service (Priority: P1) 🎯 MVP
 
-**Goal**: The shared files exist once, each service vendors them at a pin, and a copy that
-differs from its pin fails a check naming the file.
+**Goal**: The shared files exist once, each service vendors them at a pin, and a copy that differs from its pin fails a check naming the file.
 
-**Independent Test**: Change a shared file, release, move one service's pin and re-sync: the diff
-is the pin and the file. Edit one character of a vendored file: the check fails naming it.
+**Independent Test**: Change a shared file, release, move one service's pin and re-sync: the diff is the pin and the file. Edit one character of a vendored file: the check fails naming it.
 
 ### Tests for User Story 1 ⚠
 
@@ -95,11 +80,9 @@ is the pin and the file. Edit one character of a vendored file: the check fails 
 
 ## Phase 4: User Story 2 - The Shape Every Service Has (Priority: P2)
 
-**Goal**: The service check reads each service against the list and names what is missing, and
-both services pass it, which closes the six gaps.
+**Goal**: The service check reads each service against the list and names what is missing, and both services pass it, which closes the six gaps.
 
-**Independent Test**: The check reports nothing for either service; removing one item from one
-service fails it naming the item.
+**Independent Test**: The check reports nothing for either service; removing one item from one service fails it naming the item.
 
 ### Tests for User Story 2 ⚠
 
@@ -124,11 +107,9 @@ service fails it naming the item.
 
 ## Phase 5: User Story 3 - The Next Service Starts From the Rules (Priority: P3)
 
-**Goal**: A new service scaffolded from the shared repository passes both checks on its first
-run, and the family and each service's agent file name the shared rules.
+**Goal**: A new service scaffolded from the shared repository passes both checks on its first run, and the family and each service's agent file name the shared rules.
 
-**Independent Test**: Scaffold a throwaway service; its checks and its build pass; the
-repository list and the agent files name the shared repository.
+**Independent Test**: Scaffold a throwaway service; its checks and its build pass; the repository list and the agent files name the shared repository.
 
 ### Tests for User Story 3 ⚠
 
@@ -166,8 +147,7 @@ repository list and the agent files name the shared repository.
 
 ### Within Each User Story
 
-Tests ⚠ before the implementation they pin. The shared repository is released before a service
-moves its pin to the release.
+Tests ⚠ before the implementation they pin. The shared repository is released before a service moves its pin to the release.
 
 ### Parallel Opportunities
 
@@ -181,15 +161,11 @@ moves its pin to the release.
 
 ### MVP First (User Story 1 Only)
 
-Phases 1 to 3: the repository, both package moves, the shared files vendored in both services
-with the sync check. The list exists as prose in `SERVICE.md`, and the mechanism is proven by a
-drift that fails.
+Phases 1 to 3: the repository, both package moves, the shared files vendored in both services with the sync check. The list exists as prose in `SERVICE.md`, and the mechanism is proven by a drift that fails.
 
 ### Incremental Delivery
 
-Phase 4 turns the list into a check and closes the six gaps, two pull requests per service.
-Phase 5 adds the scaffold and the agent files. The shared repository is released three times,
-`v0.1.0`, `v0.2.0`, `v0.3.0`, and each service moves its pin twice.
+Phase 4 turns the list into a check and closes the six gaps, two pull requests per service. Phase 5 adds the scaffold and the agent files. The shared repository is released three times, `v0.1.0`, `v0.2.0`, `v0.3.0`, and each service moves its pin twice.
 
 ## Notes
 

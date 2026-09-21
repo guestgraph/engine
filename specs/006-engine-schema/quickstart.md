@@ -1,13 +1,10 @@
 # Quickstart & Validation: The Engine Owns One Schema
 
-**Feature**: 006-engine-schema
-**Contracts**: none change (FR-004) · **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
+**Feature**: 006-engine-schema **Contracts**: none change (FR-004) · **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
 
 ## Prerequisites
 
-As slices 1–5: JDK 25, Docker, `./mvnw`. A local volume from before this slice holds its tables
-in `public`; drop it with `docker compose down -v` before the first start after the move, as the
-README now says.
+As slices 1–5: JDK 25, Docker, `./mvnw`. A local volume from before this slice holds its tables in `public`; drop it with `docker compose down -v` before the first start after the move, as the README now says.
 
 ## Run the test suite (primary validation)
 

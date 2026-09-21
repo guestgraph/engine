@@ -6,27 +6,17 @@
 
 ## Summary
 
-The connector gains two acts on one thing: an operator can take a connection's Apaleo
-subscription away and put it back, through the operations surface and behind the token that
-guards the rest of it. Removal deletes the subscription whose endpoint is this connection's and
-nothing else in the account, and it is a statement of the end state, so asking twice succeeds.
-The subscription's state stops being a boolean and becomes four named states, so that a
-deployment deliberately without one no longer looks like a deployment whose subscription failed.
-No table changes, no migration, and nothing about how a subscription is created.
+The connector gains two acts on one thing: an operator can take a connection's Apaleo subscription away and put it back, through the operations surface and behind the token that guards the rest of it. Removal deletes the subscription whose endpoint is this connection's and nothing else in the account, and it is a statement of the end state, so asking twice succeeds. The subscription's state stops being a boolean and becomes four named states, so that a deployment deliberately without one no longer looks like a deployment whose subscription failed. No table changes, no migration, and nothing about how a subscription is created.
 
 ## Technical Context
 
-**Language/Version**: Java 25 in the connector, unchanged. The spec and its contract are prose
-and YAML in the engine.
+**Language/Version**: Java 25 in the connector, unchanged. The spec and its contract are prose and YAML in the engine.
 
-**Primary Dependencies**: none new. The webhook client gains a delete against the endpoint it
-already talks to.
+**Primary Dependencies**: none new. The webhook client gains a delete against the endpoint it already talks to.
 
-**Storage**: none. The intended state lives in memory beside the rest of the subscription's
-status, and a restart loses it on purpose (research R2).
+**Storage**: none. The intended state lives in memory beside the rest of the subscription's status, and a restart loses it on purpose (research R2).
 
-**Testing**: the connector's integration suite against its WireMock Apaleo stub, which already
-models the subscription endpoints; a sandbox walk for what a stub cannot prove.
+**Testing**: the connector's integration suite against its WireMock Apaleo stub, which already models the subscription endpoints; a sandbox walk for what a stub cannot prove.
 
 **Target Platform**: unchanged.
 
@@ -34,17 +24,13 @@ models the subscription endpoints; a sandbox walk for what a stub cannot prove.
 
 **Performance Goals**: none. Two operator-initiated calls, one Apaleo request each.
 
-**Constraints**: slice 5's contract is frozen, so the new paths get their own file and the
-connector lists both as sources (R4 of slice 7 established that shape). The connector's served
-document is generated and held against the pins by CI.
+**Constraints**: slice 5's contract is frozen, so the new paths get their own file and the connector lists both as sources (R4 of slice 7 established that shape). The connector's served document is generated and held against the pins by CI.
 
-**Scale/Scope**: 2 paths, 1 new contract file, 1 enum, 1 delete on the webhook client, 2
-controller methods, 1 status field, 6 integration tests, 3 documents.
+**Scale/Scope**: 2 paths, 1 new contract file, 1 enum, 1 delete on the webhook client, 2 controller methods, 1 status field, 6 integration tests, 3 documents.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
@@ -102,9 +88,7 @@ guestgraph/engine/
 └── docs/roadmap-notes.md                        # the deferral recorded, then consumed
 ```
 
-**Structure Decision**: the connector keeps its shape. The spec, the contract and the roadmap
-line live in the engine, where every slice's decisions live and where the connector's own
-contract already is.
+**Structure Decision**: the connector keeps its shape. The spec, the contract and the roadmap line live in the engine, where every slice's decisions live and where the connector's own contract already is.
 
 ## Design Decisions Carried From Phase 0
 
@@ -121,12 +105,7 @@ contract already is.
 
 No Constitution Check violations — the table is intentionally empty.
 
-One choice worth naming. **The intended state is deliberately not persisted**, which means the
-connector can be in a state its configuration does not describe, until it restarts. The
-alternative, a column, was rejected because a subscription removed in a sandbox session would
-otherwise still be absent months later while the connector looked healthy. The cost is that an
-operator who removes and then redeploys gets a subscription back; research R2 says so and the
-README says so where they will look.
+One choice worth naming. **The intended state is deliberately not persisted**, which means the connector can be in a state its configuration does not describe, until it restarts. The alternative, a column, was rejected because a subscription removed in a sandbox session would otherwise still be absent months later while the connector looked healthy. The cost is that an operator who removes and then redeploys gets a subscription back; research R2 says so and the README says so where they will look.
 
 ## Follow-ons Not In This Slice
 

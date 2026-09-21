@@ -7,14 +7,9 @@ description: "Task list for 004-retired-guest-ids"
 
 **Input**: Design documents from `/specs/004-retired-guest-ids/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
-[data-model.md](data-model.md), [contracts/openapi.yaml](contracts/openapi.yaml)
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/openapi.yaml](contracts/openapi.yaml)
 
-**Tests**: Test tasks are included and are not optional here. Constitution Principle VI makes TDD
-mandatory for engine work, and `GuestIdResolver` lives in the `resolution` package behind
-`GraphPort`: its rules — latest-candidate retirement, successors per kind, outcome-based status,
-dedup across branches — are where the subtle bugs live. Tasks marked ⚠ MUST be written and seen
-failing before the implementation task that follows them.
+**Tests**: Test tasks are included and are not optional here. Constitution Principle VI makes TDD mandatory for engine work, and `GuestIdResolver` lives in the `resolution` package behind `GraphPort`: its rules — latest-candidate retirement, successors per kind, outcome-based status, dedup across branches — are where the subtle bugs live. Tasks marked ⚠ MUST be written and seen failing before the implementation task that follows them.
 
 **Organization**: Grouped by user story so each is independently implementable and testable.
 
@@ -26,8 +21,7 @@ failing before the implementation task that follows them.
 
 ## Path Conventions
 
-Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under
-`src/test/java/io/guestgraph/`, migrations under `src/main/resources/db/migration/`.
+Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under `src/test/java/io/guestgraph/`, migrations under `src/main/resources/db/migration/`.
 
 ---
 
@@ -59,13 +53,9 @@ Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under
 
 ## Phase 3: User Story 1 - A Stored Guest Id Never Goes Dark (Priority: P1) 🎯 MVP
 
-**Goal**: A guest id absorbed by a merge answers 200 with the surviving guest and the time of the
-merge; an active guest answers as before plus `status: ACTIVE`; an unknown or cross-tenant id
-answers 404 as today.
+**Goal**: A guest id absorbed by a merge answers 200 with the surviving guest and the time of the merge; an active guest answers as before plus `status: ACTIVE`; an unknown or cross-tenant id answers 404 as today.
 
-**Independent Test**: Ingest two records that resolve separately, then one carrying both
-identifiers. Read the absorbed id and verify it names the survivor, the merge event and its time;
-read the survivor and verify the guest document is unchanged but for `status`.
+**Independent Test**: Ingest two records that resolve separately, then one carrying both identifiers. Read the absorbed id and verify it names the survivor, the merge event and its time; read the survivor and verify the guest document is unchanged but for `status`.
 
 ### Tests for User Story 1 ⚠
 
@@ -86,11 +76,9 @@ read the survivor and verify the guest document is unchanged but for `status`.
 
 ## Phase 4: User Story 2 - Chains Are Followed to the End (Priority: P2)
 
-**Goal**: A resolution follows retirements transitively to active guests and lists every hop in
-order; a guest reached by two paths is named once.
+**Goal**: A resolution follows retirements transitively to active guests and lists every hop in order; a guest reached by two paths is named once.
 
-**Independent Test**: Merge X into Y, then Y into Z. Read X and verify the current guest is Z with
-two hops in order; read Y and verify one hop.
+**Independent Test**: Merge X into Y, then Y into Z. Read X and verify the current guest is Z with two hops in order; read Y and verify one hop.
 
 ### Tests for User Story 2 ⚠
 
@@ -107,13 +95,9 @@ two hops in order; read Y and verify one hop.
 
 ## Phase 5: User Story 3 - A Split Guest Resolves to Every Guest It Became (Priority: P3)
 
-**Goal**: A guest emptied by an unmerge resolves to every guest its records landed on, each
-followed through later merges; a partial unmerge leaves the guest active; a walk that ends
-nowhere reports `RETIRED` rather than inventing a guest.
+**Goal**: A guest emptied by an unmerge resolves to every guest its records landed on, each followed through later merges; a partial unmerge leaves the guest active; a walk that ends nowhere reports `RETIRED` rather than inventing a guest.
 
-**Independent Test**: Build a guest from three records, unmerge all three so they land on two
-guests. Read the original id and verify both are named; merge one of them into a third guest and
-verify the answer follows it.
+**Independent Test**: Build a guest from three records, unmerge all three so they land on two guests. Read the original id and verify both are named; merge one of them into a third guest and verify the answer follows it.
 
 ### Tests for User Story 3 ⚠
 
@@ -130,11 +114,9 @@ verify the answer follows it.
 
 ## Phase 6: User Story 4 - Everything Under a Retired Id Points to the Current One (Priority: P4)
 
-**Goal**: Records, explain, timeline and unmerge on a retired id answer 410 problem details of type
-`guest-retired` naming the current guests; on an unknown id they answer the plain 404 of today.
+**Goal**: Records, explain, timeline and unmerge on a retired id answer 410 problem details of type `guest-retired` naming the current guests; on an unknown id they answer the plain 404 of today.
 
-**Independent Test**: Merge X into Y, then request X's records, timeline and explain and attempt
-an unmerge on X; verify each is 410 naming Y and that nothing was recorded.
+**Independent Test**: Merge X into Y, then request X's records, timeline and explain and attempt an unmerge on X; verify each is 410 naming Y and that nothing was recorded.
 
 ### Tests for User Story 4 ⚠
 

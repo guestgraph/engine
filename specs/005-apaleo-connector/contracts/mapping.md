@@ -2,21 +2,13 @@
 
 **Feature**: `005-apaleo-connector` | **Date**: 2026-09-10
 
-What the connector sends for one version of one Apaleo object. Stated once here, implemented by
-the mapper, pinned by unit tests on recorded documents. The engine side is the ingest contract of
-slice 1 with the source-object block of slice 3.
+What the connector sends for one version of one Apaleo object. Stated once here, implemented by the mapper, pinned by unit tests on recorded documents. The engine side is the ingest contract of slice 1 with the source-object block of slice 3.
 
 ## Two objects, two clocks
 
-Apaleo keeps persons on two objects. A **reservation** carries `primaryGuest` and
-`additionalGuests`; a **booking** groups one or more reservations and carries the `booker`. Each
-has its own `modified` instant and its own webhook topic. The copy of the booker a reservation
-shows under its expand option is not used: it is the booking's data under the reservation's
-clock, and a booker correction would not change the reservation's key.
+Apaleo keeps persons on two objects. A **reservation** carries `primaryGuest` and `additionalGuests`; a **booking** groups one or more reservations and carries the `booker`. Each has its own `modified` instant and its own webhook topic. The copy of the booker a reservation shows under its expand option is not used: it is the booking's data under the reservation's clock, and a booker correction would not change the reservation's key.
 
-For a reservation the persons are, in order: `primaryGuest`, each entry of `additionalGuests` by
-index. For a booking the person is `booker`. Each becomes one ingest record; a missing entry
-produces none.
+For a reservation the persons are, in order: `primaryGuest`, each entry of `additionalGuests` by index. For a booking the person is `booker`. Each becomes one ingest record; a missing entry produces none.
 
 ## The record
 
@@ -33,14 +25,11 @@ produces none.
 | `sourceObject.businessStart` | `arrival` | the earliest `arrival` over `reservations` |
 | `sourceObject.businessEnd` | `departure` | the latest `departure` over `reservations` |
 
-`modified`, `arrival` and `departure` are passed as Apaleo returns them, ISO-8601 with offset,
-without reformatting. Apaleo records `modified` without a fractional second. A booking whose
-reservation list is empty carries no business dates.
+`modified`, `arrival` and `departure` are passed as Apaleo returns them, ISO-8601 with offset, without reformatting. Apaleo records `modified` without a fractional second. A booking whose reservation list is empty carries no business dates.
 
 ## The payload
 
-Top level, the person's own fields under the names the engine extracts, present only when Apaleo
-supplies them:
+Top level, the person's own fields under the names the engine extracts, present only when Apaleo supplies them:
 
 | Payload field | From the person entry |
 | --- | --- |
@@ -51,8 +40,7 @@ supplies them:
 | `birthdate` | `birthDate` |
 | `idDocument` | `{ "type": identificationType, "number": identificationNumber }`, only when both are present |
 
-Never at the top level: `loyaltyId`, `externalGuestId`. Apaleo persons carry no loyalty number
-and no entity id.
+Never at the top level: `loyaltyId`, `externalGuestId`. Apaleo persons carry no loyalty number and no entity id.
 
 Nested, kept verbatim and extracted from by nothing:
 
@@ -68,15 +56,11 @@ Nested, kept verbatim and extracted from by nothing:
   and `reservations` reduced to each one's `id`, `status`, `property`, `arrival`, `departure`
   and `channelCode`.
 
-Never anywhere, on either object: `paymentAccount`, `registeredCard`, `hasActivePaymentAccount`,
-and any field of a reservation's `services` or `timeSlices`.
+Never anywhere, on either object: `paymentAccount`, `registeredCard`, `hasActivePaymentAccount`, and any field of a reservation's `services` or `timeSlices`.
 
 ## Example
 
-Booking `XPGMSXGF`, modified `2026-07-09T14:30:00Z`, with one reservation `XPGMSXGF-1`, modified
-`2026-07-09T14:30:00Z`, primary guest Anna Muster with an email and a passport, one additional
-guest, and a booker who is the same person as the primary guest. The reservation yields two
-records and the booking one:
+Booking `XPGMSXGF`, modified `2026-07-09T14:30:00Z`, with one reservation `XPGMSXGF-1`, modified `2026-07-09T14:30:00Z`, primary guest Anna Muster with an email and a passport, one additional guest, and a booker who is the same person as the primary guest. The reservation yields two records and the booking one:
 
 ```json
 [
@@ -133,9 +117,7 @@ records and the booking one:
 ]
 ```
 
-The booker and the primary guest resolve to one guest through the shared email, by the engine's
-rules and not by the connector's. When the booker is later corrected, only the booking's record
-is sent again, under the booking's new `modified`; the reservation's records are not.
+The booker and the primary guest resolve to one guest through the shared email, by the engine's rules and not by the connector's. When the booker is later corrected, only the booking's record is sent again, under the booking's new `modified`; the reservation's records are not.
 
 ## What is not mapped
 

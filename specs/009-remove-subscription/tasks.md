@@ -7,24 +7,13 @@ description: "Task list for 009-remove-subscription"
 
 **Input**: Design documents from `/specs/009-remove-subscription/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
-[data-model.md](data-model.md),
-[contracts/connector-subscription.yaml](contracts/connector-subscription.yaml),
-[quickstart.md](quickstart.md)
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/connector-subscription.yaml](contracts/connector-subscription.yaml), [quickstart.md](quickstart.md)
 
-**Tests**: Test tasks are included and are not optional here. No engine logic changes, so
-Constitution Principle VI does not compel them; the plan schedules them because every behavior
-this slice adds is about what happens in a system the connector does not own, and only a test
-against the stub proves the connector asked for the right thing. Tasks marked ⚠ MUST be written
-and seen failing before the implementation task that follows them.
+**Tests**: Test tasks are included and are not optional here. No engine logic changes, so Constitution Principle VI does not compel them; the plan schedules them because every behavior this slice adds is about what happens in a system the connector does not own, and only a test against the stub proves the connector asked for the right thing. Tasks marked ⚠ MUST be written and seen failing before the implementation task that follows them.
 
-**Organization**: Grouped by user story. The contract and the client's delete come first because
-every story needs them. US1 is the removal and is the MVP on its own; US2 makes a teardown
-legible; US3 is two assertions and a warning that stops crying wolf.
+**Organization**: Grouped by user story. The contract and the client's delete come first because every story needs them. US1 is the removal and is the MVP on its own; US2 makes a teardown legible; US3 is two assertions and a warning that stops crying wolf.
 
-**Where the work lands**: the specification, the contract and the roadmap line are in
-`guestgraph/engine`, this repository. Every line of code is in `guestgraph/connector-apaleo`,
-whose paths below are relative to that repository's root.
+**Where the work lands**: the specification, the contract and the roadmap line are in `guestgraph/engine`, this repository. Every line of code is in `guestgraph/connector-apaleo`, whose paths below are relative to that repository's root.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -53,11 +42,9 @@ whose paths below are relative to that repository's root.
 
 ## Phase 3: User Story 1 - Tear a connection down without leaving a subscription behind (Priority: P1) 🎯 MVP
 
-**Goal**: an operator removes one connection's subscription through the operations surface, and
-Apaleo holds none afterwards.
+**Goal**: an operator removes one connection's subscription through the operations surface, and Apaleo holds none afterwards.
 
-**Independent test**: with a subscription in place, call the removal, then ask the Apaleo stub
-what it holds. Nothing names that connection's endpoint.
+**Independent test**: with a subscription in place, call the removal, then ask the Apaleo stub what it holds. Nothing names that connection's endpoint.
 
 ### Tests for User Story 1 ⚠
 
@@ -81,11 +68,9 @@ what it holds. Nothing names that connection's endpoint.
 
 ## Phase 4: User Story 2 - Know that a removal happened, and by whom (Priority: P2)
 
-**Goal**: a connection deliberately without a subscription no longer looks like one whose
-subscription failed.
+**Goal**: a connection deliberately without a subscription no longer looks like one whose subscription failed.
 
-**Independent test**: remove a subscription, read `GET /status`, and see a state that says the
-absence was asked for; break a second connection's creation and see a different state.
+**Independent test**: remove a subscription, read `GET /status`, and see a state that says the absence was asked for; break a second connection's creation and see a different state.
 
 ### Tests for User Story 2 ⚠
 
@@ -105,11 +90,9 @@ absence was asked for; break a second connection's creation and see a different 
 
 ## Phase 5: User Story 3 - A removal is not undone by the connector's own housekeeping (Priority: P2)
 
-**Goal**: a removal lasts as long as the connector runs, and the reconciliation stops warning
-about a connection that is deliberately without a subscription.
+**Goal**: a removal lasts as long as the connector runs, and the reconciliation stops warning about a connection that is deliberately without a subscription.
 
-**Independent test**: remove a subscription, run a reconciliation, and find the state still
-`REMOVED` with a successful run and no warning line.
+**Independent test**: remove a subscription, run a reconciliation, and find the state still `REMOVED` with a successful run and no warning line.
 
 ### Tests for User Story 3 ⚠
 
@@ -164,14 +147,8 @@ about a connection that is deliberately without a subscription.
 
 ## Implementation Strategy
 
-**MVP**: Phase 1, Phase 2 and Phase 3. At that point an operator can remove a subscription and
-Apaleo holds none, which is the whole reason the slice exists. Stopping there leaves a teardown
-that reads as a fault in the status, which is a real cost but not a broken one.
+**MVP**: Phase 1, Phase 2 and Phase 3. At that point an operator can remove a subscription and Apaleo holds none, which is the whole reason the slice exists. Stopping there leaves a teardown that reads as a fault in the status, which is a real cost but not a broken one.
 
-**Then US3 before US2** if only one more can be done: a reconciliation warning every fifteen
-minutes about a deliberate absence is noisier than a status field nobody reads yet, and the
-restore in T024 is what makes the removal safe to use at all.
+**Then US3 before US2** if only one more can be done: a reconciliation warning every fifteen minutes about a deliberate absence is noisier than a status field nobody reads yet, and the restore in T024 is what makes the removal safe to use at all.
 
-**One pull request per repository**, in the order the family re-syncs: the engine's spec branch
-last, after the connector's code and the site's page have merged, so its tasks can be ticked
-against work that exists.
+**One pull request per repository**, in the order the family re-syncs: the engine's spec branch last, after the connector's code and the site's page have merged, so its tasks can be ticked against work that exists.

@@ -1,14 +1,8 @@
 # Glossary
 
-Every family term in its fixed English and German form. The writer uses the English column
-so the third site says what the first says; the translator uses the German column so one
-word has one rendering across the sites. A term joins the table the first time a text needs
-it and the translator has to choose, and the owner's choice is recorded here rather than in
-the attribute where it was first made.
+Every family term in its fixed English and German form. The writer uses the English column so the third site says what the first says; the translator uses the German column so one word has one rendering across the sites. A term joins the table the first time a text needs it and the translator has to choose, and the owner's choice is recorded here rather than in the attribute where it was first made.
 
-The German cells are inline code because the prose check reads no language and a German word
-such as `Organisation` would be a hit. This table, the German paragraph of `WRITING.md` and the
-marks `TRANSLATOR.md` repeats are the only places the shared files carry German on purpose.
+The German cells are inline code because the prose check reads no language and a German word such as `Organisation` would be a hit. This table, the German paragraph of `WRITING.md` and the marks `TRANSLATOR.md` repeats are the only places the shared files carry German on purpose.
 
 | Term | English | German | Note |
 | --- | --- | --- | --- |
@@ -47,5 +41,4 @@ marks `TRANSLATOR.md` repeats are the only places the shared files carry German 
 | evidence | evidence | `Beleg` | The fact a claim rests on, in the cell beside it. Same sentence as above. |
 | declare | declares | `deklariert` | Of what a schema states a type carries, or an instance states of itself. Not `erklärt`, which reads as explains. |
 
-English forms fixed here whose German no page carries yet, to be chosen the first time a text
-needs them: pack, design system, deck.
+English forms fixed here whose German no page carries yet, to be chosen the first time a text needs them: pack, design system, deck.

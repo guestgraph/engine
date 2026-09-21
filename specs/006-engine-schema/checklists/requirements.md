@@ -1,8 +1,6 @@
 # Specification Quality Checklist: The Engine Owns One Schema
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-09-10
-**Feature**: [spec.md](../spec.md)
+**Purpose**: Validate specification completeness and quality before proceeding to planning **Created**: 2026-09-10 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 

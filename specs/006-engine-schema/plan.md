@@ -6,25 +6,17 @@
 
 ## Summary
 
-The engine moves from the database's default schema into a schema of its own, `engine`, reached
-as a role that owns it and nothing else, so that one database or two is a deployment choice and
-a second service's role cannot read the engine's tables. Nothing in the engine names a schema
-today, so the move is two properties fed by one configuration value, the ER regeneration script
-following the schema, one integration test that proves the isolation, and one paragraph of
-deployment guidance in the README. No migration changes, no contract changes.
+The engine moves from the database's default schema into a schema of its own, `engine`, reached as a role that owns it and nothing else, so that one database or two is a deployment choice and a second service's role cannot read the engine's tables. Nothing in the engine names a schema today, so the move is two properties fed by one configuration value, the ER regeneration script following the schema, one integration test that proves the isolation, and one paragraph of deployment guidance in the README. No migration changes, no contract changes.
 
 ## Technical Context
 
 **Language/Version**: Java 25, unchanged
 
-**Primary Dependencies**: Spring Boot 4, HikariCP as the pool it ships, Flyway, the PostgreSQL
-driver. No new dependency.
+**Primary Dependencies**: Spring Boot 4, HikariCP as the pool it ships, Flyway, the PostgreSQL driver. No new dependency.
 
-**Storage**: PostgreSQL. No migration. The pool's connection schema and Flyway's default schema
-both read `DATABASE_SCHEMA`, default `engine` (research R1).
+**Storage**: PostgreSQL. No migration. The pool's connection schema and Flyway's default schema both read `DATABASE_SCHEMA`, default `engine` (research R1).
 
-**Testing**: one new Testcontainers test, `SchemaIsolationTest`; every existing suite unchanged;
-ArchUnit, PMD, Spotless as before; the ER drift gate after the script follows the schema.
+**Testing**: one new Testcontainers test, `SchemaIsolationTest`; every existing suite unchanged; ArchUnit, PMD, Spotless as before; the ER drift gate after the script follows the schema.
 
 **Target Platform**: Linux server, unchanged
 
@@ -32,16 +24,13 @@ ArchUnit, PMD, Spotless as before; the ER drift gate after the script follows th
 
 **Performance Goals**: none new; a search path on each pooled connection costs nothing measurable.
 
-**Constraints**: Nothing may name the schema (FR-003). Every API contract and response is
-unchanged (FR-004). A database from before the move is dropped, not migrated (FR-006).
+**Constraints**: Nothing may name the schema (FR-003). Every API contract and response is unchanged (FR-004). A database from before the move is dropped, not migrated (FR-006).
 
-**Scale/Scope**: 2 properties in `application.yaml`, 1 script change, 1 new test, 1 README
-paragraph and 1 README sentence, 0 migrations, 0 contract changes.
+**Scale/Scope**: 2 properties in `application.yaml`, 1 script change, 1 new test, 1 README paragraph and 1 README sentence, 0 migrations, 0 contract changes.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
@@ -87,8 +76,7 @@ README.md                                                    # the deployment pa
 docs/roadmap-notes.md                                        # the cross-cutting note marked consumed
 ```
 
-**Structure Decision**: No new package, no migration. The schema is named in one configuration
-value and read by the two components that need it; everything else follows the connection.
+**Structure Decision**: No new package, no migration. The schema is named in one configuration value and read by the two components that need it; everything else follows the connection.
 
 ## Design Decisions Carried From Phase 0
 
@@ -105,11 +93,7 @@ value and read by the two components that need it; everything else follows the c
 
 No Constitution Check violations — the table is intentionally empty.
 
-One choice worth naming: **the connector's configuration names the schema on the JDBC URL**
-(slice 5, data model) while this slice uses the pool's schema property. Both work; one value in
-one place is the better shape, and the connector should follow it when its configuration is
-built (slice 5, T008). Recorded as a follow-on rather than edited into slice 5's frozen data
-model.
+One choice worth naming: **the connector's configuration names the schema on the JDBC URL** (slice 5, data model) while this slice uses the pool's schema property. Both work; one value in one place is the better shape, and the connector should follow it when its configuration is built (slice 5, T008). Recorded as a follow-on rather than edited into slice 5's frozen data model.
 
 ## Follow-ons Not In This Slice
 

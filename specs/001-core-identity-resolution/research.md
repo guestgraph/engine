@@ -2,9 +2,7 @@
 
 **Feature**: 001-core-identity-resolution | **Date**: 2026-07-09
 
-The Technical Context contains no `NEEDS CLARIFICATION` items — language, framework,
-datastore, build tool, and testing approach are fixed by the constitution and the approved
-design doc. Research therefore resolves the remaining *implementation-level* choices.
+The Technical Context contains no `NEEDS CLARIFICATION` items — language, framework, datastore, build tool, and testing approach are fixed by the constitution and the approved design doc. Research therefore resolves the remaining *implementation-level* choices.
 
 ## R1. Persistence approach: JPA + MapStruct with guardrails
 

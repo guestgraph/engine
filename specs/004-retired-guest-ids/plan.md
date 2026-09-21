@@ -6,60 +6,35 @@
 
 ## Summary
 
-A guest id that a merge absorbed or an unmerge emptied stops answering not-found. Reading it
-returns a resolution: the guest or guests that hold the person now, when the id was retired and
-the chain of decisions in between, followed transitively to active guests. Every sub-resource
-under a retired id refuses with problem details that name the current guests. A stored guest id
-thereby becomes the reliable external reference the roadmap requires before connectors (slice 5
-in the README numbering) may write one back.
+A guest id that a merge absorbed or an unmerge emptied stops answering not-found. Reading it returns a resolution: the guest or guests that hold the person now, when the id was retired and the chain of decisions in between, followed transitively to active guests. Every sub-resource under a retired id refuses with problem details that name the current guests. A stored guest id thereby becomes the reliable external reference the roadmap requires before connectors (slice 5 in the README numbering) may write one back.
 
-Technically: nothing new is written. The audit trail already records every retirement —
-`absorbed_guest_ids` on a merge, the detached records on an unmerge and the replay events that
-placed them — so the slice is a pure-JVM walk over `merge_event` behind `GraphPort`, mirroring
-`ExplainOperation`, plus three port methods, one native containment query, one migration that
-adds a partial GIN index and a btree, a `status` field on the guest document and a 410 problem
-type. No table changes shape and no existing rule changes meaning.
+Technically: nothing new is written. The audit trail already records every retirement — `absorbed_guest_ids` on a merge, the detached records on an unmerge and the replay events that placed them — so the slice is a pure-JVM walk over `merge_event` behind `GraphPort`, mirroring `ExplainOperation`, plus three port methods, one native containment query, one migration that adds a partial GIN index and a btree, a `status` field on the guest document and a 410 problem type. No table changes shape and no existing rule changes meaning.
 
 ## Technical Context
 
 **Language/Version**: Java 25 (virtual threads / Loom), unchanged
 
-**Primary Dependencies**: Spring Boot 4, Spring Data JPA + Hibernate, MapStruct, Flyway. No new
-dependencies.
+**Primary Dependencies**: Spring Boot 4, Spring Data JPA + Hibernate, MapStruct, Flyway. No new dependencies.
 
-**Storage**: PostgreSQL. Migration `V4__retired_guest_id_indexes.sql` — a partial GIN index
-and a btree on `merge_event`, nothing else (research R3, R7). The cost of this slice sits on
-the write side, and the index shape is chosen so ingest pays only when a merge happens.
+**Storage**: PostgreSQL. Migration `V4__retired_guest_id_indexes.sql` — a partial GIN index and a btree on `merge_event`, nothing else (research R3, R7). The cost of this slice sits on the write side, and the index shape is chosen so ingest pays only when a merge happens.
 
-**Testing**: JUnit 5 + AssertJ; pure-JVM scenario tests for the resolver on `InMemoryGraph`
-(written first, Constitution VI); Testcontainers-backed integration tests for the SQL and the API
-surface; ArchUnit (`PersistenceRulesTest`) unchanged; `OpenApiConformanceTest` auto-enrols this
-slice's contract, which declares no operation.
+**Testing**: JUnit 5 + AssertJ; pure-JVM scenario tests for the resolver on `InMemoryGraph` (written first, Constitution VI); Testcontainers-backed integration tests for the SQL and the API surface; ArchUnit (`PersistenceRulesTest`) unchanged; `OpenApiConformanceTest` auto-enrols this slice's contract, which declares no operation.
 
 **Target Platform**: Linux server (single Spring Boot service), unchanged
 
 **Project Type**: Web service — single Maven module
 
-**Performance Goals**: SC-003 — a resolution through ten retirements under 1 s. A merge hop is
-one indexed containment lookup; a split hop is a forward range scan bounded by the replay it
-reads (research R3). Ten hops are tens of index probes, not scans.
+**Performance Goals**: SC-003 — a resolution through ten retirements under 1 s. A merge hop is one indexed containment lookup; a split hop is a forward range scan bounded by the replay it reads (research R3). Ten hops are tens of index probes, not scans.
 
-**Constraints**: Every query tenant-scoped (Constitution I). Resolution writes nothing (FR-010).
-One native query, in the sanctioned form — `@Query(nativeQuery = true)` on a repository with a
-tenant predicate, as `GuestRepo` already does. No index that every ingest must maintain. No
-`JdbcClient` outside the allowlist. JPA stays confined to `io.guestgraph.persistence`.
+**Constraints**: Every query tenant-scoped (Constitution I). Resolution writes nothing (FR-010). One native query, in the sanctioned form — `@Query(nativeQuery = true)` on a repository with a tenant predicate, as `GuestRepo` already does. No index that every ingest must maintain. No `JdbcClient` outside the allowlist. JPA stays confined to `io.guestgraph.persistence`.
 
-**Scale/Scope**: 0 new endpoints, 5 changed responses, 0 new tables, 2 new indexes (one
-partial), 1 new pure-JVM class, 3 port methods, 1 new exception and problem type, 1 shared guest
-gate replacing four inline checks.
+**Scale/Scope**: 0 new endpoints, 5 changed responses, 0 new tables, 2 new indexes (one partial), 1 new pure-JVM class, 3 port methods, 1 new exception and problem type, 1 shared guest gate replacing four inline checks.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
-**Initial evaluation — PASS.** **Post-design re-evaluation — PASS** (no design element changed a
-verdict; notes below reflect the final design).
+**Initial evaluation — PASS.** **Post-design re-evaluation — PASS** (no design element changed a verdict; notes below reflect the final design).
 
 - [x] **Tenant isolation (I)**: both new queries carry `tenant_id`, as does `guestExists`; the
       walk never leaves the tenant, so an id from another tenant resolves as never-existed and
@@ -139,10 +114,7 @@ README.md                                                  # roadmap line alread
 docs/roadmap-notes.md                                      # R-X5 marked consumed; slice-4 condition resolved
 ```
 
-**Structure Decision**: Single Maven module, unchanged. The resolver joins `ExplainOperation`
-and `UnmergeOperation` in `io.guestgraph.resolution` as pure JVM behind `GraphPort`, which is
-what lets the scenario tests pin its rules on `InMemoryGraph`. Persistence and API additions
-follow the existing layout; the ArchUnit rules constrain them with no rule changes.
+**Structure Decision**: Single Maven module, unchanged. The resolver joins `ExplainOperation` and `UnmergeOperation` in `io.guestgraph.resolution` as pure JVM behind `GraphPort`, which is what lets the scenario tests pin its rules on `InMemoryGraph`. Persistence and API additions follow the existing layout; the ArchUnit rules constrain them with no rule changes.
 
 ## Design Decisions Carried From Phase 0
 

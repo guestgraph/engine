@@ -7,15 +7,9 @@ description: "Task list for 003-timeline-journey"
 
 **Input**: Design documents from `/specs/003-timeline-journey/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
-[data-model.md](data-model.md), [contracts/openapi.yaml](contracts/openapi.yaml)
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/openapi.yaml](contracts/openapi.yaml)
 
-**Tests**: Test tasks are included and are not optional here. Constitution Principle VI makes TDD
-mandatory for engine work (US3 touches `ResolutionEngine`, `UnmergeOperation`, and
-`ReviewDecisionOperation`), and the plan additionally schedules the association deriver test-first
-because its rules — current vs ended, successor naming, dedup, ordering — are where the subtle
-bugs live. Tasks marked ⚠ MUST be written and seen failing before the implementation task that
-follows them.
+**Tests**: Test tasks are included and are not optional here. Constitution Principle VI makes TDD mandatory for engine work (US3 touches `ResolutionEngine`, `UnmergeOperation`, and `ReviewDecisionOperation`), and the plan additionally schedules the association deriver test-first because its rules — current vs ended, successor naming, dedup, ordering — are where the subtle bugs live. Tasks marked ⚠ MUST be written and seen failing before the implementation task that follows them.
 
 **Organization**: Grouped by user story so each is independently implementable and testable.
 
@@ -27,15 +21,13 @@ follows them.
 
 ## Path Conventions
 
-Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under
-`src/test/java/io/guestgraph/`, migrations under `src/main/resources/db/migration/`.
+Single Maven module. Main code under `src/main/java/io/guestgraph/`, tests under `src/test/java/io/guestgraph/`, migrations under `src/main/resources/db/migration/`.
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: The pure value types every later phase refers to. No new dependencies — the slice
-needs no library the repository does not already carry.
+**Purpose**: The pure value types every later phase refers to. No new dependencies — the slice needs no library the repository does not already carry.
 
 - [X] T001 [P] Create domain types in `src/main/java/io/guestgraph/domain/`: `ObjectRole` enum (PRIMARY_GUEST, ADDITIONAL_GUEST, BOOKER), `ActorType` enum (SYSTEM, HUMAN, AGENT), `Actor` record (type + id, with a `system(matcherName)` factory), `RecordObject` record per [data-model.md](data-model.md)
 - [X] T002 [P] Create pure timeline types in `src/main/java/io/guestgraph/timeline/`: `Association`, `AssociationStatus` (CURRENT, ENDED), `ObjectObservation` — plain records, no Spring and no JPA imports (the ArchUnit `onlyPersistenceDependsOnJpa` rule covers this package)
@@ -46,9 +38,7 @@ needs no library the repository does not already carry.
 
 **Purpose**: Schema and test-harness changes every story below depends on.
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete. T005 in particular is
-not optional — the harness truncates an explicit table list, so a missing entry fails *every*
-integration test on FK truncate errors.
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete. T005 in particular is not optional — the harness truncates an explicit table list, so a missing entry fails *every* integration test on FK truncate errors.
 
 - [X] T003 Write additive migration `src/main/resources/db/migration/V3__timeline_and_actors.sql` per [data-model.md](data-model.md): `record_object` table (tenant-scoped, `object_version timestamptz NOT NULL`, role CHECK, denormalized `source_system_id`, roster and record indexes); `actor_type`/`actor_id` nullable columns on `merge_event` and `negative_match_rule`; `actor_type` NOT NULL DEFAULT 'HUMAN' + `actor_name` on `api_key`, backfilled from `label` before `SET NOT NULL`; `lifted_at`/`lifted_actor_type`/`lifted_actor_id` on `negative_match_rule`, replacing its `UNIQUE (tenant_id, record_a, record_b)` with a partial unique index `WHERE lifted_at IS NULL` so a pair may be split, lifted, and split again. No edits to V1 or V2
 - [X] T004 Update both `api_key` INSERT sites for the new NOT NULL column — `seedTenant` in `src/test/java/io/guestgraph/integration/PostgresIntegrationTest.java` and `src/main/java/io/guestgraph/config/LocalDevSeeder.java` — to supply `actor_name` (and `actor_type` where a non-default is wanted). Both use explicit column lists, so without this every integration test and local dev startup fails on a fresh database against V3
@@ -62,12 +52,9 @@ integration test on FK truncate errors.
 
 ## Phase 3: User Story 1 - What Does This Guest Currently Have? (Priority: P1) 🎯 MVP
 
-**Goal**: A resolved guest's business objects appear as associations — one entry per object and
-role, showing the newest version's state, ordered by business dates.
+**Goal**: A resolved guest's business objects appear as associations — one entry per object and role, showing the newest version's state, ordered by business dates.
 
-**Independent Test**: Ingest three versions of one reservation and a second reservation with two
-persons; read the timelines and verify each booking appears once per guest and role with the
-newest version's data, while `GET /guests/{id}/records` is unchanged.
+**Independent Test**: Ingest three versions of one reservation and a second reservation with two persons; read the timelines and verify each booking appears once per guest and role with the newest version's data, while `GET /guests/{id}/records` is unchanged.
 
 ### Tests for User Story 1 ⚠
 
@@ -91,13 +78,9 @@ newest version's data, while `GET /guests/{id}/records` is unchanged.
 
 ## Phase 4: User Story 2 - A Booking's Current Guests Are the Newest Version's Guests (Priority: P2)
 
-**Goal**: The newest roster decides membership: reassignment moves the association, removal ends
-it without fabricating a transfer, and the full observation history stays reachable on the object.
+**Goal**: The newest roster decides membership: reassignment moves the association, removal ends it without fabricating a transfer, and the full observation history stays reachable on the object.
 
-**Independent Test**: Ingest v1 naming Anna and v2 naming Bruno for one reservation and role, then
-a two-person version followed by a one-person version; verify the association is current on Bruno
-only, that the dropped guest leaves without the remaining guest inheriting anything, and that both
-histories are retrievable.
+**Independent Test**: Ingest v1 naming Anna and v2 naming Bruno for one reservation and role, then a two-person version followed by a one-person version; verify the association is current on Bruno only, that the dropped guest leaves without the remaining guest inheriting anything, and that both histories are retrievable.
 
 ### Tests for User Story 2 ⚠
 
@@ -117,12 +100,9 @@ histories are retrievable.
 
 ## Phase 5: User Story 3 - Every Decision Names Who Made It (Priority: P3)
 
-**Goal**: Merge events, review decisions, unmerges, and do-not-merge rules record whether the
-system, a named human, or a named agent caused them.
+**Goal**: Merge events, review decisions, unmerges, and do-not-merge rules record whether the system, a named human, or a named agent caused them.
 
-**Independent Test**: Perform one automatic ingest merge, one human review confirmation, and one
-agent confirmation; verify each records the right actor type and identity in explain, and that a
-request claiming a type its credential does not grant is refused.
+**Independent Test**: Perform one automatic ingest merge, one human review confirmation, and one agent confirmation; verify each records the right actor type and identity in explain, and that a request claiming a type its credential does not grant is refused.
 
 ### Tests for User Story 3 ⚠
 
@@ -143,12 +123,9 @@ request claiming a type its credential does not grant is refused.
 
 ## Phase 6: User Story 4 - Connectors Emit Observations That Order Correctly (Priority: P4)
 
-**Goal**: The published ingest contract states how mutable multi-person objects are keyed and
-emitted, and the service behaves correctly for every case it describes.
+**Goal**: The published ingest contract states how mutable multi-person objects are keyed and emitted, and the service behaves correctly for every case it describes.
 
-**Independent Test**: Submit a three-person reservation version, resubmit it verbatim, then submit
-a version whose only change is non-person data; verify three observations, a clean duplicate
-absorption, and no guest identifier from booking-level contact data.
+**Independent Test**: Submit a three-person reservation version, resubmit it verbatim, then submit a version whose only change is non-person data; verify three observations, a clean duplicate absorption, and no guest identifier from booking-level contact data.
 
 ### Tests for User Story 4 ⚠
 
@@ -244,8 +221,7 @@ Task: "T022 Actor on MergeEvent + NegativeMatchRule in src/main/java/io/guestgra
 
 ### Parallel Team Strategy
 
-Two developers split cleanly at the Foundational checkpoint: one takes US1 → US2 → US4 (the
-timeline spine), the other takes US3 (actor identity) end to end. They meet only in Polish.
+Two developers split cleanly at the Foundational checkpoint: one takes US1 → US2 → US4 (the timeline spine), the other takes US3 (actor identity) end to end. They meet only in Polish.
 
 ---
 

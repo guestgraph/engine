@@ -1,8 +1,6 @@
 # Specification Quality Checklist: Probabilistic Matching
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-07-10
-**Feature**: [spec.md](../spec.md)
+**Purpose**: Validate specification completeness and quality before proceeding to planning **Created**: 2026-07-10 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 

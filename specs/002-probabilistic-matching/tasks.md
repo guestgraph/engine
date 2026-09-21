@@ -9,14 +9,9 @@ description: "Task list for feature 002-probabilistic-matching"
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/openapi.yaml, quickstart.md
 
-**Tests**: INCLUDED — constitution Principle VI mandates TDD for resolution-engine work.
-The scorer, banding, both gates, and block-key derivation are engine logic: their ⚠ test
-tasks MUST be written and seen FAILING before the implementation tasks. Every new endpoint
-ships with integration tests (workflow gates).
+**Tests**: INCLUDED — constitution Principle VI mandates TDD for resolution-engine work. The scorer, banding, both gates, and block-key derivation are engine logic: their ⚠ test tasks MUST be written and seen FAILING before the implementation tasks. Every new endpoint ships with integration tests (workflow gates).
 
-**Organization**: grouped by user story; each story is an independently testable increment.
-Slice-1 behavior is regression-guarded throughout (SC-008): the existing suites must stay
-green after every phase.
+**Organization**: grouped by user story; each story is an independently testable increment. Slice-1 behavior is regression-guarded throughout (SC-008): the existing suites must stay green after every phase.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -47,11 +42,9 @@ green after every phase.
 
 ## Phase 3: User Story 1 - Likely Matches Surface for Review (Priority: P1) 🎯 MVP
 
-**Goal**: fuzzy candidates found via block keys, scored with per-signal breakdown, routed
-into three per-tenant bands with auto-merge shipped off; deterministic precedence intact.
+**Goal**: fuzzy candidates found via block keys, scored with per-signal breakdown, routed into three per-tenant bands with auto-merge shipped off; deterministic precedence intact.
 
-**Independent Test**: ingest similar-but-not-identical pairs sharing no identifier →
-scored review entry with breakdown, no automatic merge under defaults (spec US1).
+**Independent Test**: ingest similar-but-not-identical pairs sharing no identifier → scored review entry with breakdown, no automatic merge under defaults (spec US1).
 
 ### Tests for User Story 1 (TDD — write first, see them FAIL) ⚠
 
@@ -71,11 +64,9 @@ scored review entry with breakdown, no automatic merge under defaults (spec US1)
 
 ## Phase 4: User Story 2 - Steward Splits Stick (Priority: P2)
 
-**Goal**: unmerge/reject write persistent do-not-merge rules; any merge crossing a rule —
-fuzzy or exact — downgrades to review; confirm lifts; rules listable/deletable.
+**Goal**: unmerge/reject write persistent do-not-merge rules; any merge crossing a rule — fuzzy or exact — downgrades to review; confirm lifts; rules listable/deletable.
 
-**Independent Test**: unmerge a pair, ingest connecting evidence → parked citing the rule,
-never silently merged (spec US2).
+**Independent Test**: unmerge a pair, ingest connecting evidence → parked citing the rule, never silently merged (spec US2).
 
 ### Tests for User Story 2 (TDD — write first, see them FAIL) ⚠
 
@@ -92,11 +83,9 @@ never silently merged (spec US2).
 
 ## Phase 5: User Story 3 - Shared & Masked Identifiers (Priority: P3)
 
-**Goal**: IGNORE / PERFECT_MATCH / MASKED_ALIAS rules evaluated at matching time; built-in
-OTA relay defaults; masked emails never merge alone and never displace a real profile email.
+**Goal**: IGNORE / PERFECT_MATCH / MASKED_ALIAS rules evaluated at matching time; built-in OTA relay defaults; masked emails never merge alone and never displace a real profile email.
 
-**Independent Test**: two different guests sharing one masked OTA address → two guests, at
-most a review, profiles keep real emails (spec US3).
+**Independent Test**: two different guests sharing one masked OTA address → two guests, at most a review, profiles keep real emails (spec US3).
 
 ### Tests for User Story 3 (TDD — write first, see them FAIL) ⚠
 
@@ -114,8 +103,7 @@ most a review, profiles keep real emails (spec US3).
 
 ## Phase 6: User Story 4 - Tenant Tunes Matching (Priority: P4)
 
-**Goal**: one API resource for the three thresholds; validated, transactional, effective on
-the next resolution, tenant-isolated.
+**Goal**: one API resource for the three thresholds; validated, transactional, effective on the next resolution, tenant-isolated.
 
 **Independent Test**: read defaults, change bands, next ingest routes accordingly (spec US4).
 
@@ -155,7 +143,4 @@ the next resolution, tenant-isolated.
 
 ## Implementation Strategy
 
-MVP first: Phases 1–3 (T001–T013) deliver P1 — fuzzy candidates with explainable scores in
-the review queue, automation off. Stop, `./mvnw verify`, validate, then US2 → US3 → US4
-in priority order. Commit after each task or logical group; slice-1 suites must stay green
-at every checkpoint (SC-008).
+MVP first: Phases 1–3 (T001–T013) deliver P1 — fuzzy candidates with explainable scores in the review queue, automation off. Stop, `./mvnw verify`, validate, then US2 → US3 → US4 in priority order. Commit after each task or logical group; slice-1 suites must stay green at every checkpoint (SC-008).

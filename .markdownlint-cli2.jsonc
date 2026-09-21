@@ -5,7 +5,7 @@
 // saved in an editor and a file written by `conventions-format fix` come out the same.
 //
 // The paragraph these rules enforce is the Markdown paragraph of conventions/WRITING.md, and the
-// one rule markdownlint does not ship is conventions/markdown-rules.cjs beside them. Edit either
+// two rules markdownlint does not ship are in conventions/markdown-rules.cjs beside them. Edit either
 // in robertblust/conventions and never in a member: conventions-sync vendors both and
 // conventions-check holds every copy to the release.
 //
@@ -21,6 +21,9 @@
 {
   "config": {
     "default": false,
+
+    // A paragraph is one line, and the three blocks whose breaks are content keep theirs.
+    "paragraph-on-one-line": true,
 
     // Tables, emphasis, list markers and whitespace: the Markdown paragraph of WRITING.md.
     "MD004": { "style": "dash" },

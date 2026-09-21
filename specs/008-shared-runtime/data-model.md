@@ -2,8 +2,7 @@
 
 **Feature**: `008-shared-runtime` | **Date**: 2026-09-11 | Migration: none
 
-No table changes in either service. The model is the shape of a problem, the shared package and
-what a service keeps of its own.
+No table changes in either service. The model is the shape of a problem, the shared package and what a service keeps of its own.
 
 ---
 
@@ -35,13 +34,11 @@ The slugs and their statuses:
 | `invalid-unmerge` | 400 | Invalid unmerge | engine |
 | `internal-error` | 500 | Internal server error | both, from the advice |
 
-Problems the framework produces itself, validation and unparseable bodies and unknown paths,
-keep the framework's shape, which is the same members without the family's `type`.
+Problems the framework produces itself, validation and unparseable bodies and unknown paths, keep the framework's shape, which is the same members without the family's `type`.
 
 ## The shared package
 
-`io.guestgraph.service`, in the shared repository under `spring/runtime/`, vendored into a
-service's `src/main/java/io/guestgraph/service/`:
+`io.guestgraph.service`, in the shared repository under `spring/runtime/`, vendored into a service's `src/main/java/io/guestgraph/service/`:
 
 | Class | Configuration it reads |
 | --- | --- |
@@ -54,12 +51,9 @@ service's `src/main/java/io/guestgraph/service/`:
 
 | `ServiceDefaults` | none; loads `service-defaults.yaml` beneath everything |
 
-Two resources travel with the package: `service-defaults.yaml`, vendored into
-`src/main/resources/`, and `META-INF/spring.factories`, which names the post-processor.
+Two resources travel with the package: `service-defaults.yaml`, vendored into `src/main/resources/`, and `META-INF/spring.factories`, which names the post-processor.
 
-The package also carries a `pom.xml` of its own in the shared repository, naming the parent, so
-the sources compile and their unit tests run where they are written; the sync copies the
-classes and not the pom.
+The package also carries a `pom.xml` of its own in the shared repository, naming the parent, so the sources compile and their unit tests run where they are written; the sync copies the classes and not the pom.
 
 ## What a service keeps
 

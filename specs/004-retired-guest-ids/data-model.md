@@ -2,9 +2,7 @@
 
 **Feature**: `004-retired-guest-ids` | **Date**: 2026-09-09 | Migration: `V4__retired_guest_id_indexes.sql`
 
-No table changes shape and none is added. The slice is a read over `merge_event` as it has been
-written since slice 1; the only migration adds two indexes so that read stays fast at scale
-(research R3).
+No table changes shape and none is added. The slice is a read over `merge_event` as it has been written since slice 1; the only migration adds two indexes so that read stays fast at scale (research R3).
 
 ---
 
@@ -15,9 +13,7 @@ written since slice 1; the only migration adds two indexes so that read stays fa
 | `merge_event_absorbed_gin` | `USING gin (absorbed_guest_ids jsonb_path_ops) WHERE absorbed_guest_ids <> '[]'::jsonb` | "which event absorbed guest X" — the merge hop. Partial, so only merge rows maintain it (research R3) |
 | `merge_event_tenant_time_idx` | `(tenant_id, created_at, id)` btree | the tenant's events from an instant forward — the split hop's bounded scan |
 
-Columns, constraints and the append-only trigger are untouched. Existing rows need no backfill:
-every retirement since slice 1 is already expressed in `absorbed_guest_ids`, `source_record_ids`
-and `created_at`.
+Columns, constraints and the append-only trigger are untouched. Existing rows need no backfill: every retirement since slice 1 is already expressed in `absorbed_guest_ids`, `source_record_ids` and `created_at`.
 
 ---
 
@@ -25,8 +21,7 @@ and `created_at`.
 
 ### `GuestIdResolution`
 
-The answer to "where is the person this id referred to". Computed per request by
-`GuestIdResolver` (research R2) and returned by `GET /guests/{guestId}` for a retired id.
+The answer to "where is the person this id referred to". Computed per request by `GuestIdResolver` (research R2) and returned by `GET /guests/{guestId}` for a retired id.
 
 | Field | Type | Rule |
 | --- | --- | --- |
@@ -36,8 +31,7 @@ The answer to "where is the person this id referred to". Computed per request by
 | retiredAt | instant | `createdAt` of the read id's own retirement event |
 | hops | `ResolutionHop[]` | every retirement the walk crossed, in the order it happened |
 
-An active guest is not a `GuestIdResolution`; it is the existing guest document with
-`status: ACTIVE` added (FR-005, FR-012).
+An active guest is not a `GuestIdResolution`; it is the existing guest document with `status: ACTIVE` added (FR-005, FR-012).
 
 ### `ResolutionHop`
 
@@ -51,8 +45,7 @@ One retirement on the way from the read id to a current guest.
 | at | instant | the event's `createdAt` |
 | successorGuestIds | uuid[] | for `MERGE` the survivor; for `SPLIT` the guests the detached records landed on |
 
-A successor that is itself retired appears as the `retiredGuestId` of a later hop; a successor
-that is active appears in `currentGuestIds`.
+A successor that is itself retired appears as the `retiredGuestId` of a later hop; a successor that is active appears in `currentGuestIds`.
 
 ### `RetiredGuestProblem`
 
@@ -68,8 +61,7 @@ The 410 problem details every sub-resource of a retired id answers with (researc
 | resolutionStatus | `MERGED` \| `SPLIT` \| `RETIRED` | extension: the resolution's status; named apart from RFC 9457's own `status` |
 | currentGuestIds | uuid[] | extension: the resolution's current guests |
 
-An id that never existed keeps the 404 `not-found` problem of today with no extension members
-(FR-006, FR-009).
+An id that never existed keeps the 404 `not-found` problem of today with no extension members (FR-006, FR-009).
 
 ---
 
@@ -103,13 +95,10 @@ Stated once here; the resolver implements them and the scenario tests pin them.
 | `eventsAbsorbing(tenantId, guestId)` | events whose absorbed list contains the guest, oldest first | native containment query, `merge_event_absorbed_gin` |
 | `eventsSince(tenantId, from, afterId, limit)` | one page of the tenant's events in `(createdAt, id)` order: with a null `afterId` every event at or after `from`, because the replay events an unmerge writes share its transaction and may share its timestamp while a random id can sort before the unmerge's own; with one, strictly after `(from, afterId)` | two native queries, `findFrom` and `findAfter`, over `merge_event_tenant_time_idx` |
 
-`UNMERGE` candidates come from the existing `eventsForGuests`, filtered by kind. `InMemoryGraph`
-implements all three over its event list with the same ordering.
+`UNMERGE` candidates come from the existing `eventsForGuests`, filtered by kind. `InMemoryGraph` implements all three over its event list with the same ordering.
 
 ---
 
 ## Unchanged
 
-`guest`, `resolution_link`, `source_record` and every companion table; `MergeEvent` and
-`MergeEventKind`; the engine, unmerge and review operations. This slice writes nothing during
-resolution (FR-010).
+`guest`, `resolution_link`, `source_record` and every companion table; `MergeEvent` and `MergeEventKind`; the engine, unmerge and review operations. This slice writes nothing during resolution (FR-010).

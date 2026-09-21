@@ -1,9 +1,6 @@
 # Data Model: Core Identity Resolution Service
 
-**Feature**: 001-core-identity-resolution | **Date**: 2026-07-09
-**Store**: PostgreSQL (Flyway-managed schema). All ids are `uuid` (v7 preferred for index
-locality). All tables carry `tenant_id` and every uniqueness constraint is composite with it
-(Constitution I). Timestamps are `timestamptz`.
+**Feature**: 001-core-identity-resolution | **Date**: 2026-07-09 **Store**: PostgreSQL (Flyway-managed schema). All ids are `uuid` (v7 preferred for index locality). All tables carry `tenant_id` and every uniqueness constraint is composite with it (Constitution I). Timestamps are `timestamptz`.
 
 ## Entity overview
 
@@ -22,9 +19,7 @@ erDiagram
     guest ||--o{ match_review : "candidate in"
 ```
 
-Append-only audit: `merge_event` (per tenant); `match_review` decisions reference the
-`merge_event` they produced. Column detail lives in the tables below — the diagram shows
-relationships only, on purpose: relationships are stable, field lists drift.
+Append-only audit: `merge_event` (per tenant); `match_review` decisions reference the `merge_event` they produced. Column detail lives in the tables below — the diagram shows relationships only, on purpose: relationships are stable, field lists drift.
 
 > The mechanically-true, column-level companion is [`docs/er-schema.mmd`](../../docs/er-schema.mmd),
 > generated from the Flyway migrations by `./scripts/regen-er.sh`
@@ -77,9 +72,7 @@ relationships only, on purpose: relationships are stable, field lists drift.
 | needs_review_reasons | jsonb | NOT NULL DEFAULT `[]` — e.g. `["email: unparseable"]` |
 | received_at | timestamptz | NOT NULL |
 
-**Immutability rule**: rows are inserted once; `payload`, `external_key`, ids and timestamps
-never change. Trigger `source_record_immutable` rejects UPDATEs touching those columns.
-Only `needs_review`/`needs_review_reasons` may be cleared by a future review flow.
+**Immutability rule**: rows are inserted once; `payload`, `external_key`, ids and timestamps never change. Trigger `source_record_immutable` rejects UPDATEs touching those columns. Only `needs_review`/`needs_review_reasons` may be cleared by a future review flow.
 
 ## record_identifier
 
@@ -93,8 +86,7 @@ What a record contributed to matching — survives unmerge, drives threshold cou
 | type | text | NOT NULL — enum: EMAIL, PHONE, LOYALTY_ID, ID_DOCUMENT, EXTERNAL_KEY |
 | value_normalized | text | NOT NULL — E.164 / lowercased email / SHA-256 hash for ID_DOCUMENT (R5) |
 
-UNIQUE (source_record_id, type, value_normalized).
-INDEX (tenant_id, type, value_normalized) — candidate lookup + threshold count (R9).
+UNIQUE (source_record_id, type, value_normalized). INDEX (tenant_id, type, value_normalized) — candidate lookup + threshold count (R9).
 
 ## guest
 
@@ -106,9 +98,7 @@ INDEX (tenant_id, type, value_normalized) — candidate lookup + threshold count
 | created_at | timestamptz | NOT NULL |
 | updated_at | timestamptz | NOT NULL |
 
-Guests with zero remaining links after unmerge are deleted (their records re-resolve);
-merge losers are deleted after their links/identifiers move to the survivor — MergeEvent
-retains their ids for the audit trail.
+Guests with zero remaining links after unmerge are deleted (their records re-resolve); merge losers are deleted after their links/identifiers move to the survivor — MergeEvent retains their ids for the audit trail.
 
 ## identifier  *(guest-level, drives matching)*
 
@@ -120,10 +110,7 @@ retains their ids for the audit trail.
 | type | text | NOT NULL — same enum as record_identifier |
 | value_normalized | text | NOT NULL |
 
-UNIQUE (tenant_id, type, value_normalized, guest_id); INDEX (tenant_id, type,
-value_normalized). Note: the same identifier value MAY legitimately sit on multiple guests
-(review-rejected shared email) — that is why uniqueness includes `guest_id`. Rebuilt from
-linked records' `record_identifier`s on merge/unmerge.
+UNIQUE (tenant_id, type, value_normalized, guest_id); INDEX (tenant_id, type, value_normalized). Note: the same identifier value MAY legitimately sit on multiple guests (review-rejected shared email) — that is why uniqueness includes `guest_id`. Rebuilt from linked records' `record_identifier`s on merge/unmerge.
 
 ## resolution_link
 
@@ -152,8 +139,7 @@ linked records' `record_identifier`s on merge/unmerge.
 | excluded_guest_ids | jsonb | NOT NULL DEFAULT `[]` — UNMERGE: guests the detached records must not rejoin on replay (R8) |
 | created_at | timestamptz | NOT NULL |
 
-INDEX (tenant_id, guest_id, created_at) — explain chain traversal. `explain` collects events
-for the guest plus, transitively, events of `absorbed_guest_ids`.
+INDEX (tenant_id, guest_id, created_at) — explain chain traversal. `explain` collects events for the guest plus, transitively, events of `absorbed_guest_ids`.
 
 ## match_review  *(Constitution IV; primary channel for slice-2 probabilistic)*
 
@@ -202,8 +188,4 @@ stateDiagram-v2
 
 ## GDPR readiness (Constitution — Compliance)
 
-Every guest-linked row is reachable via `tenant_id` + (`guest_id` | `source_record_id`)
-foreign keys: erasure/export can enumerate `guest → resolution_link → source_record →
-record_identifier` plus `identifier`, `merge_event` (by guest ids), `match_review`. Nothing
-stores plaintext ID documents (hash only). No design element precludes the future
-deletion/export API.
+Every guest-linked row is reachable via `tenant_id` + (`guest_id` | `source_record_id`) foreign keys: erasure/export can enumerate `guest → resolution_link → source_record → record_identifier` plus `identifier`, `merge_event` (by guest ids), `match_review`. Nothing stores plaintext ID documents (hash only). No design element precludes the future deletion/export API.

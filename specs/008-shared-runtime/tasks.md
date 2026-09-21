@@ -7,19 +7,11 @@ description: "Task list for 008-shared-runtime"
 
 **Input**: Design documents from `/specs/008-shared-runtime/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
-[data-model.md](data-model.md), [contracts/shared-runtime.md](contracts/shared-runtime.md),
-[quickstart.md](quickstart.md)
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/shared-runtime.md](contracts/shared-runtime.md), [quickstart.md](quickstart.md)
 
-**Tests**: Test tasks are included and are not optional here. No engine logic changes, so
-Constitution Principle VI does not compel them; the plan schedules them because the shape a
-caller reads is what the slice is for, and only a test that provokes a refusal from each origin
-proves it. Tasks marked ⚠ MUST be written and seen failing before the implementation task that
-follows them.
+**Tests**: Test tasks are included and are not optional here. No engine logic changes, so Constitution Principle VI does not compel them; the plan schedules them because the shape a caller reads is what the slice is for, and only a test that provokes a refusal from each origin proves it. Tasks marked ⚠ MUST be written and seen failing before the implementation task that follows them.
 
-**Organization**: Grouped by user story. The shared package is written and released first, the
-engine adopts before the connector (as in slice 7), and the check comes last because it reads
-what the adoptions leave.
+**Organization**: Grouped by user story. The shared package is written and released first, the engine adopts before the connector (as in slice 7), and the check comes last because it reads what the adoptions leave.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -30,17 +22,13 @@ what the adoptions leave.
 
 ## Path Conventions
 
-Paths starting with `shared/` are in `guestgraph/service-conventions`; `engine/` is this
-repository; `connector/` is `guestgraph/connector-apaleo`; `site/` is
-`guestgraph/guestgraph.github.io`. Every other path is relative to the repository the task
-names. The shared package's path in a service is `src/main/java/io/guestgraph/service/`.
+Paths starting with `shared/` are in `guestgraph/service-conventions`; `engine/` is this repository; `connector/` is `guestgraph/connector-apaleo`; `site/` is `guestgraph/guestgraph.github.io`. Every other path is relative to the repository the task names. The shared package's path in a service is `src/main/java/io/guestgraph/service/`.
 
 ---
 
 ## Phase 1: Setup (the runtime module)
 
-**Purpose**: A place in the shared repository where the shared sources compile, format and test
-before any service takes them.
+**Purpose**: A place in the shared repository where the shared sources compile, format and test before any service takes them.
 
 - [x] T001 Create `shared/spring/runtime/pom.xml`: a Maven module `io.guestgraph:service-runtime` naming the parent `service-parent` by `<relativePath>../pom.xml</relativePath>`, with `spring-boot-starter-webmvc` and `spring-boot-starter-test`, no application class; `./mvnw -q verify` in it passes empty; add it to `shared/tests/run` as a step and to `shared/.github/workflows/tests.yml` with `actions/setup-java@v6`; the module is never vendored
 - [x] T002 [P] Extend `shared/spring/service-conventions-sync`: a second list `RUNTIME="Problems.java ServiceException.java ServiceExceptionHandler.java RequestSizeLimitFilter.java ApiDocsController.java BearerTokenFilter.java"` fetched from `<stack>/runtime/src/main/java/io/guestgraph/service/` and written to `src/main/java/io/guestgraph/service/`, compared by `check` like every other file; extend `shared/tests/run`'s sync cases with a runtime file drifted and one missing
@@ -72,8 +60,7 @@ before any service takes them.
 
 **Goal**: Both services answer every refusal through the shared shape, and every type resolves.
 
-**Independent Test**: A refusal from each origin in each service is a problem detail with a
-type under the family's base; the 500 is logged and says nothing.
+**Independent Test**: A refusal from each origin in each service is a problem detail with a type under the family's base; the 500 is logged and says nothing.
 
 ### Tests for User Story 1 ⚠
 
@@ -93,11 +80,9 @@ type under the family's base; the 500 is logged and says nothing.
 
 ## Phase 4: User Story 2 - The Few Classes Every Service Carries (Priority: P2)
 
-**Goal**: A change to a shared class reaches both services by one pin move, and a vendored
-copy edited in a service fails the sync check.
+**Goal**: A change to a shared class reaches both services by one pin move, and a vendored copy edited in a service fails the sync check.
 
-**Independent Test**: Change one line in the shared repository, release, move a pin, re-sync:
-the diff is the pin and the class; edit a vendored class in a service: the sync check fails.
+**Independent Test**: Change one line in the shared repository, release, move a pin, re-sync: the diff is the pin and the class; edit a vendored class in a service: the sync check fails.
 
 - [x] T017 [US2] Walk quickstart step 2 with a real change: the `payload-too-large` detail sentence in `Problems`, released as `v0.6.1`; move each service's pin in its own pull request and read the diff. Record the walk in the shared repository's README under "How a rule changes" as the runtime's example
 - [x] T018 [P] [US2] Update `shared/new-service`: no `ApiDocsController` and no `RequestSizeLimitFilter` of its own, `service.max-request-bytes` in its `application.yaml`, the shared package vendored by the sync it runs; `sh tests/run`'s scaffold case passes; `./mvnw verify` in a scaffolded service with the wrapper copied in passes
@@ -108,11 +93,9 @@ the diff is the pin and the class; edit a vendored class in a service: the sync 
 
 ## Phase 5: User Story 3 - The Check Reads the Error Shape (Priority: P3)
 
-**Goal**: The service check names a problem written by hand, a framework status exception, an
-advice of a service's own, and a filter writing a body, in the service's own code.
+**Goal**: The service check names a problem written by hand, a framework status exception, an advice of a service's own, and a filter writing a body, in the service's own code.
 
-**Independent Test**: The check names nothing in either service; a planted violation fails it
-naming the file.
+**Independent Test**: The check names nothing in either service; a planted violation fails it naming the file.
 
 ### Tests for User Story 3 ⚠
 
@@ -159,15 +142,11 @@ naming the file.
 
 ### MVP First (User Story 1 Only)
 
-Phases 1 to 3: the module, the six classes with their tests, `v0.6.0`, both adoptions and the
-problems page. A caller then reads one shape from both services with types that resolve.
+Phases 1 to 3: the module, the six classes with their tests, `v0.6.0`, both adoptions and the problems page. A caller then reads one shape from both services with types that resolve.
 
 ### Incremental Delivery
 
-Phase 4 proves the pin move with a real change and brings the scaffold along; phase 5 turns the
-shape into a check and releases `v0.7.0`; phase 6 records the amendments and walks the
-quickstart. Three releases of the shared repository, and each service moves its pin three
-times.
+Phase 4 proves the pin move with a real change and brings the scaffold along; phase 5 turns the shape into a check and releases `v0.7.0`; phase 6 records the amendments and walks the quickstart. Three releases of the shared repository, and each service moves its pin three times.
 
 ## Notes
 

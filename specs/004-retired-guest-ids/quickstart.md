@@ -1,16 +1,12 @@
 # Quickstart & Validation: Retired Guest Ids Resolve
 
-**Feature**: 004-retired-guest-ids
-**Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) (schemas; the changed operations are amended in the slice-1 and slice-3 contract files, research R5)
-**Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
+**Feature**: 004-retired-guest-ids **Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) (schemas; the changed operations are amended in the slice-1 and slice-3 contract files, research R5) **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
 
 ## Prerequisites
 
-As slices 1–3: JDK 25, Docker, `./mvnw`. Local run: `./mvnw spring-boot:run
--Dspring-boot.run.profiles=local` (tenant `demo` / key `demo-key`).
+As slices 1–3: JDK 25, Docker, `./mvnw`. Local run: `./mvnw spring-boot:run -Dspring-boot.run.profiles=local` (tenant `demo` / key `demo-key`).
 
-The migration adds two indexes only, but Flyway still records it: a local volume created before it
-fails the checksum check, so `docker compose down -v` and re-run.
+The migration adds two indexes only, but Flyway still records it: a local volume created before it fails the checksum check, so `docker compose down -v` and re-run.
 
 ## Run the test suite (primary validation)
 
@@ -35,8 +31,7 @@ Expected green, including the new suites:
 
 ## End-to-end smoke walk (maps to the spec's user stories)
 
-Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`,
-`Content-Type: application/json`. `$B` and `$H` as in the slice-2 quickstart.
+Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`, `Content-Type: application/json`. `$B` and `$H` as in the slice-2 quickstart.
 
 ### US1 — a stored id never goes dark
 

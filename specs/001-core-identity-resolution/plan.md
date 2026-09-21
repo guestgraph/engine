@@ -8,49 +8,31 @@
 
 ## Summary
 
-Build the GuestGraph core service: a single Spring Boot application that ingests raw guest
-records per tenant, stores them immutably, resolves identities deterministically on normalized
-strong identifiers (with transitive merging, MergeEvent audit, explain/unmerge, and a
-match-review queue for suspicious matches), derives golden Guest profiles via survivorship
-rules, and exposes everything through a tenant-scoped `/api/v1` REST API with RFC 9457 errors
-and per-tenant API-key auth. The resolution engine is built TDD-first behind a candidate-scoring
-`ResolutionStrategy` interface so slice-2 probabilistic matching lands without redesign or
-schema migration.
+Build the GuestGraph core service: a single Spring Boot application that ingests raw guest records per tenant, stores them immutably, resolves identities deterministically on normalized strong identifiers (with transitive merging, MergeEvent audit, explain/unmerge, and a match-review queue for suspicious matches), derives golden Guest profiles via survivorship rules, and exposes everything through a tenant-scoped `/api/v1` REST API with RFC 9457 errors and per-tenant API-key auth. The resolution engine is built TDD-first behind a candidate-scoring `ResolutionStrategy` interface so slice-2 probabilistic matching lands without redesign or schema migration.
 
 ## Technical Context
 
 **Language/Version**: Java 25 (virtual threads enabled: `spring.threads.virtual.enabled=true`)
 
-**Primary Dependencies**: Spring Boot 4 (web, validation, data-jpa), MapStruct
-(entity → domain mapping, research R1), Flyway (schema migrations), libphonenumber
-(E.164 phone normalization), Jackson (JSON payload handling)
+**Primary Dependencies**: Spring Boot 4 (web, validation, data-jpa), MapStruct (entity → domain mapping, research R1), Flyway (schema migrations), libphonenumber (E.164 phone normalization), Jackson (JSON payload handling)
 
-**Storage**: PostgreSQL 18 (always latest released major) — relational schema + `jsonb` for immutable raw payloads;
-per-tenant advisory locks (`pg_advisory_xact_lock`) around merge operations
+**Storage**: PostgreSQL 18 (always latest released major) — relational schema + `jsonb` for immutable raw payloads; per-tenant advisory locks (`pg_advisory_xact_lock`) around merge operations
 
-**Testing**: JUnit 5 + AssertJ; resolution engine via table-driven scenario tests (TDD);
-Testcontainers (PostgreSQL) for repository and API integration tests; Spring Boot Test with
-`RestClient` against a random-port server for the API layer; ArchUnit persistence guardrails
+**Testing**: JUnit 5 + AssertJ; resolution engine via table-driven scenario tests (TDD); Testcontainers (PostgreSQL) for repository and API integration tests; Spring Boot Test with `RestClient` against a random-port server for the API layer; ArchUnit persistence guardrails
 
 **Target Platform**: Linux server (JVM 25); local dev via Docker Compose (Postgres)
 
 **Project Type**: web-service — single Spring Boot service, single Maven module
 
-**Performance Goals**: single-record ingest resolves synchronously in < 1 s under normal load
-(SC-002); batch ingest processes records independently without one failure blocking others
+**Performance Goals**: single-record ingest resolves synchronously in < 1 s under normal load (SC-002); batch ingest processes records independently without one failure blocking others
 
-**Constraints**: every table/query/endpoint tenant-scoped; source records immutable after
-insert; no parseable data dropped (`needs_review` instead); all errors RFC 9457; merge
-concurrency serialized per tenant via Postgres advisory locks; data model probabilistic-ready
-(confidence, matcher metadata, review queue)
+**Constraints**: every table/query/endpoint tenant-scoped; source records immutable after insert; no parseable data dropped (`needs_review` instead); all errors RFC 9457; merge concurrency serialized per tenant via Postgres advisory locks; data model probabilistic-ready (confidence, matcher metadata, review queue)
 
-**Scale/Scope**: OSS core, single-instance deployments initially; design for ~10⁶ source
-records / ~10⁵ guests per tenant; 9 REST endpoints, 8 core entities
+**Scale/Scope**: OSS core, single-instance deployments initially; design for ~10⁶ source records / ~10⁵ guests per tenant; 9 REST endpoints, 8 core entities
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
 - [x] **Tenant isolation (I)**: every table carries `tenant_id` (see data-model.md); all
       uniqueness constraints are composite with `tenant_id`; tenant is resolved from the API
@@ -79,8 +61,7 @@ records / ~10⁵ guests per tenant; 9 REST endpoints, 8 core entities
       foreign keys, so future per-guest export/erasure can enumerate it; ID documents stored
       hashed only.
 
-**Post-design re-check (after Phase 1)**: PASS — data-model.md and contracts/openapi.yaml
-introduce no violations; Complexity Tracking is empty.
+**Post-design re-check (after Phase 1)**: PASS — data-model.md and contracts/openapi.yaml introduce no violations; Complexity Tracking is empty.
 
 ## Project Structure
 
@@ -135,10 +116,7 @@ src/
         └── contract/                 # API ↔ openapi.yaml conformance tests
 ```
 
-**Structure Decision**: Single Maven module at the repository root (constitution: "single
-module until slice 2 forces modularization — do not pre-modularize"). Packages, not modules,
-separate the engine (`resolution`, `normalize`, `survivorship`) from transport (`api`, `auth`)
-and storage (`persistence`), keeping the engine unit-testable without Spring or a database.
+**Structure Decision**: Single Maven module at the repository root (constitution: "single module until slice 2 forces modularization — do not pre-modularize"). Packages, not modules, separate the engine (`resolution`, `normalize`, `survivorship`) from transport (`api`, `auth`) and storage (`persistence`), keeping the engine unit-testable without Spring or a database.
 
 ### Component view
 
@@ -169,9 +147,7 @@ flowchart LR
     PERS --> PG
 ```
 
-The engine subgraph depends only on `GraphPort` — the table-driven scenario tests run it
-against the in-memory `InMemoryGraph`; production wires `PostgresGraph` (ArchUnit enforces
-that JPA never leaks past `persistence`).
+The engine subgraph depends only on `GraphPort` — the table-driven scenario tests run it against the in-memory `InMemoryGraph`; production wires `PostgresGraph` (ArchUnit enforces that JPA never leaks past `persistence`).
 
 ## Complexity Tracking
 

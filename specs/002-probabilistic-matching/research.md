@@ -2,9 +2,7 @@
 
 **Feature**: 002-probabilistic-matching | **Date**: 2026-07-10
 
-No `NEEDS CLARIFICATION` items — approach, policy, and scope are fixed by the approved
-design doc (docs/superpowers/specs/2026-07-10-probabilistic-matching-design.md).
-Research resolves implementation-level choices.
+No `NEEDS CLARIFICATION` items — approach, policy, and scope are fixed by the approved design doc (docs/superpowers/specs/2026-07-10-probabilistic-matching-design.md). Research resolves implementation-level choices.
 
 ## R2-1. Similarity & phonetics libraries
 

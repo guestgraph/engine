@@ -1,16 +1,12 @@
 # Quickstart & Validation: Guest Timeline & Attributed Decisions
 
-**Feature**: 003-timeline-journey
-**Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) (new endpoints; slice-1/2 surface unchanged)
-**Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
+**Feature**: 003-timeline-journey **Contracts**: [contracts/openapi.yaml](contracts/openapi.yaml) (new endpoints; slice-1/2 surface unchanged) **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
 
 ## Prerequisites
 
-As slices 1–2: JDK 25, Docker, `./mvnw`. Local run: `./mvnw spring-boot:run
--Dspring-boot.run.profiles=local` (tenant `demo` / key `demo-key`).
+As slices 1–2: JDK 25, Docker, `./mvnw`. Local run: `./mvnw spring-boot:run -Dspring-boot.run.profiles=local` (tenant `demo` / key `demo-key`).
 
-After the migration lands, a stale local volume will fail Flyway's checksum check:
-`docker compose down -v`, then re-run.
+After the migration lands, a stale local volume will fail Flyway's checksum check: `docker compose down -v`, then re-run.
 
 ## Run the test suite (primary validation)
 
@@ -33,8 +29,7 @@ Expected green, including the new suites:
 
 ## End-to-end smoke walk (maps to the spec's user stories)
 
-Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`,
-`Content-Type: application/json`. `$B` and `$H` as in the slice-2 quickstart.
+Base `http://localhost:8080/api/v1`, headers `X-API-Key: demo-key`, `Content-Type: application/json`. `$B` and `$H` as in the slice-2 quickstart.
 
 ### US1 — a booking appears once, showing its latest state
 

@@ -6,28 +6,17 @@
 
 ## Summary
 
-The code-level rules of the guestgraph services move into one repository,
-`guestgraph/service-conventions`, that each service vendors at a pinned release with a sync
-check, the shape the family already uses for its prose and git rules. The shared files are a
-parent POM taken by path, the PMD ruleset, the architecture rules as one test class, the diagram
-script, the workflow and a service check that reads a service against the list of what every
-service must have. Both services adopt it and close the gaps the comparison found: the engine
-moves its packages under `io.guestgraph.engine` and answers a health check; the connector moves
-its endpoints under `api`, serves its API document, caps request bodies, carries a diagram with
-a drift check and a local profile. No table, no contract and no behavior beyond those changes.
+The code-level rules of the guestgraph services move into one repository, `guestgraph/service-conventions`, that each service vendors at a pinned release with a sync check, the shape the family already uses for its prose and git rules. The shared files are a parent POM taken by path, the PMD ruleset, the architecture rules as one test class, the diagram script, the workflow and a service check that reads a service against the list of what every service must have. Both services adopt it and close the gaps the comparison found: the engine moves its packages under `io.guestgraph.engine` and answers a health check; the connector moves its endpoints under `api`, serves its API document, caps request bodies, carries a diagram with a drift check and a local profile. No table, no contract and no behavior beyond those changes.
 
 ## Technical Context
 
-**Language/Version**: Java 25 in both services, unchanged; the scripts in POSIX sh, as the
-family's are.
+**Language/Version**: Java 25 in both services, unchanged; the scripts in POSIX sh, as the family's are.
 
-**Primary Dependencies**: Spring Boot 4 with the actuator now in both services; Maven's parent by
-`relativePath`; PMD, Spotless, ArchUnit as before; mermerd for the diagram, as the engine has.
+**Primary Dependencies**: Spring Boot 4 with the actuator now in both services; Maven's parent by `relativePath`; PMD, Spotless, ArchUnit as before; mermerd for the diagram, as the engine has.
 
 **Storage**: none new; no migration in either service.
 
-**Testing**: the shared repository tests its two scripts against fixtures; each service's suite
-proves its items with new integration tests; ArchUnit runs from the vendored class.
+**Testing**: the shared repository tests its two scripts against fixtures; each service's suite proves its items with new integration tests; ArchUnit runs from the vendored class.
 
 **Target Platform**: Linux server for the services; the scripts run on macOS and Linux.
 
@@ -35,18 +24,13 @@ proves its items with new integration tests; ArchUnit runs from the vendored cla
 
 **Performance Goals**: none; the checks add seconds to a CI run.
 
-**Constraints**: no publish step anywhere (research R1); every service keeps one Maven module;
-no contract line changes (FR-010); the package moves are single commits verified by the suites
-(R5).
+**Constraints**: no publish step anywhere (research R1); every service keeps one Maven module; no contract line changes (FR-010); the package moves are single commits verified by the suites (R5).
 
-**Scale/Scope**: 1 new repository with the list, 8 shared files of one stack and a scaffold script; in the engine 165
-Java files renamed, 1 dependency, 1 test, the parent adopted; in the connector 15 files moved,
-4 items added with their tests, the parent adopted; 1 conventions release; 3 agent files.
+**Scale/Scope**: 1 new repository with the list, 8 shared files of one stack and a scaffold script; in the engine 165 Java files renamed, 1 dependency, 1 test, the parent adopted; in the connector 15 files moved, 4 items added with their tests, the parent adopted; 1 conventions release; 3 agent files.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-*Source: `.specify/memory/constitution.md` v1.0.0*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.* *Source: `.specify/memory/constitution.md` v1.0.0*
 
 **Initial evaluation — PASS.** **Post-design re-evaluation — PASS.**
 
@@ -126,9 +110,7 @@ guestgraph/connector-apaleo/
 robertblust/conventions                          # a release adding the repository to REPOSITORIES.md (R7)
 ```
 
-**Structure Decision**: One new repository holding files, no new module in either service. The
-services change where their packages sit and gain the items the list names; everything shared
-arrives by the sync and is never edited in place.
+**Structure Decision**: One new repository holding files, no new module in either service. The services change where their packages sit and gain the items the list names; everything shared arrives by the sync and is never edited in place.
 
 ## Design Decisions Carried From Phase 0
 
@@ -148,11 +130,7 @@ arrives by the sync and is never edited in place.
 
 No Constitution Check violations — the table is intentionally empty.
 
-Two choices worth naming. **A parent POM by `relativePath`** is unusual outside multi-module
-builds; it is used here because it is the one Maven mechanism that shares versions and plugin
-configuration without a repository to publish to, and the sync check holds the file it reads.
-**An ArchUnit test in the default package** is unusual too; it is what lets one vendored file run
-in every service without a package path to match, reading the root from the pin.
+Two choices worth naming. **A parent POM by `relativePath`** is unusual outside multi-module builds; it is used here because it is the one Maven mechanism that shares versions and plugin configuration without a repository to publish to, and the sync check holds the file it reads. **An ArchUnit test in the default package** is unusual too; it is what lets one vendored file run in every service without a package path to match, reading the root from the pin.
 
 ## Follow-ons Not In This Slice
 

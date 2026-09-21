@@ -1,21 +1,14 @@
 # How GuestGraph decides two records are the same person
 
-This is the reference for the matching rules: what makes two records candidates, how a
-candidate is scored, and what happens to the score. It is written for stewards reading a
-review entry, operators tuning thresholds, and contributors adding a matcher.
+This is the reference for the matching rules: what makes two records candidates, how a candidate is scored, and what happens to the score. It is written for stewards reading a review entry, operators tuning thresholds, and contributors adding a matcher.
 
-**Keyed by matcher version.** Every merge event permanently records the `matcherName` that
-decided it, and merge events are never deleted. So this document is organized by matcher
-version and is append-only: when `fuzzy-rules-v2` lands, it gets its own section and the
-`fuzzy-rules-v1` section stays, because events from 2026 must remain interpretable in 2030.
+**Keyed by matcher version.** Every merge event permanently records the `matcherName` that decided it, and merge events are never deleted. So this document is organized by matcher version and is append-only: when `fuzzy-rules-v2` lands, it gets its own section and the `fuzzy-rules-v1` section stays, because events from 2026 must remain interpretable in 2030.
 
 ---
 
 ## The model: layered confidence
 
-The goal is not to replace deterministic matching with something cleverer. It is a **layered
-confidence model**, where each layer decides only what it is entitled to decide and hands the
-rest upward — and where every layer's decisions are explainable and reversible.
+The goal is not to replace deterministic matching with something cleverer. It is a **layered confidence model**, where each layer decides only what it is entitled to decide and hands the rest upward — and where every layer's decisions are explainable and reversible.
 
 | Layer | Decides | Confidence | Reversible by |
 | --- | --- | --- | --- |
@@ -31,22 +24,15 @@ Two properties hold across every layer, and they are why the layers can be added
 - **Every merge can be undone**, and an unmerge writes a persistent do-not-merge rule, so the
   correction survives new evidence rather than being silently re-merged.
 
-That ordering is deliberate. The safety machinery — review queue, unmerge, negative rules,
-confidence metadata — shipped in slice 1, *before* any probabilistic decision existed,
-precisely so nothing uncertain could ever be trusted without it. Each new layer is "another
-imperfect matcher" gated by machinery that already works.
+That ordering is deliberate. The safety machinery — review queue, unmerge, negative rules, confidence metadata — shipped in slice 1, *before* any probabilistic decision existed, precisely so nothing uncertain could ever be trusted without it. Each new layer is "another imperfect matcher" gated by machinery that already works.
 
-**What is not the goal:** a single model that swallows the whole problem. Deterministic
-identifier matching is not a weaker version of fuzzy matching — it is a different kind of
-claim, and it keeps confidence 1.0 because it deserves it.
+**What is not the goal:** a single model that swallows the whole problem. Deterministic identifier matching is not a weaker version of fuzzy matching — it is a different kind of claim, and it keeps confidence 1.0 because it deserves it.
 
 ---
 
 ## Layer 1 — deterministic identifiers
 
-Two records that share a normalized strong identifier resolve to the same guest, at confidence
-1.0. Identifiers are normalized before comparison: emails lowercased and trimmed, phones to
-E.164, ID documents hashed (never stored in plaintext).
+Two records that share a normalized strong identifier resolve to the same guest, at confidence 1.0. Identifiers are normalized before comparison: emails lowercased and trimmed, phones to E.164, ID documents hashed (never stored in plaintext).
 
 Two things can stop a deterministic merge:
 
@@ -61,25 +47,19 @@ Two things can stop a deterministic merge:
   | `PERFECT_MATCH` | may connect guests only when the names agree exactly, otherwise review |
   | `MASKED_ALIAS` | OTA relay addresses (`…@guest.booking.com`) — never merges on its own |
 
-There is also a **sharing threshold** (`review_threshold`, default 10): an identifier appearing
-on unusually many records is suspicious rather than conclusive, and further records carrying it
-are parked for review instead of merged.
+There is also a **sharing threshold** (`review_threshold`, default 10): an identifier appearing on unusually many records is suspicious rather than conclusive, and further records carrying it are parked for review instead of merged.
 
 ---
 
 ## Layer 2 — `fuzzy-rules-v1`
 
-Rule-based. **There is no machine learning in this matcher** — no model, no training, no learned
-weights. The name says so on purpose, and it is recorded on every event it decides.
+Rule-based. **There is no machine learning in this matcher** — no model, no training, no learned weights. The name says so on purpose, and it is recorded on every event it decides.
 
-It runs in two stages that use two different algorithms, because the stages need different
-*shapes* of answer.
+It runs in two stages that use two different algorithms, because the stages need different *shapes* of answer.
 
 ### Stage 1: blocking — which pairs get scored at all
 
-You cannot ask a database index for "rows similar to this", only "rows equal to this". So
-candidate discovery needs a function that collapses similar records onto the *same* string. At
-ingest each record derives blocking keys, stored immutably beside it:
+You cannot ask a database index for "rows similar to this", only "rows equal to this". So candidate discovery needs a function that collapses similar records onto the *same* string. At ingest each record derives blocking keys, stored immutably beside it:
 
 | Key | Derivation | Catches |
 | --- | --- | --- |
@@ -89,17 +69,13 @@ ingest each record derives blocking keys, stored immutably beside it:
 | `EMAIL_LOCALPART` | text before the `@`, real emails only | same person across providers |
 | `EMAIL_MASKED` | the whole relay address | repeat bookings behind one OTA alias |
 
-**Blocking is a recall filter, not a decision.** Sharing a key makes two records candidates; it
-proves nothing on its own.
+**Blocking is a recall filter, not a decision.** Sharing a key makes two records candidates; it proves nothing on its own.
 
 ### Stage 2: scoring — how good a candidate is
 
-Jaro-Winkler string similarity on diacritic-folded text. **Not phonetic** — phonetics decided
-*which pairs to look at*; scoring needs a gradient, and a phonetic code is only ever equal or
-not.
+Jaro-Winkler string similarity on diacritic-folded text. **Not phonetic** — phonetics decided *which pairs to look at*; scoring needs a gradient, and a phonetic code is only ever equal or not.
 
-The name signal takes the better of the two name orderings, so "Anna Müller" and "Mueller Anna"
-score as the same person.
+The name signal takes the better of the two name orderings, so "Anna Müller" and "Mueller Anna" score as the same person.
 
 | Signal | Weight | How it is measured |
 | --- | --- | --- |
@@ -133,8 +109,7 @@ Four rules are doing real work here, and each exists to prevent a specific wrong
 - **The 0.999 cap.** Certainty belongs to deterministic identifiers. It also makes
   `auto_merge_threshold = 1.0` genuinely mean *off* rather than *very unlikely*.
 
-**A candidate needs a name plus at least one other signal.** A name alone yields no score at
-all — not a low one. Scoring on a single common name would flood the queue with noise.
+**A candidate needs a name plus at least one other signal.** A name alone yields no score at all — not a low one. Scoring on a single common name would flood the queue with noise.
 
 ### Stage 3: banding — what happens to the score
 
@@ -144,8 +119,7 @@ all — not a low one. Scoring on a single common name would flood the queue wit
 | review | `score ≥ review_floor` | parked in the review queue with its breakdown |
 | discard | below `review_floor` | nothing happens |
 
-At-threshold belongs to the higher band. Both thresholds are per tenant, readable and writable
-at `GET|PUT /api/v1/config/matching`.
+At-threshold belongs to the higher band. Both thresholds are per tenant, readable and writable at `GET|PUT /api/v1/config/matching`.
 
 **The shipped defaults mean fuzzy matching never merges anything:**
 
@@ -154,10 +128,7 @@ auto_merge_threshold = 1.000    # and fuzzy scores cap at 0.999
 review_floor         = 0.750
 ```
 
-The auto-merge band is provably empty until a tenant explicitly lowers the threshold. Out of the
-box, probabilistic matching is a *suggestion engine* — it finds duplicates exact matching cannot
-see and shows a human why it thinks so. Lowering the threshold is an explicit act of trust, and
-it is reversible.
+The auto-merge band is provably empty until a tenant explicitly lowers the threshold. Out of the box, probabilistic matching is a *suggestion engine* — it finds duplicates exact matching cannot see and shows a human why it thinks so. Lowering the threshold is an explicit act of trust, and it is reversible.
 
 ### Worked examples
 
@@ -181,8 +152,7 @@ The last two rows are the honest limits:
 
 ### Reading a review entry
 
-Every scored decision carries its breakdown, in the review entry and in the merge event's
-evidence:
+Every scored decision carries its breakdown, in the review entry and in the merge event's evidence:
 
 ```json
 {"signals": {"name":      {"value": 0.94, "weight": 0.45},
@@ -191,39 +161,23 @@ evidence:
  "score": 0.88}
 ```
 
-Read it as: the names are very similar, the birthdates match exactly, the phones match — and
-nothing contradicted. The score is below 1.0 because no strong identifier was shared and two of
-the five signals were unobserved.
+Read it as: the names are very similar, the birthdates match exactly, the phones match — and nothing contradicted. The score is below 1.0 because no strong identifier was shared and two of the five signals were unobserved.
 
 ---
 
 ## Layer 3 — an agent as steward (planned)
 
-Not built. The intent is three-tier stewardship: rules decide the clear cases, an agent decides
-high-confidence reviews over MCP tools mapping 1:1 to the REST surface, and ambiguous ones
-escalate to a human with a summarized recommendation.
+Not built. The intent is three-tier stewardship: rules decide the clear cases, an agent decides high-confidence reviews over MCP tools mapping 1:1 to the REST surface, and ambiguous ones escalate to a human with a summarized recommendation.
 
-Structurally an agent is just another imperfect matcher, gated by the same machinery. Its
-prerequisites are tracked in [roadmap-notes.md](roadmap-notes.md) under R5-1; actor identity
-(who decided — system, human, or a named agent) shipped in slice 3, and do-not-merge rules now
-record both the actor who created a split and the actor who lifted it, so the rule *"an agent
-never overrides a human's explicit split"* becomes a single-row comparison. That restriction is
-enabled but not yet enforced.
+Structurally an agent is just another imperfect matcher, gated by the same machinery. Its prerequisites are tracked in [roadmap-notes.md](roadmap-notes.md) under R5-1; actor identity (who decided — system, human, or a named agent) shipped in slice 3, and do-not-merge rules now record both the actor who created a split and the actor who lifted it, so the rule *"an agent never overrides a human's explicit split"* becomes a single-row comparison. That restriction is enabled but not yet enforced.
 
 ## On "ML"
 
-The roadmap says *"fuzzy/ML resolution"*. Today the ML half is a direction, not an
-implementation: there is no model, no training pipeline, and no ML dependency in `pom.xml`.
+The roadmap says *"fuzzy/ML resolution"*. Today the ML half is a direction, not an implementation: there is no model, no training pipeline, and no ML dependency in `pom.xml`.
 
-What makes it feasible later is that it needs no redesign. `ResolutionStrategy` is a single
-method — *candidates in, scored decisions out* — and `fuzzy-rules-v1` is already its second
-implementation; a model would be the third, with bands, review queue, explain, and unmerge
-unchanged. The constitution pre-authorizes a sidecar (e.g. Python/ONNX) behind that contract.
+What makes it feasible later is that it needs no redesign. `ResolutionStrategy` is a single method — *candidates in, scored decisions out* — and `fuzzy-rules-v1` is already its second implementation; a model would be the third, with bands, review queue, explain, and unmerge unchanged. The constitution pre-authorizes a sidecar (e.g. Python/ONNX) behind that contract.
 
-The more interesting part: **every decision already persists its full feature vector**, and every
-review carries a `CONFIRMED`/`REJECTED` outcome. So stewards doing ordinary work are emitting
-labeled training data — feature vector plus human verdict — on the tenant's own data. Nobody
-has built that pipeline, but the data is accruing in the right shape.
+The more interesting part: **every decision already persists its full feature vector**, and every review carries a `CONFIRMED`/`REJECTED` outcome. So stewards doing ordinary work are emitting labeled training data — feature vector plus human verdict — on the tenant's own data. Nobody has built that pipeline, but the data is accruing in the right shape.
 
 ---
 
@@ -234,10 +188,6 @@ has built that pipeline, but the data is accruing in the right shape.
 - Band routing: `MatchingPolicy`
 - Thresholds: per tenant, `GET|PUT /api/v1/config/matching`
 
-A change to any of the first three is a **new matcher version**, not an edit: bump the name,
-add a section here, and leave the old one. Existing merge events name the matcher that decided
-them, and they must stay readable.
+A change to any of the first three is a **new matcher version**, not an edit: bump the name, add a section here, and leave the old one. Existing merge events name the matcher that decided them, and they must stay readable.
 
-Scenario tests are the specification of this behavior — `FuzzyScenarioTest` and
-`ResolutionScenarioTest` run pure-JVM against an in-memory graph. Per the constitution,
-resolution-engine changes are test-first: the failing scenario comes before the rule.
+Scenario tests are the specification of this behavior — `FuzzyScenarioTest` and `ResolutionScenarioTest` run pure-JVM against an in-memory graph. Per the constitution, resolution-engine changes are test-first: the failing scenario comes before the rule.

@@ -1,13 +1,10 @@
 # Roadmap notes — requirements captured for future slices
 
-Requirements that surfaced during slice 1 but belong to later slices. Each slice's
-`/speckit-specify` run MUST consume its section here.
+Requirements that surfaced during slice 1 but belong to later slices. Each slice's `/speckit-specify` run MUST consume its section here.
 
 ## Cross-slice — capability parity with mutable-record identity systems
 
-Identity services built on mutable rows (one row per source object, upserted in place)
-offer conveniences that immutability removes; each needs an audit-preserving
-replacement:
+Identity services built on mutable rows (one row per source object, upserted in place) offer conveniences that immutability removes; each needs an audit-preserving replacement:
 
 - **R-X1 Steward corrections (was: `PATCH /guest-identities`)** — corrections enter as
   ordinary immutable records via a built-in `manual-corrections` source system, so
@@ -66,17 +63,9 @@ replacement:
 
 ### R5-1: AI agent as merge steward (real goal, not a nice-to-have)
 
-The review queue is deliberately agent-ready: entries carry per-signal score breakdowns,
-`explain` + `/records` expose full evidence, decisions are exactly-once and reversible,
-and `merge_event.matcher_name`/`evidence` already accommodate an agent identity and its
-rationale. An AI steward is structurally "another imperfect matcher" — the same safety
-machinery (review bands, unmerge, negative rules) that gates probabilistic scores gates
-the agent.
+The review queue is deliberately agent-ready: entries carry per-signal score breakdowns, `explain` + `/records` expose full evidence, decisions are exactly-once and reversible, and `merge_event.matcher_name`/`evidence` already accommodate an agent identity and its rationale. An AI steward is structurally "another imperfect matcher" — the same safety machinery (review bands, unmerge, negative rules) that gates probabilistic scores gates the agent.
 
-**Operating model**: three-tier stewardship — rules decide the clear cases, the agent
-(over MCP tools mapping 1:1 to the REST surface: list/decide reviews, explain, records)
-decides high-confidence reviews and escalates ambiguous ones to a human with a
-summarized recommendation.
+**Operating model**: three-tier stewardship — rules decide the clear cases, the agent (over MCP tools mapping 1:1 to the REST surface: list/decide reviews, explain, records) decides high-confidence reviews and escalates ambiguous ones to a human with a summarized recommendation.
 
 **Prerequisites to build (small, some earlier than slice 5):**
 
@@ -180,21 +169,9 @@ summarized recommendation.
 
 ## Slice 5 follow-on — a subscription the connector could not remove — ✅ consumed by specs/009-remove-subscription
 
-The sandbox session of Sep 11, 2026 left a subscription in Apaleo pointing at a tunnel that was
-about to go down, and the connector had no way to take it away: it creates a subscription at
-start and confirms it during every reconciliation, and the webhook client had list and create and
-no delete. The only recourse was Apaleo's own API with the credentials the connector already
-holds. Agreed as deferred in conversation that day and never written down, which is how a
-deferral becomes a thing nobody can find; the specification is its first written form.
+The sandbox session of Sep 11, 2026 left a subscription in Apaleo pointing at a tunnel that was about to go down, and the connector had no way to take it away: it creates a subscription at start and confirms it during every reconciliation, and the webhook client had list and create and no delete. The only recourse was Apaleo's own API with the credentials the connector already holds. Agreed as deferred in conversation that day and never written down, which is how a deferral becomes a thing nobody can find; the specification is its first written form.
 
-*Taken by slice 9, Sep 14, 2026*: a delete and a put on
-`/connections/{connectionId}/subscription`, with four named states replacing the boolean that
-could not tell a connection deliberately without a subscription from one whose creation failed.
-Two decisions are worth carrying forward. The intended state is **not persisted**, so a restart
-subscribes every configured connection again: a column would have made a subscription removed in
-a sandbox session still absent months later while the connector looked healthy, and configuration
-is where "which connections this connector serves" belongs. And a **restore** exists because a
-removal nobody can reverse without a restart is one an operator will not use.
+*Taken by slice 9, Sep 14, 2026*: a delete and a put on `/connections/{connectionId}/subscription`, with four named states replacing the boolean that could not tell a connection deliberately without a subscription from one whose creation failed. Two decisions are worth carrying forward. The intended state is **not persisted**, so a restart subscribes every configured connection again: a column would have made a subscription removed in a sandbox session still absent months later while the connector looked healthy, and configuration is where "which connections this connector serves" belongs. And a **restore** exists because a removal nobody can reverse without a restart is one an operator will not use.
 
 Two findings the slice produced without looking for them.
 
@@ -216,53 +193,13 @@ Two findings the slice produced without looking for them.
 
 ## Next — Service conventions — ✅ consumed by specs/007-service-conventions
 
-Every guestgraph Java service should have the same shape by check, not by hand: the engine and
-the connector match in stack, guardrails and CI because the second copied the first, and nothing
-compares them. A comparison on Sep 10, 2026 found the connector serving no API document where
-the engine serves the union of its contracts at `/api-docs`, no request size cap on the webhook
-endpoint, no ER diagram with a drift job, no local profile and a thinner error layer, and the
-engine without a health endpoint. The slice: a repository `guestgraph/service-conventions`,
-vendored at a pinned tag like `conventions/`, holding the PMD ruleset, the Spotless
-configuration, the shared ArchUnit rules as source, the CI workflow templates and a service check
-that asserts the list every service must have; each service runs its sync check and the service
-check beside `verify` and `conventions`. Adding a repository means a conventions release naming
-it in `REPOSITORIES.md`.
+Every guestgraph Java service should have the same shape by check, not by hand: the engine and the connector match in stack, guardrails and CI because the second copied the first, and nothing compares them. A comparison on Sep 10, 2026 found the connector serving no API document where the engine serves the union of its contracts at `/api-docs`, no request size cap on the webhook endpoint, no ER diagram with a drift job, no local profile and a thinner error layer, and the engine without a health endpoint. The slice: a repository `guestgraph/service-conventions`, vendored at a pinned tag like `conventions/`, holding the PMD ruleset, the Spotless configuration, the shared ArchUnit rules as source, the CI workflow templates and a service check that asserts the list every service must have; each service runs its sync check and the service check beside `verify` and `conventions`. Adding a repository means a conventions release naming it in `REPOSITORIES.md`.
 
-*Taken by slice 7, Sep 11, 2026*: the repository exists, released four times on the day, and both
-services vendor it and pass the service check. Two decisions moved during the build. The served
-API lives under `src/main/resources/api/` in every service, with `sources.json` beside the
-documents naming where each comes from, rather than a POM bundling of the specs directory in the
-engine and a root directory in the connector; the engine's contracts under `specs/` stay the frozen
-records and are served as copies held equal to them. And what is shared is rules, configuration
-and one test class, not runtime code: the size filter, the health endpoint and the document
-controller are a few lines each service carries, because shared code needs a library and a
-publish step the family does not have; that is the follow-on.
+*Taken by slice 7, Sep 11, 2026*: the repository exists, released four times on the day, and both services vendor it and pass the service check. Two decisions moved during the build. The served API lives under `src/main/resources/api/` in every service, with `sources.json` beside the documents naming where each comes from, rather than a POM bundling of the specs directory in the engine and a root directory in the connector; the engine's contracts under `specs/` stay the frozen records and are served as copies held equal to them. And what is shared is rules, configuration and one test class, not runtime code: the size filter, the health endpoint and the document controller are a few lines each service carries, because shared code needs a library and a publish step the family does not have; that is the follow-on.
 
-*Amended Sep 11, 2026, service-conventions v0.5.0*: the served API is one file per service,
-`src/main/resources/api/openapi.yaml`, generated by the vendored `regen-api` from the sources
-`sources.json` names and held against a fresh generation in CI, as the diagram is held to the
-migrations; the engine's four records under `specs/` are its sources, the connector's is the
-engine's contract at a pinned commit. The copies of slice 7's first shape are gone, and a
-consumer reads the whole API in one file.
+*Amended Sep 11, 2026, service-conventions v0.5.0*: the served API is one file per service, `src/main/resources/api/openapi.yaml`, generated by the vendored `regen-api` from the sources `sources.json` names and held against a fresh generation in CI, as the diagram is held to the migrations; the engine's four records under `specs/` are its sources, the connector's is the engine's contract at a pinned commit. The copies of slice 7's first shape are gone, and a consumer reads the whole API in one file.
 
-*Amended Sep 11, 2026, specs/008-shared-runtime*: the follow-on is consumed. The runtime code is
-shared after all, as source vendored by the same sync into the package `io.guestgraph.service`,
-tested in a module of the shared repository, because a library needs a publish step the family
-does not have and a vendored copy held by a check does not. Every refusal from every service is
-a problem detail whose type is `https://guestgraph.io/problems/#<slug>`, and the page says what
-each slug means. The frozen contracts of slices 1 to 5 keep their status codes and are amended
-forward here with the slugs their problem responses carry: slice 1's source systems, records,
-guests, explain and unmerge answer `invalid-request`, `not-found`, `conflict`, `invalid-unmerge`
-and `payload-too-large`, with `unauthorized` and `invalid-actor-claim` from the key filter;
-slice 2's match reviews, matching configuration and identifier rules add
-`review-already-decided`; slice 3's timeline, source objects and negative rules answer
-`invalid-request` and `not-found`; slice 4's retired ids answer `guest-retired` with the members
-`guestId`, `resolutionStatus` and `currentGuestIds`; slice 5's connector API answers
-`unauthorized`, `not-found`, `run-in-progress`, `invalid-request` and `payload-too-large`; and
-every one answers `internal-error` from the shared advice, its detail saying nothing of the
-cause. Two follow-ons: a published library replacing the vendored copies without a rename, once
-the family has a repository to publish to; and the framework's own problems, a body that is not
-JSON among them, carrying the family's type rather than `about:blank`.
+*Amended Sep 11, 2026, specs/008-shared-runtime*: the follow-on is consumed. The runtime code is shared after all, as source vendored by the same sync into the package `io.guestgraph.service`, tested in a module of the shared repository, because a library needs a publish step the family does not have and a vendored copy held by a check does not. Every refusal from every service is a problem detail whose type is `https://guestgraph.io/problems/#<slug>`, and the page says what each slug means. The frozen contracts of slices 1 to 5 keep their status codes and are amended forward here with the slugs their problem responses carry: slice 1's source systems, records, guests, explain and unmerge answer `invalid-request`, `not-found`, `conflict`, `invalid-unmerge` and `payload-too-large`, with `unauthorized` and `invalid-actor-claim` from the key filter; slice 2's match reviews, matching configuration and identifier rules add `review-already-decided`; slice 3's timeline, source objects and negative rules answer `invalid-request` and `not-found`; slice 4's retired ids answer `guest-retired` with the members `guestId`, `resolutionStatus` and `currentGuestIds`; slice 5's connector API answers `unauthorized`, `not-found`, `run-in-progress`, `invalid-request` and `payload-too-large`; and every one answers `internal-error` from the shared advice, its detail saying nothing of the cause. Two follow-ons: a published library replacing the vendored copies without a rename, once the family has a repository to publish to; and the framework's own problems, a body that is not JSON among them, carrying the family's type rather than `about:blank`.
 
 ## Scale levers (when volume demands, not before)
 
@@ -277,19 +214,9 @@ JSON among them, carrying the family's type rather than `about:blank`.
 
 ### R3-1: "What reservations does this guest have?" — ✅ consumed by specs/003-timeline-journey
 
-Slice 1 answers *"what did we observe about this person"* (`GET /guests/{id}/records`);
-it deliberately does not answer *"what does this person currently have"*. Multiple
-observations of the same source object (e.g. Apaleo reservation `R1` whose guest was
-edited from person A to person B) live as independent immutable records on different
-guests — both guests' record lists reference R1, with no supersession link.
+Slice 1 answers *"what did we observe about this person"* (`GET /guests/{id}/records`); it deliberately does not answer *"what does this person currently have"*. Multiple observations of the same source object (e.g. Apaleo reservation `R1` whose guest was edited from person A to person B) live as independent immutable records on different guests — both guests' record lists reference R1, with no supersession link.
 
-Slice 3 made source objects (reservation first) first-class **associations** on resolved guests.
-Note what changed from the sketch below: rather than grouping by `(object, role slot)` and
-superseding slot by slot, **the object version became the unit of supersession** — the newest
-version's complete person roster determines who is on the object, and persons are never matched
-across versions. Sources carrying entity-less persons give no id to follow across edits, so slot
-tracking would have to guess, and would report a reassignment every time a guest list shrank. The
-roster model also makes *removal* detectable, which no slot scheme handles honestly.
+Slice 3 made source objects (reservation first) first-class **associations** on resolved guests. Note what changed from the sketch below: rather than grouping by `(object, role slot)` and superseding slot by slot, **the object version became the unit of supersession** — the newest version's complete person roster determines who is on the object, and persons are never matched across versions. Sources carrying entity-less persons give no id to follow across edits, so slot tracking would have to guess, and would report a reassignment every time a guest list shrank. The roster model also makes *removal* detectable, which no slot scheme handles honestly.
 
 The original sketch:
 
@@ -306,35 +233,17 @@ The original sketch:
 
 ### R3-2: A canceled booking on a guest's timeline — surfaced by specs/005-apaleo-connector
 
-An association carries business dates but no status, so a canceled or no-show reservation looks
-on the timeline exactly like one the guest will arrive for. The connector cannot express it: a
-cancellation changes no person, so under the roster rule it submits nothing, and if it did submit,
-the status would sit inside the payload where nothing reads it. If a consumer needs "does this
-guest currently hold a booking" to exclude cancellations, the answer is an optional status on the
-source-object block of the ingest contract and on the association, with a connector emitting a
-version when it changes — an engine slice, not a connector one.
+An association carries business dates but no status, so a canceled or no-show reservation looks on the timeline exactly like one the guest will arrive for. The connector cannot express it: a cancellation changes no person, so under the roster rule it submits nothing, and if it did submit, the status would sit inside the payload where nothing reads it. If a consumer needs "does this guest currently hold a booking" to exclude cancellations, the answer is an optional status on the source-object block of the ingest contract and on the association, with a connector emitting a version when it changes — an engine slice, not a connector one.
 
 ## Slice 4 — Connectors — ✅ consumed by specs/005-apaleo-connector
 
-**R-X5 is built** ([specs/004-retired-guest-ids](../specs/004-retired-guest-ids/spec.md)), so
-connectors may hold a `guestId`: writing one back into a PMS or CRM is what makes GuestGraph the
-system of record rather than a report. The connector contract states the integrator rule rather
-than a constraint: a stored guest id may be retired by a merge or a split; reading it answers
-`MERGED` with the one current id, which the connector stores in its place, or `SPLIT` with
-several, which the connector escalates rather than guesses. Every sub-resource under a retired
-id refuses with the current ids, so a connector that skips the read still fails loudly.
+**R-X5 is built** ([specs/004-retired-guest-ids](../specs/004-retired-guest-ids/spec.md)), so connectors may hold a `guestId`: writing one back into a PMS or CRM is what makes GuestGraph the system of record rather than a report. The connector contract states the integrator rule rather than a constraint: a stored guest id may be retired by a merge or a split; reading it answers `MERGED` with the one current id, which the connector stores in its place, or `SPLIT` with several, which the connector escalates rather than guesses. Every sub-resource under a retired id refuses with the current ids, so a connector that skips the read still fails loudly.
 
 ### R4-1: externalKey convention for mutable, multi-person source objects (Apaleo pattern) — contract published by specs/003-timeline-journey; amended by specs/005-apaleo-connector
 
-*Amended by slice 5*: the booker is a role on the **booking** object, not on the reservation. In
-Apaleo the booker lives on the booking with the booking's own modified instant and events, and a
-reservation only shows a copy of it on request; keyed by the reservation, a booker correction
-would not change the key and would be lost as a duplicate. So a connector emits two source
-objects — `reservation` with the primary and additional guests, `booking` with the booker — each
-versioned by its own clock, and derives the booking's business dates from its reservations.
+*Amended by slice 5*: the booker is a role on the **booking** object, not on the reservation. In Apaleo the booker lives on the booking with the booking's own modified instant and events, and a reservation only shows a copy of it on request; keyed by the reservation, a booker correction would not change the key and would be lost as a duplicate. So a connector emits two source objects — `reservation` with the primary and additional guests, `booking` with the booker — each versioned by its own clock, and derives the booking's business dates from its reservations.
 
-`externalKey` identifies an *observation*, not the source object (see slice-1 API
-contract). For PMS reservations carrying entity-less persons the convention is:
+`externalKey` identifies an *observation*, not the source object (see slice-1 API contract). For PMS reservations carrying entity-less persons the convention is:
 
 ```
 {reservationId}:{personRole}:{entityModifiedTimestamp}

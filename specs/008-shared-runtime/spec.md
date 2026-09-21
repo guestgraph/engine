@@ -63,20 +63,11 @@ A rule that holds by inspection is one that a new service or a hurried afternoon
 
 ### User Story 4 - The Configuration Every Service Starts From (Priority: P4)
 
-Both services' configuration files carry the same lines by hand: virtual threads, problem
-details, the schema pair read from one variable, the migration tool's schema, the persistence
-layer's validation, the compose lifecycle, health alone, the size cap's default. Only the
-schema's name differs. After this slice, those lines live once in the shared rules as a
-defaults document every service carries, loaded beneath everything else so a service's own
-configuration and its environment override it, and a service's own file keeps only what is its
-own: its name, its port, its schema's name, its datasource and its own properties.
+Both services' configuration files carry the same lines by hand: virtual threads, problem details, the schema pair read from one variable, the migration tool's schema, the persistence layer's validation, the compose lifecycle, health alone, the size cap's default. Only the schema's name differs. After this slice, those lines live once in the shared rules as a defaults document every service carries, loaded beneath everything else so a service's own configuration and its environment override it, and a service's own file keeps only what is its own: its name, its port, its schema's name, its datasource and its own properties.
 
-**Why this priority**: It is the same drift as the code's, in configuration, and it removes the
-last place where the two services say the same thing twice.
+**Why this priority**: It is the same drift as the code's, in configuration, and it removes the last place where the two services say the same thing twice.
 
-**Independent Test**: Delete the shared lines from a service's own configuration and start it:
-it behaves as before; set one of them in the service's own file to another value and verify the
-service's value wins.
+**Independent Test**: Delete the shared lines from a service's own configuration and start it: it behaves as before; set one of them in the service's own file to another value and verify the service's value wins.
 
 **Acceptance Scenarios**:
 

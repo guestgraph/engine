@@ -1,12 +1,10 @@
 # Quickstart & Validation: Service Conventions
 
-**Feature**: 007-service-conventions
-**Contract**: [contracts/service-conventions.md](contracts/service-conventions.md) · **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
+**Feature**: 007-service-conventions **Contract**: [contracts/service-conventions.md](contracts/service-conventions.md) · **Model**: [data-model.md](data-model.md) · **Research**: [research.md](research.md)
 
 ## Prerequisites
 
-JDK 25, Docker, `./mvnw` in both services; sh, curl and awk for the scripts; `gh` for the
-releases. Three checkouts: the engine, the connector and `guestgraph/service-conventions`.
+JDK 25, Docker, `./mvnw` in both services; sh, curl and awk for the scripts; `gh` for the releases. Three checkouts: the engine, the connector and `guestgraph/service-conventions`.
 
 ## Run the test suites (primary validation)
 
@@ -21,10 +19,7 @@ sh service-conventions/service-conventions-check
 sh conventions/conventions-check
 ```
 
-Expected green, including in the shared repository a fixture that passes and one fixture per
-item with that item removed, each failing with the item's line; in the engine the health test
-and every existing test unchanged; in the connector the API document test, the size cap test,
-the local profile start test and every existing test unchanged.
+Expected green, including in the shared repository a fixture that passes and one fixture per item with that item removed, each failing with the item's line; in the engine the health test and every existing test unchanged; in the connector the API document test, the size cap test, the local profile start test and every existing test unchanged.
 
 ## Walk
 
