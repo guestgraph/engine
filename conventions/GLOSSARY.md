@@ -46,5 +46,6 @@ The German cells are inline code because the prose check reads no language and a
 | claim | claim | `Anspruch` | What a profile asserts of itself and a page then has to show. blust.ch's model page: `Ein Anspruch ohne konkreten Beleg daneben ist im Modell ein Fehler`. |
 | evidence | evidence | `Beleg` | The fact a claim rests on, in the cell beside it. Same sentence as above. |
 | declare | declares | `deklariert` | Of what a schema states a type carries, or an instance states of itself. Not `erklärt`, which reads as explains. |
+| Swiss Standard German | Swiss Standard German | `Schweizer Hochdeutsch` | The written German of Switzerland, de-CH, the second language every page carries. Never `Swiss German`, which in English names the spoken dialect, `Schweizerdeutsch`, and which no page carries; an agent reading that name concludes the pages are in dialect. Neuter, `das Schweizer Hochdeutsch`. |
 
 English forms fixed here whose German no page carries yet, to be chosen the first time a text needs them: pack, design system, deck.
