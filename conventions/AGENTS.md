@@ -1,18 +1,19 @@
-<!-- conventions · v1.28.0 -->
+<!-- conventions · v1.29.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in `conventions/`, vendored from robertblust/conventions at the release `conventions.json` names. Read them before writing or committing anything here.
 
 - `conventions/WRITING.md` — how we write: one voice, three registers, English and German.
 - `conventions/WORKING.md` — how we work with git and GitHub.
 - `conventions/REPOSITORIES.md` — the family: what each repository is and what pins what.
-- `conventions/WRITER.md`, `conventions/TRANSLATOR.md`, `conventions/GLOSSARY.md` — the two roles that
-  make a text, and the terms they keep.
+- `conventions/WRITER.md`, `conventions/TRANSLATOR.md`, `conventions/EDITOR.md`,
+  `conventions/BACKREADER.md`, `conventions/GLOSSARY.md`, `conventions/GERMAN.md` — the four roles
+  that make a text, the terms they keep and the German they write.
 
 Everything below this block is this repository's own. `sh conventions/conventions-sync check` says whether the copy matches the release, `sync` brings it to the release the pin names, and `sh conventions/conventions-check` holds this repository's own Markdown to `WRITING.md`, and `sh conventions/conventions-format` to its one form, which `fix` writes. Edit a shared file in robertblust/conventions, never here.
 <!-- end conventions -->
 
 # robertblust/conventions — working conventions
 
-This repository is the source of the block above. It mirrors the layout it vendors: the shared files live under `conventions/` here exactly as they do in every member, so the block reads the same in both. The block is plain words and names no agent vendor; `CLAUDE.md` is the one vendor adapter, four lines that import the entry file and `WRITING.md`, `WORKING.md` and `REPOSITORIES.md` in that vendor's syntax, and a member carries the same four lines; the two briefs and the glossary are read by the agent adapters the README names, not by every session. Three kinds of file break that mirror. This `AGENTS.md` sits at the root here and is vendored as `conventions/AGENTS.md`, so that `check` can compare a member's block against the release without a network. `.markdownlint-cli2.jsonc` goes the other way: it sits at the root here and at a member's root too, because markdownlint-cli2 finds it there and nowhere else, and this repository carries it for itself as every member does. `conventions/vscode-settings.json` and `conventions/vscode-extensions.json` are neither: they are what `sync` writes into a member's `.vscode/` where it finds none, and `.vscode/` is ignored here as it is everywhere, so this repository's own copies are untracked like any member's and no check reads them.
+This repository is the source of the block above. It mirrors the layout it vendors: the shared files live under `conventions/` here exactly as they do in every member, so the block reads the same in both. The block is plain words and names no agent vendor; `CLAUDE.md` is the one vendor adapter, four lines that import the entry file and `WRITING.md`, `WORKING.md` and `REPOSITORIES.md` in that vendor's syntax, and a member carries the same four lines; the four briefs, the glossary and `GERMAN.md` are read by the agent adapters the README names, not by every session. Three kinds of file break that mirror. This `AGENTS.md` sits at the root here and is vendored as `conventions/AGENTS.md`, so that `check` can compare a member's block against the release without a network. `.markdownlint-cli2.jsonc` goes the other way: it sits at the root here and at a member's root too, because markdownlint-cli2 finds it there and nowhere else, and this repository carries it for itself as every member does. `conventions/vscode-settings.json` and `conventions/vscode-extensions.json` are neither: they are what `sync` writes into a member's `.vscode/` where it finds none, and `.vscode/` is ignored here as it is everywhere, so this repository's own copies are untracked like any member's and no check reads them.
 
 Releasing is a tag and a GitHub Release with notes. Before tagging, set the version in the first line of this file to the new tag: the script rewrites it to the pin on sync, so a stale number here misleads only a reader of the source, but that reader is the one deciding whether to release.
 
