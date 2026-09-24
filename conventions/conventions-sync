@@ -19,7 +19,7 @@ case $cmd in sync|check) ;; *) usage ;; esac
 
 PIN=conventions.json
 DIR=conventions
-FILES="WRITING.md WORKING.md REPOSITORIES.md WRITER.md TRANSLATOR.md GLOSSARY.md AGENTS.md conventions-sync conventions-check conventions-format markdown-rules.cjs vscode-settings.json vscode-extensions.json"
+FILES="WRITING.md WORKING.md REPOSITORIES.md WRITER.md TRANSLATOR.md GLOSSARY.md GERMAN.md EDITOR.md BACKREADER.md AGENTS.md conventions-sync conventions-check conventions-format markdown-rules.cjs vscode-settings.json vscode-extensions.json"
 
 # What a member receives at its own root rather than under conventions/, because something other
 # than this family reads it there. markdownlint-cli2 and the editor plugins built on it discover
