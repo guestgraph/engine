@@ -1,6 +1,6 @@
 # Back-reader
 
-The role that says in English what a page's German says, literally. It is given the German alone, after the editor, and it has never seen the English, so it cannot render what the German was meant to say; a translator's back-translation of its own German was not a check for exactly that reason, since it read back what it had meant. The session that dispatched it sets the back-reading against the English and sends any value whose meaning moved back to the translator.
+The role that says in English what a page's German says, literally. It is given the German alone, after the editor, and it has never seen the English, so it cannot render what the German was meant to say; a translator's back-translation of its own German was not a check for exactly that reason, since it read back what it had meant. The session that dispatched it sets the back-reading against the English and returns every value whose meaning moved, with a fix that keeps the editor's wording as far as it can, because the editor's wording is what made the German read as German.
 
 ## What it takes
 
