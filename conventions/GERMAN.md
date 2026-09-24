@@ -16,7 +16,6 @@ Where Switzerland and Germany write different words, the page writes Switzerland
 | `allfällig` | `etwaig` | |
 | `Auftragsbearbeiter` | `Auftragsverarbeiter` | The revised DSG's term; where a page names the GDPR too, the GDPR term follows in brackets. |
 | `bearbeiten` (Daten) | `verarbeiten` (Daten) | The DSG's verb for what is done with personal data. |
-| `Website` | `Seite` for a site | `Seite` is one page; a site of several pages is a `Website`. |
 | `per` (Datum) | `zum` (Datum) | Of a date something takes effect. |
 | `innert` | `innerhalb von` | Of a period of time. |
 
@@ -38,15 +37,13 @@ Each of these was found on the pages, more than once, by a German-only read. A t
 
 ## Forms the check refuses
 
-One form a line, the refused form, an arrow and the form the page writes. The page check reads this block from the vendored copy and fails on any refused form inside a German value, matched case-insensitively and as a whole phrase, so a form enters it only where it is wrong in every sentence it could appear in; a form that is wrong only in some sentences belongs in the tables above, where the editor weighs it.
+One form a line, the refused form, an arrow and the form the page writes. The page check reads this block from the vendored copy and fails on any refused form inside a German value, matched case-insensitively and as a whole phrase — the informal plural and a bare count of the years are rules of the check itself and stay out of this block — so a form enters it only where it is wrong in every sentence it could appear in; a form that is wrong only in some sentences belongs in the tables above, where the editor weighs it.
 
 ```banned
 Reservierung → Reservation
 selbstständig → selbständig
 Offener Kern → Open Core
-Open Source → quelloffen, or Open-Source- in a compound
-eure → Ihre
-euch → Sie
+Open Source → quelloffen
 Takeaway → Fazit
 Requirements → Anforderungen
 ```
@@ -65,3 +62,10 @@ Each row is a sentence the editor flagged and the owner settled, kept where it g
 | «Der Haken» | «Der Aufhänger» | The hook of a talk; «Haken» is a catch. |
 | «wie Arbeit fliesst» | «wie die Arbeit abläuft» | The English picture of flow. |
 | «Menschen richten sich schneller aus» | «Menschen finden schneller eine gemeinsame Linie» | *Align* word for word. |
+| «Zusammenführen ist einfach. Falsch liegen ist teuer.» | «Treffer finden ist einfach. Danebenliegen ist teuer.» | *Matching* is finding a match, not merging. |
+| «Jede Ablehnung trägt einen Typ» | «Jede Ablehnung nennt ihren Typ» | *Carries* is not «trägt». |
+| «kein Wegzoll» | «keine Pflichtgebühr» | *A toll* is a charge one must pay. |
+| «Wie über Identität entschieden wird» | «Wie Identität festgestellt wird» | The heading of a process. |
+| «Nur würden keine zwei Leute am selben Ort nachschauen» | «Nur schaut jeder an einem anderen Ort nach» | On a slide the owner took the plain indicative. |
+| «Ein Graph.» | «Ein einziger Graph.» | *One* graph, not *a* graph, where the number is the point. |
+| «Nicht pro Sitzplatz» | «Nicht pro Nutzer» | A license seat is not a theater seat. |

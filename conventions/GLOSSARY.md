@@ -61,5 +61,32 @@ The German cells are inline code because the prose check reads no language and a
 | standard | standard | `Massstab` | A yardstick. Not `Anspruch`, which is this table's claim. |
 | takeaway | takeaway | `Fazit` | The label that closes a talk's argument. |
 | Software Engineer & Architect | Software Engineer & Architect | `Software Engineer & Architect` | The owner's title, English in both views, as Swiss IT titles usually are; in a sentence, `Software Engineer und Architect`. |
+| seat (billed) | seat | `Nutzer` | What billing does not count: «Nicht pro Nutzer». Not `Sitzplatz`, a seat in a theater; a seat a person holds on a team page stays `Sitz`. |
+| retainer | retainer | `Pauschalhonorar` | A flat fee paid ahead of the work. |
+| day rate | rate | `Tagessatz` | What is billed per day. Not the bare `Satz`, which is also a sentence. |
+| CLI | CLI | `CLI` | The command-line tool, `die CLI`, even where the English says command line. |
+| chat panel | panel | `Chatfenster` | The chat's panel on a page. |
+| maker | maker | `Erzeuger` | What writes a surface, a person or a build. Not `Urheber`, which carries copyright. |
+| Direction | Direction | `Ausrichtung` | The group over vision, values and strategy. Not `Richtung`, a heading on a map. |
+| kind | kind | `Art` | The kind of an entity. `Typ` stays for what a schema declares, so the two words keep two meanings. |
+| person (in a seat) | person | `Mensch` | The human who holds a seat, set against an agent: «ein Mensch wacht über jedes Gate». An ordinary person stays `Person`. |
+| board | board | `Übersicht` | A team page's grid of seats. Not `Tafel`, a blackboard. |
+| projection | projection | `Projektion` | The model as a derived view of how a company runs. |
+| adoption | adoption | `Verbreitung` | A thing others take up: «wenn es sich durchsetzt … seine Verbreitung». |
+| process (data) | process | `bearbeiten` | The DSG's verb, for content as well as personal data, on a page that names the DSG. |
+| problem detail | problem detail | `Problem Detail` | The body an API returns for a refusal, RFC 9457. The RFC's name, neuter: `das Problem Detail`. |
+| actor claim | actor claim | `Actor-Claim` | A claim in a JWT that names who acts. Masculine, `der Actor-Claim`. |
+| steward | steward | `verantwortliche Person` | Who reviews a proposed match; plural `die Mitarbeitenden, die prüfen`. A hotel reader does not know Steward. |
+| API (surface) | surface | `API` | An API as what a caller reaches, `die API`. Not `Schnittstelle`, and not `Surface`, which is a page the model is published on. |
+| credit meter | credit meter | `Abrechnung nach Guthaben` | Billing against a prepaid balance. |
+| backfill | backfill | `Historischer Import` | The first import of the history before live data. |
+| walk-in | walk-in | `Walk-in` | A guest without a reservation, as Swiss hotels say it; plural `Walk-ins`. |
+| origin | origin | `Domain` | Where a request comes from. `Origin` is exact and unread outside a developer. |
+| removal | removal | `Löschung` | A request to remove; what it removed is `entfernt`. |
+| layered confidence | layered confidence | `mehrstufige Konfidenz` | Graded confidence in a match. Not `Gewissheit`, which claims certainty. |
+| loyalty id | loyalty id | `Mitgliedsnummer des Treueprogramms` | A guest's loyalty number. Not `Kundennummer`, a PMS customer number. |
+| review queue | review queue | `Prüfwarteschlange` | The matches a person decides. Feminine. |
+| golden profile | golden profile | `das goldene Profil` | The one resolved profile of a guest. |
+| matching evidence | evidence | `Hinweise` | What points toward a match. The table's `Beleg` stays the fact a claim rests on. |
 
 English forms fixed here whose German no page carries yet, to be chosen the first time a text needs them: pack, design system.
