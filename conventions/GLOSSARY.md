@@ -88,5 +88,18 @@ The German cells are inline code because the prose check reads no language and a
 | review queue | review queue | `Prüfwarteschlange` | The matches a person decides. Feminine. |
 | golden profile | golden profile | `das goldene Profil` | The one resolved profile of a guest. |
 | matching evidence | evidence | `Hinweise` | What points toward a match. The table's `Beleg` stays the fact a claim rests on. |
+| contractor rate | contractor rate | `Freelancer-Ansatz` | What an external specialist bills per hour; plural `Freelancer-Ansätze`, with the Swiss `Ansatz` for a rate. What is billed per day stays `Tagessatz`. |
+| conventional | conventional | `konventionell` | Of a team working without agents, as against agentic AI. The owner's choice over `klassisch`, which judges. |
+| owner's share | owner's share | `Pensum des Owners` | The part of a team's months the owner works, as a percentage; `Pensum` is the Swiss word for a share of full time. |
+| delivery team | delivery team | `Umsetzungsteam` | The team that would build a result. Not `Lieferteam`, which reads as logistics. |
+| workstream | workstream | `Arbeitspaket` | One slice of the work a team's effort is estimated by. |
+| employer cost | employer cost | `Arbeitgeberkosten` | A salary with its social charges and workplace, what a person costs the company that employs them. |
+| rating | outcome | `Wertung` | The column that says which side comes out ahead. Not `Ausgang`, which can read as exit. |
+| four-eyes principle | two people on every change | `Vier-Augen-Prinzip` | German's fixed term for every change checked by a second person. |
+| put up for scrutiny | put up for scrutiny | `zur Prüfung gestellt` | Of an idea opened to other people's judgment; blust.ch's ideas page and the deciding-well talk. `Prüfung` is kept for scrutiny, so the next row is not `prüfen`. |
+| validate | validate | `validieren` | Of testing an idea or a proposal in the open; the noun is `Validierung`, as on blust.ch's ideas page. |
+| agentic AI | agentic AI | `agentische KI` | AI that acts through agents; lower case adjective, `KI` as German abbreviates it. |
+| IT architect | IT architect | `IT-Architekt` | The owner's role from October 2026; hyphenated as German writes it. |
+| lead engineer | lead engineer | `Lead Engineer` | A job title, English in both languages as Swiss IT titles usually are; `Lead` alone for the lead role. |
 
 English forms fixed here whose German no page carries yet, to be chosen the first time a text needs them: pack, design system.
