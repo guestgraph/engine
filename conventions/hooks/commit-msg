@@ -1,0 +1,49 @@
+#!/bin/sh
+# Refuses a commit whose author is a seat of the governing instance that the phase named in its
+# trailers does not list, as WORKING.md says under Branches and commits. The governing instance
+# is this repository where it is one, and otherwise its organization's mental-model at the
+# local path REPOSITORIES.md gives. The check is companygraph commits, at the release that
+# instance's manifest names, so this family pins no meta-model release of its own. Only the
+# checker's refusal (exit 3) refuses the commit; where the check cannot run — no clone, offline,
+# no npx, a release without commits — the commit goes through with a sentence, because the pull
+# request's check runs it again.
+top=$(git rev-parse --show-toplevel) || exit 0
+list=${CONVENTIONS_REPOSITORIES:-conventions/REPOSITORIES.md}
+if [ -f "$top/.companygraph/manifest.json" ]; then
+  instance=$top
+else
+  org=$(git -C "$top" remote get-url origin 2> /dev/null | sed -n 's#.*github\.com[:/]\([^/]*\)/.*#\1#p')
+  path=$(awk -F'|' -v repo="$org/mental-model" '{ gsub(/^ +| +$/, "", $2) } $2 == repo { p = $(NF - 1); gsub(/^ +| +$/, "", p); print p; exit }' "$top/$list" 2> /dev/null)
+  case $path in \~/*) path=$HOME/${path#\~/} ;; esac
+  if [ -z "$org" ] || [ -z "$path" ] || [ ! -f "$path/.companygraph/manifest.json" ]; then
+    echo "commit-msg: no clone of ${org:-this organization}/mental-model at ${path:-a path REPOSITORIES.md gives}; the seat check did not run, and the pull request's check will" >&2
+    exit 0
+  fi
+  instance=$path
+fi
+# Git hands the hook its own repository variables: GIT_INDEX_FILE always, and GIT_DIR in a
+# linked worktree. npx clones meta-model, and a clone that inherits them writes meta-model's
+# index over this repository's. Git runs the hook at the top of the working tree, so git var,
+# interpret-trailers and the checker find this repository from the working directory alone.
+unset GIT_INDEX_FILE GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+tooling=$(sed -n 's/.*"tooling" *: *"\([^"]*\)".*/\1/p' "$instance/.companygraph/manifest.json" | head -1)
+# The checker's refusals go to stderr, and a passing check has nothing to say, so its stdout is
+# kept and shown only when the check did not pass.
+out=$(
+  if [ -n "${COMPANYGRAPH_CLI:-}" ]; then
+    node "$COMPANYGRAPH_CLI" commits "$instance" --message "$1"
+  elif command -v npx > /dev/null 2>&1 && [ -n "$tooling" ]; then
+    npx --yes --prefer-offline --package "github:companygraph/meta-model#v$tooling" companygraph commits "$instance" --message "$1"
+  else
+    false
+  fi
+)
+status=$?
+[ "$status" -eq 0 ] && exit 0
+[ -n "$out" ] && printf '%s\n' "$out"
+if [ "$status" -eq 3 ]; then
+  echo "commit-msg: correct the trailers, or the author with git commit --author \"<Seat> <seat@domain>\"; the rule is in conventions/WORKING.md, Branches and commits" >&2
+  exit 1
+fi
+echo "commit-msg: the seat check did not run here (exit $status); the pull request's check will run it" >&2
+exit 0

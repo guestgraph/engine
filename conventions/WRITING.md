@@ -60,11 +60,11 @@ For commit messages and pull request descriptions.
 
 The subject is a sentence in plain words, under seventy characters where it can be, with no type prefix and no trailing period. It says what is now true that was not before.
 
-The body is one to three short paragraphs, cause before mechanism. No headers, no bullets. A table only for counts. It ends with one line beginning `Verified:` that names what ran and passed, then the trailers.
+The body is one to three short paragraphs, cause before mechanism. No headers, no bullets. A table only for counts. It ends with one line beginning `Verified:` that names what ran and passed, then a blank line and the trailers. A commit an agent makes opens its trailers with `Process`, `Phase` and `Track`, named as the governing instance names them, and `Track` only where the process has tracks; git reads trailers only from the message's last paragraph, so no blank line falls between them and `Co-Authored-By`.
 
 A pull request description is the commit body reread for a reviewer who has not seen the diff, plus links to the sibling pull requests when there are any.
 
-One example, a commit message in full, then the trailers:
+One example, an agent's commit message in full, trailers and all:
 
 ```
 The list is the scope
@@ -75,6 +75,11 @@ When a task needs something outside it, the task names it and the one purpose it
 serves, and that reference stays with the task.
 
 Verified: the spelling tripwire passes.
+
+Process: Delivery
+Phase: Implement
+Track: Prose
+Co-Authored-By: Claude Code <noreply@anthropic.com>
 ```
 
 ## The reply register

@@ -19,7 +19,7 @@ case $cmd in sync|check) ;; *) usage ;; esac
 
 PIN=conventions.json
 DIR=conventions
-FILES="WRITING.md WORKING.md REPOSITORIES.md PINS.md WRITER.md TRANSLATOR.md GLOSSARY.md GERMAN.md EDITOR.md BACKREADER.md AGENTS.md conventions-sync conventions-check conventions-format markdown-rules.cjs vscode-settings.json vscode-extensions.json"
+FILES="WRITING.md WORKING.md REPOSITORIES.md PINS.md WRITER.md TRANSLATOR.md GLOSSARY.md GERMAN.md EDITOR.md BACKREADER.md AGENTS.md conventions-sync conventions-check conventions-format markdown-rules.cjs vscode-settings.json vscode-extensions.json hooks/commit-msg"
 
 # What a member receives at its own root rather than under conventions/, because something other
 # than this family reads it there. markdownlint-cli2 and the editor plugins built on it discover
@@ -97,6 +97,37 @@ write_block() {
   mv AGENTS.md.tmp AGENTS.md
 }
 
+# hooks_path: point git at the seat hook, which is in use only where git reads hooks from it.
+# Only at the top of a clone, because a relative core.hooksPath is read from there. A hooks
+# path the member set for itself is its own, and hooks git already runs from its own directory
+# would stop running once the path moves, so either is left alone with a sentence instead.
+hooks_path() {
+  [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ] || return 0
+  [ -z "$(git rev-parse --show-prefix)" ] || return 0
+  current=$(git config --get core.hooksPath || true)
+  if [ -n "$current" ]; then
+    [ "$current" = "$DIR/hooks" ] || echo "! conventions: core.hooksPath is $current here, so the seat check's hook in $DIR/hooks is not in use" >&2
+    return 0
+  fi
+  own=$(git rev-parse --git-path hooks)
+  # Git for Windows prints an absolute path in drive form, C:/…, in a linked worktree.
+  case $own in /*|[A-Za-z]:*) ;; *) own=$(git rev-parse --show-toplevel)/$own ;; esac
+  found=""
+  if [ -d "$own" ]; then
+    for h in "$own"/*; do
+      [ -f "$h" ] || continue
+      case $h in *.sample) continue ;; esac
+      found="${found:+$found, }${h##*/}"
+    done
+  fi
+  if [ -n "$found" ]; then
+    echo "! conventions: $own holds $found, which would stop running under core.hooksPath, so it is left unset and the seat check's hook in $DIR/hooks is not in use" >&2
+    return 0
+  fi
+  git config core.hooksPath "$DIR/hooks"
+  echo "✓ conventions: core.hooksPath is now $DIR/hooks; it is local config and not cloned, so a fresh clone runs sync once, or git config core.hooksPath $DIR/hooks"
+}
+
 sync() {
   mkdir -p "$DIR"
   # A member running an older conventions-sync has an older FILES list, missing whatever file
@@ -115,6 +146,8 @@ sync() {
     fi
   fi
   for f in $FILES; do
+    d=${f%/*}
+    [ "$d" = "$f" ] || mkdir -p "$DIR/$d"
     case $f in
       AGENTS.md) fetch "AGENTS.md" "$DIR/$f.new" ;;
       *)         fetch "$DIR/$f"   "$DIR/$f.new" ;;
@@ -139,6 +172,8 @@ sync() {
   chmod +x "$DIR/conventions-sync"
   chmod +x "$DIR/conventions-check"
   chmod +x "$DIR/conventions-format"
+  chmod +x "$DIR/hooks/commit-msg"
+  hooks_path
   write_block
   {
     printf '{\n  "repo": "%s",\n  "tag": "%s",\n  "files": {\n' "$REPO" "$TAG"
