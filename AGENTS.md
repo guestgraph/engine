@@ -1,9 +1,10 @@
-<!-- conventions · v1.34.0 -->
+<!-- conventions · v1.35.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in `conventions/`, vendored from robertblust/conventions at the release `conventions.json` names. Read them before writing or committing anything here.
 
 - `conventions/WRITING.md` — how we write: one voice, three registers, English and German.
 - `conventions/WORKING.md` — how we work with git and GitHub.
 - `conventions/REPOSITORIES.md` — the family: what each repository is and what pins what.
+- `conventions/PINS.md` — what a member pins and how the family resync moves it.
 - `conventions/WRITER.md`, `conventions/TRANSLATOR.md`, `conventions/EDITOR.md`,
   `conventions/BACKREADER.md`, `conventions/GLOSSARY.md`, `conventions/GERMAN.md` — the four roles
   that make a text, the terms they keep and the German they write.

@@ -1,9 +1,10 @@
-<!-- conventions · v1.34.0 -->
+<!-- conventions · v1.35.0 -->
 Shared conventions of the robertblust, guestgraph and companygraph organizations live in `conventions/`, vendored from robertblust/conventions at the release `conventions.json` names. Read them before writing or committing anything here.
 
 - `conventions/WRITING.md` — how we write: one voice, three registers, English and German.
 - `conventions/WORKING.md` — how we work with git and GitHub.
 - `conventions/REPOSITORIES.md` — the family: what each repository is and what pins what.
+- `conventions/PINS.md` — what a member pins and how the family resync moves it.
 - `conventions/WRITER.md`, `conventions/TRANSLATOR.md`, `conventions/EDITOR.md`,
   `conventions/BACKREADER.md`, `conventions/GLOSSARY.md`, `conventions/GERMAN.md` — the four roles
   that make a text, the terms they keep and the German they write.
@@ -17,4 +18,4 @@ This repository is the source of the block above. It mirrors the layout it vendo
 
 Releasing is a tag and a GitHub Release with notes. Before tagging, set the version in the first line of this file to the new tag: the script rewrites it to the pin on sync, so a stale number here misleads only a reader of the source, but that reader is the one deciding whether to release.
 
-The tests are `sh test/run.sh`, which runs the scripts against temporary members with this checkout as the source, and `sh conventions/conventions-check` and `sh conventions/conventions-format` over this checkout itself, with `docs/superpowers/` excluded from the prose check because a spec or plan quotes the very list it scans for, and held to the form like everything else. `.superpowers/` is excluded from both, as tooling scratch that is not prose.
+The tests are `sh test/run.sh`, which runs the scripts against temporary members with this checkout as the source, and `sh conventions/conventions-check` and `sh conventions/conventions-format` over this checkout itself, with `docs/superpowers/` excluded from the prose check because a spec or plan quotes the very list it scans for, and held to the form like everything else. It also runs the tests of `family/`, the family report and resync, on Node's own runner. `.superpowers/` is excluded from both, as tooling scratch that is not prose.
