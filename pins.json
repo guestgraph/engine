@@ -1,0 +1,13 @@
+{
+  "pins": [
+    { "kind": "conventions", "file": "conventions.json", "repo": "robertblust/conventions" },
+    { "kind": "service-conventions", "file": "service-conventions.json", "repo": "guestgraph/service-conventions" }
+  ],
+  "verify": [
+    "./mvnw -B verify",
+    "sh service-conventions/regen-er && git diff --exit-code docs/er-schema.mmd",
+    "sh service-conventions/service-conventions-sync check",
+    "sh service-conventions/service-conventions-check",
+    "sh service-conventions/regen-api && git diff --exit-code src/main/resources/api/openapi.yaml"
+  ]
+}
