@@ -1,7 +1,12 @@
 {
   "pins": [
     { "kind": "conventions", "file": "conventions.json", "repo": "robertblust/conventions" },
-    { "kind": "service-conventions", "file": "service-conventions.json", "repo": "guestgraph/service-conventions" }
+    {
+      "kind": "service-conventions",
+      "file": "service-conventions.json",
+      "repo": "guestgraph/service-conventions",
+      "move": "V={version}; BAREV=${V#v}; sed -i.bak -E 's/(\"tag\": *\")[^\"]*\"/\\1'\"$V\"'\"/' service-conventions.json && rm -f service-conventions.json.bak && sh service-conventions/service-conventions-sync sync && sed -i.bak -E '/<parent>/,/<\\/parent>/ s#(<version>)[^<]*(</version>)#\\1'\"$BAREV\"'\\2#' pom.xml && rm -f pom.xml.bak"
+    }
   ],
   "verify": [
     "./mvnw -B verify",
