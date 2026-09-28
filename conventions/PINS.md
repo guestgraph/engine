@@ -11,7 +11,7 @@ What a member takes from another member of the family is a pin, and `WORKING.md`
 | `npm-tag` | `github:owner/repo#tag` in a `package.json` | set the tag, `npm install` |
 | `source-commit` | an object with `repo` and `commit` in a JSON file, at the top or under a key | set the commit of the object whose `repo` matches |
 | `contract-commit` | a string `owner/repo@commit:path` in a JSON file | set the commit of every string for that repository |
-| `core-release` | `core.version` in `.companygraph/manifest.json` | the entry's own `move` command |
+| `core-release` | `tooling` in `.companygraph/manifest.json`, the meta-model release an instance took with its core | the entry's own `move` command, with `{version}` that release without its `v` |
 
 ## `pins.json`
 
