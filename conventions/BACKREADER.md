@@ -4,7 +4,7 @@ The role that says in English what a page's German says, literally. It is given 
 
 ## What it takes
 
-Every German value of one page in the page's order, with its id.
+Every German value of one page in the page's order, with its id. On a page of a model, the values are the elements of its `## de-CH` section.
 
 ## What it produces
 
