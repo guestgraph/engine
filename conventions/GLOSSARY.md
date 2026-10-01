@@ -19,7 +19,7 @@ The German cells are inline code because the prose check reads no language and a
 | talk | talk | `Vortrag` | A talk on a site; the deck is the file that carries it. |
 | reference instance | reference instance | `Referenz-Instanz` | mental-model's role in the family; the form blust.ch's ideas page chose. |
 | guest graph | guest graph | `Gast-Graph` | The short form, distinct from guest identity graph; blust.ch's ideas page. |
-| core | core | `core` | The directory in companygraph/meta-model and the release its version names; a name the ecosystem reads, so not `Kern`. |
+| core | core | `core` | The directory in companygraph/meta-model and the release its version names; a name the ecosystem reads, so not `Kern`. Masculine, `der core`, as `der Kern` would be. |
 | considered, not accepted | considered, not accepted | `Erwogen, nicht angenommen` | The design system's phrase for a candidate weighed and set aside; one form on every billing page. |
 | figure | figure | `Diagramm` | The drawn graph on a model page. The owner's choice over `Zeichnung`, which reads as a drawing by hand. |
 | experience | experience | `Erfahrung` | An entry in the model's experiences folder, whatever its kind; blust.ch's timeline and model pages. The row it makes on the timeline is an `Eintrag`. |
@@ -27,6 +27,8 @@ The German cells are inline code because the prose check reads no language and a
 | surface | surface | `Surface` | A page the model is published on, written by hand or built by a repository's build, and the type in `model/surfaces/`. A name the ecosystem reads, so not `Oberfläche`, which in German software prose is the user interface. Capitalized as a German noun; feminine, `die Surface`, plural `die Surfaces`. |
 | lineage | lineage | `Herkunft` | The drawing on a Surfaces page from the model's commit through each maker to its surfaces. Not `Stammbaum`, which reads as family descent, and not `Linie`, which the same page uses for the drawn line itself. companygraph.io's label is `Herkunft der Surfaces`. |
 | owner | owner | `Owner` | The one person the company of one is, and the role of that name in the model. Kept English, because the role's name on blust.ch's team page is English in both views and the word and the role are one thing. The owner's choice over `Inhaber`. Masculine, `der Owner`. |
+| owner of a nested entity | owner | `Besitzer` | The entity another is nested under, as a schema names it and as the plugin and the MCP tools' `owner` argument take it; companygraph.io's model page and Obsidian plugin talk. Not the person, who is `Owner`, so two senses keep two words. Masculine, `der Besitzer`. |
+| pane | pane | `Bereich` | A panel of the Obsidian window, as the plugin's compliance pane or the one Claudian opens; companygraph.io's CLI page and Obsidian plugin talk. The pane's own name stays English, in `«»`. Masculine, `der Bereich`. |
 | requestor | Requestor | `Requestor` | The seat that raises a feature request, and the role of that name in companygraph/mental-model. Kept English, as the model's role names are on a team page; masculine, `der Requestor`, like `der Owner`. |
 | contributor | Contributor | `Contributor` | The seat that proposes a contribution, and the role of that name in companygraph/mental-model. Kept English for the same reason; masculine, `der Contributor`. |
 | build | build | `Build` | What a repository runs to write a page or a built surface from the model. Kept English like `Connector`; masculine, `der Build`. |
