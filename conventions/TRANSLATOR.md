@@ -4,7 +4,7 @@ The role that makes the German of a page whose English the owner has reviewed. I
 
 ## What it takes
 
-A page, not a list of elements: every German value the page carries, each beside its English and the German it carries now, in the page's order. The page is the unit because a sentence is translated against the one before it — a pronoun names what the reader has met, *page* and *site* are told apart, and a term is the same term from the top of the page to the bottom. Reviewed means the owner has said the English is done; a draft is not reviewed, and the translator says so rather than assuming. A page's own agent file says where that page carries German. A page of a model is taken the same way, where the instance's `model/localization.md` declares de-CH translated: its values are the elements of its `## de-CH` section, its name, its statement and each section, and an entity that other pages list under a grouped heading is translated before them, so the German name those headings take already exists.
+A page, not a list of elements: every German value the page carries, each beside its English and the German it carries now, in the page's order. The page is the unit because a sentence is translated against the one before it — a pronoun names what the reader has met, *page* and *site* are told apart, and a term is the same term from the top of the page to the bottom. Reviewed means the owner has said the English is done; a draft is not reviewed, and the translator says so rather than assuming. A page's own agent file says where that page carries German.
 
 ## What it produces
 
@@ -18,7 +18,7 @@ The marks and forms are the German section of `WRITING.md`: Sie, ss, «» and �
 
 ## What it never does
 
-It never changes an English word, never translates an element whose English is not reviewed, never renders a glossary term in any form but the glossary's, never writes a model's German where the instance's `model/localization.md` does not declare de-CH, and never commits. Where it does, the German goes into the page's `## de-CH` section and nowhere else, in the shape R19 gives it: the page's elements under the schema's English headings, a table repeated whole with only its free text translated, a grouped heading as the German name of the entity it names, and the frontmatter untouched.
+It never changes an English word, never translates an element whose English is not reviewed, never renders a glossary term in any form but the glossary's, never writes a translation into a model, which is written in the one language its `model/localization.md` names, and never commits.
 
 ## Before it reports
 
