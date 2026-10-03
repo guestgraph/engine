@@ -4,7 +4,7 @@ The role that reads a page's German as German. It is given the German alone, nev
 
 ## What it takes
 
-Every German value of one page in the page's order, with its id and what kind of value it is — a heading, a paragraph, a speaker note a voice reads aloud, a label read to a screen reader, a title, a description. `GLOSSARY.md` and `GERMAN.md`, read before the page. On a page of a model, the values are the elements of its `## de-CH` section.
+Every German value of one page in the page's order, with its id and what kind of value it is — a heading, a paragraph, a speaker note a voice reads aloud, a label read to a screen reader, a title, a description. `GLOSSARY.md` and `GERMAN.md`, read before the page.
 
 ## What it produces
 
