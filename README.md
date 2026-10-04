@@ -34,24 +34,28 @@ Matching is one of six concepts with a reference document of its own, each answe
 ```mermaid
 flowchart TB
     subgraph commercial["Commercial — guestgraph.io (planned)"]
-        SAAS["Managed hosting · MCP server · console"]
+        SAAS["Managed hosting · MCP access · console"]
     end
-    subgraph oss["Open source — Apache 2.0 (this org)"]
-        CONN["Connectors — PMS, POS, booking ..."]
-        TL["Timeline — unified guest journey"]
-        CORE["Core — identity resolution engine<br/>+ guest graph + REST API"]
+    subgraph oss["Open source — Apache 2.0"]
+        CONN["<b>connector-apaleo</b><br/>the first connector, more to come"]
+        CORE["<b>engine</b><br/>identity resolution, guest graph,<br/>timeline, REST API"]
+        SVC["<b>service-conventions</b><br/>parent build, error shape,<br/>architecture tests"]
     end
-    PG[("PostgreSQL")]
+    CDB[("PostgreSQL<br/>schema apaleo_connector")]
+    EDB[("PostgreSQL<br/>schema engine")]
 
-    SAAS --> CONN & TL
-    CONN --> CORE
-    TL --> CORE
-    CORE --> PG
+    SAAS --> CORE
+    CONN -- "REST · X-API-Key" --> CORE
+    CONN --- CDB
+    CORE --- EDB
+    CORE & CONN -- "vendored at a release" --> SVC
 ```
+
+The engine holds the guest graph and serves the API every other component is a client of; the timeline is a part of it, not a service beside it. A connector reaches one external system and submits what it finds to that API, so a deployment can run the engine alone or several connectors against one engine. Each service owns its schema and connects as a role that sees nothing else, and both take their parent build and shared rules from [service-conventions](https://github.com/guestgraph/service-conventions) at the release their `service-conventions.json` names.
 
 ## Status
 
-🚧 **Early development.** The core identity resolution service is being built spec-first — see [`docs/`](docs/) and [`.specify/`](.specify/) for the design and specs.
+Built spec-first in the open, one slice at a time: each slice's specification is in [`specs/`](specs/), and the design behind them in [`docs/`](docs/) and [`.specify/`](.specify/). Which slices are done and what comes next is on the [guestgraph organization page](https://github.com/guestgraph), and what a slice left for a later one is in [`docs/roadmap-notes.md`](docs/roadmap-notes.md).
 
 ## Stack
 
