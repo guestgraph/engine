@@ -31,27 +31,11 @@ Matching is one of six concepts with a reference document of its own, each answe
 
 ## How it fits together
 
-```mermaid
-flowchart TB
-    subgraph commercial["Commercial — guestgraph.io (planned)"]
-        SAAS["Managed hosting · MCP server · console"]
-    end
-    subgraph oss["Open source — Apache 2.0 (this org)"]
-        CONN["Connectors — PMS, POS, booking ..."]
-        TL["Timeline — unified guest journey"]
-        CORE["Core — identity resolution engine<br/>+ guest graph + REST API"]
-    end
-    PG[("PostgreSQL")]
-
-    SAAS --> CONN & TL
-    CONN --> CORE
-    TL --> CORE
-    CORE --> PG
-```
+The engine holds the guest graph and serves the API every other component is a client of; the timeline is a part of it, not a service beside it. Which services run, what each exposes and holds, and what they talk to is drawn once, under [What runs](https://github.com/guestgraph/.github/blob/main/profile/README.md#-what-runs) on the guestgraph organization page, and not repeated here.
 
 ## Status
 
-🚧 **Early development.** The core identity resolution service is being built spec-first — see [`docs/`](docs/) and [`.specify/`](.specify/) for the design and specs.
+Built spec-first in the open, one slice at a time: each slice's specification is in [`specs/`](specs/), and the design behind them in [`docs/`](docs/) and [`.specify/`](.specify/). Which slices are done and what comes next is on the [guestgraph organization page](https://github.com/guestgraph), and what a slice left for a later one is in [`docs/roadmap-notes.md`](docs/roadmap-notes.md).
 
 ## Stack
 
