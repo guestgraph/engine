@@ -31,27 +31,7 @@ Matching is one of six concepts with a reference document of its own, each answe
 
 ## How it fits together
 
-```mermaid
-flowchart TB
-    subgraph commercial["Commercial — guestgraph.io (planned)"]
-        SAAS["Managed hosting · MCP access · console"]
-    end
-    subgraph oss["Open source — Apache 2.0"]
-        CONN["<b>connector-apaleo</b><br/>the first connector, more to come"]
-        CORE["<b>engine</b><br/>identity resolution, guest graph,<br/>timeline, REST API"]
-        SVC["<b>service-conventions</b><br/>parent build, error shape,<br/>architecture tests"]
-    end
-    CDB[("PostgreSQL<br/>schema apaleo_connector")]
-    EDB[("PostgreSQL<br/>schema engine")]
-
-    SAAS --> CORE
-    CONN -- "REST · X-API-Key" --> CORE
-    CONN --- CDB
-    CORE --- EDB
-    CORE & CONN -- "vendored at a release" --> SVC
-```
-
-The engine holds the guest graph and serves the API every other component is a client of; the timeline is a part of it, not a service beside it. A connector reaches one external system and submits what it finds to that API, so a deployment can run the engine alone or several connectors against one engine. Each service owns its schema and connects as a role that sees nothing else, and both take their parent build and shared rules from [service-conventions](https://github.com/guestgraph/service-conventions) at the release their `service-conventions.json` names.
+The engine holds the guest graph and serves the API every other component is a client of; the timeline is a part of it, not a service beside it. Which services run, what each exposes and holds, and what they talk to is drawn once, under [What runs](https://github.com/guestgraph/.github/blob/main/profile/README.md#-what-runs) on the guestgraph organization page, and not repeated here.
 
 ## Status
 
