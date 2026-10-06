@@ -36,6 +36,8 @@ updates:
     ignore:
       - dependency-name: "actions/checkout"
       - dependency-name: "actions/setup-java"
+      # The family's shared check, pinned by tag beside conventions.json and moved with it.
+      - dependency-name: "*robertblust/conventions*"
     groups:
       actions:
         patterns:
