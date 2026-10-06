@@ -151,9 +151,104 @@ else
   fi
 fi
 
-if [ -n "$hits" ] || [ -n "$title_hit" ]; then
+# --- Dependabot leaves the family's pins alone -------------------------------------------------
+# A pin is editorial and the family resync moves it, with everything its move rewrites: a bot
+# that proposes one moves a line alone, a conventions workflow past conventions.json, a package
+# past what its `after` writes. So where a member keeps .github/dependabot.yml, every family
+# repository a block of it would watch is ignored in that block. What a block watches is read
+# from the member's own files in the block's directory: `uses:` lines under .github/workflows for
+# github-actions, `github:owner/repo#` values in a package.json for npm, and `git::` module
+# sources in a .tf file for terraform. A dependency-name is a glob, so "*companygraph/mcp-server*"
+# covers every path of that repository. No file, no list, or no family pin is a quiet pass.
+# The tools a conventions release pins count as family pins too, wherever a package.json declares
+# them: their version is the family's, set in the vendored scripts, so a bump of one copy alone
+# leaves the others behind. TOOLS is that list, and test/run.sh holds it to conventions-format.
+BOT=$ROOT/.github/dependabot.yml
+TOOLS="markdownlint-cli2"
+bot_hits=""
+if [ -f "$BOT" ] && [ -f "$LIST" ]; then
+  tab=$(printf '\t')
+  family=$(awk -F'|' '/^\|/ { n = $2; gsub(/^[ \t]+|[ \t]+$/, "", n); if (n ~ /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/) printf "%s ", n }' "$LIST")
+  # Every block as "ecosystem<TAB>directory<TAB>pattern" lines, one per ignored name, and one
+  # with no pattern, so a block that ignores nothing is still seen as watching its directory.
+  blocks=$(awk '
+    function val(s) { sub(/^[^:]*:[ \t]*/, "", s); sub(/[ \t]+#.*$/, "", s); gsub(/["\047]/, "", s); sub(/[ \t]+$/, "", s); return s }
+    function emit(   i, j, d) {
+      if (eco == "") return
+      for (i = 1; i <= nd; i++) {
+        d = dirs[i]; sub(/\/+$/, "", d); if (d == "") d = "/"
+        print eco "\t" d "\t"
+        for (j = 1; j <= np; j++) print eco "\t" d "\t" pats[j]
+      }
+    }
+    /^[ \t]*-[ \t]*package-ecosystem:/ { emit(); eco = val($0); nd = 0; np = 0; inlist = 0; next }
+    /^[ \t]*directory:/ { dirs[++nd] = val($0); inlist = 0; next }
+    /^[ \t]*directories:/ { inlist = 1; next }
+    inlist && /^[ \t]*-[ \t]*["\047]?\// { s = $0; sub(/^[ \t]*-[ \t]*/, "", s); gsub(/["\047]/, "", s); sub(/[ \t]+$/, "", s); dirs[++nd] = s; next }
+    /^[ \t]*[a-z-]+:/ { inlist = 0 }
+    /dependency-name:/ { pats[++np] = val($0) }
+    END { emit() }' "$BOT")
+  # Every family pin the member's files hold, as "ecosystem<TAB>directory<TAB>name<TAB>where<TAB>suggestion".
+  dirof() { d=${1%/*}; d=${d#"$ROOT"}; [ -n "$d" ] || d=/; printf '%s' "$d"; }
+  pins=$(
+    for f in "$ROOT"/.github/workflows/*.yml "$ROOT"/.github/workflows/*.yaml; do
+      [ -f "$f" ] || continue
+      awk -v fam="$family" -v file="${f#"$ROOT"/}" '
+        BEGIN { n = split(fam, F, " "); for (i = 1; i <= n; i++) R[F[i]] = 1 }
+        /^[ \t]*#/ { next }
+        /uses:[ \t]*[^ \t]+@/ {
+          s = $0; sub(/.*uses:[ \t]*/, "", s); gsub(/["\047]/, "", s); sub(/@.*/, "", s)
+          split(s, p, "/"); r = p[1] "/" p[2]
+          if (r in R) print "github-actions\t/\t" s "\t" file ":" NR "\t*" r "*"
+        }' "$f"
+    done
+    find "$ROOT" -name node_modules -prune -o -name .git -prune -o -type f -name package.json -print | while IFS= read -r f; do
+      awk -v fam="$family" -v tools="$TOOLS" -v file="${f#"$ROOT"/}" -v dir="$(dirof "$f")" '
+        BEGIN { n = split(fam, F, " "); for (i = 1; i <= n; i++) R[F[i]] = 1; m = split(tools, T, " ") }
+        {
+          for (i = 1; i <= m; i++) if (index($0, "\"" T[i] "\"") && match($0, "\"" T[i] "\"[ \t]*:")) print "npm\t" dir "\t" T[i] "\t" file ":" NR "\t" T[i]
+          # Every "name": "github:owner/repo#tag" pair on the line, wherever it stands.
+          line = $0
+          while (match(line, /"[^"]+"[ \t]*:[ \t]*"github:[^"#]+#/)) {
+            pair = substr(line, RSTART, RLENGTH); line = substr(line, RSTART + RLENGTH)
+            name = pair; sub(/^"/, "", name); sub(/".*/, "", name)
+            s = pair; sub(/.*"github:/, "", s); sub(/#$/, "", s)
+            if (s in R) print "npm\t" dir "\t" name "\t" file ":" NR "\t" name
+          }
+        }' "$f"
+    done
+    find "$ROOT" -name .terraform -prune -o -name .git -prune -o -type f -name '*.tf' -print | while IFS= read -r f; do
+      awk -v fam="$family" -v file="${f#"$ROOT"/}" -v dir="$(dirof "$f")" '
+        BEGIN { n = split(fam, F, " "); for (i = 1; i <= n; i++) R[F[i]] = 1 }
+        /source[ \t]*=[ \t]*"git::https:\/\/github\.com\// {
+          s = $0; sub(/.*"git::/, "", s); sub(/[?"].*/, "", s)
+          r = s; sub(/^https:\/\/github\.com\//, "", r); split(r, p, "/"); r = p[1] "/" p[2]; sub(/\.git$/, "", r)
+          if (r in R) print "terraform\t" dir "\t" s "\t" file ":" NR "\t*" r "*"
+        }' "$f"
+    done
+  )
+  # A pin a block watches and no pattern of that block covers is a hit. Globbing is off while the
+  # patterns are split, so "*owner/repo*" stays a pattern and is not expanded against the tree.
+  set -f
+  bot_hits=$(printf '%s\n' "$pins" | while IFS="$tab" read -r eco dir name where suggest; do
+    [ -n "$eco" ] || continue
+    printf '%s\n' "$blocks" | grep -q "^$eco$tab$dir$tab" || continue
+    covered=no
+    for p in $(printf '%s\n' "$blocks" | awk -F'\t' -v e="$eco" -v d="$dir" '$1 == e && $2 == d && $3 != "" { print $3 }'); do
+      # shellcheck disable=SC2254 # the pattern is meant to match as a glob
+      case "$name" in ($p) covered=yes; break ;; esac
+    done
+    if [ "$covered" = no ]; then
+      echo "✗ .github/dependabot.yml: the $eco block for $dir watches $name ($where), a family pin the resync moves; add  - dependency-name: \"$suggest\"  to its ignore"
+    fi
+  done)
+  set +f
+fi
+
+if [ -n "$hits" ] || [ -n "$title_hit" ] || [ -n "$bot_hits" ]; then
   if [ -n "$hits" ]; then echo "$hits"; fi
   if [ -n "$title_hit" ]; then echo "$title_hit"; fi
+  if [ -n "$bot_hits" ]; then echo "$bot_hits"; fi
   exit 1
 fi
 echo "✓ every Markdown file follows WRITING.md"
