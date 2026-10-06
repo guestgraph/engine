@@ -3,8 +3,10 @@
 # Maven follows the parent a service's pom takes by relativePath, and that parent is vendored:
 # a bump written into the copy makes it differ from its release and the service-conventions job
 # refuses it. Everything the parent pins is therefore ignored here and bumped in the shared
-# repository, where `sh tests/run` holds this list to what the parent actually pins. Everything
-# a service declares for itself stays watched.
+# repository, where `sh tests/run` holds this list to what the parent actually pins. The same
+# holds for the other vendored files Dependabot reads: the Maven wrapper, whose version is the
+# runtime module's, and the actions the vendored workflow verify.yml uses. Everything a service
+# declares for itself stays watched.
 version: 2
 updates:
   - package-ecosystem: "maven"
@@ -25,11 +27,15 @@ updates:
       - dependency-name: "com.diffplug.spotless:spotless-maven-plugin"
       - dependency-name: "com.google.googlejavaformat:google-java-format"
       - dependency-name: "org.codehaus.mojo:exec-maven-plugin"
+      - dependency-name: "org.apache.maven:apache-maven"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "actions/checkout"
+      - dependency-name: "actions/setup-java"
     groups:
       actions:
         patterns:
