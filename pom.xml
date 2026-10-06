@@ -7,7 +7,7 @@
   <parent>
     <groupId>io.guestgraph</groupId>
     <artifactId>service-parent</artifactId>
-    <version>0.12.0</version>
+    <version>0.13.0</version>
     <relativePath>service-conventions/pom.xml</relativePath>
   </parent>
 
