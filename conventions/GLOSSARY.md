@@ -27,11 +27,11 @@ The German cells are inline code because the prose check reads no language and a
 | kind of experience | kind of experience | `Erfahrungsart` | The experience-kind entities — Role, Project, Community, Education, Independent — whose names stay English in both views. The owner's choice over the bare `Art` on a control, which the page's prose may still use for the short form. |
 | surface | surface | `Surface` | A page the model is published on, written by hand or built by a repository's build, and the type in `model/surfaces/`. A name the ecosystem reads, so not `Oberfläche`, which in German software prose is the user interface. Capitalized as a German noun; feminine, `die Surface`, plural `die Surfaces`. |
 | lineage | lineage | `Herkunft` | The drawing on a Surfaces page from the model's commit through each maker to its surfaces. Not `Stammbaum`, which reads as family descent, and not `Linie`, which the same page uses for the drawn line itself. companygraph.io's label is `Herkunft der Surfaces`. |
-| owner | owner | `Owner` | The one person the company of one is, and the role of that name in the model. Kept English, because the role's name on blust.ch's team page is English in both views and the word and the role are one thing. The owner's choice over `Inhaber`. Masculine, `der Owner`. |
+| owner | owner | `Owner` | The one person the company of one is, and the seat of that name in the model. Kept English, because the seat's name on blust.ch's Processes page is English in both views and the word and the seat are one thing. The owner's choice over `Inhaber`. Masculine, `der Owner`. |
 | owner of a nested entity | owner | `Besitzer` | The entity another is nested under, as a schema names it and as the plugin and the MCP tools' `owner` argument take it; companygraph.io's model page and Obsidian plugin talk. Not the person, who is `Owner`, so two senses keep two words. Masculine, `der Besitzer`. |
 | pane | pane | `Bereich` | A panel of the Obsidian window, as the plugin's compliance pane or the one Claudian opens; companygraph.io's CLI page and Obsidian plugin talk. The pane's own name stays English, in `«»`. Masculine, `der Bereich`. |
-| requestor | Requestor | `Requestor` | The seat that raises a feature request, and the role of that name in companygraph/mental-model. Kept English, as the model's role names are on a team page; masculine, `der Requestor`, like `der Owner`. |
-| contributor | Contributor | `Contributor` | The seat that proposes a contribution, and the role of that name in companygraph/mental-model. Kept English for the same reason; masculine, `der Contributor`. |
+| requestor | Requestor | `Requestor` | The seat that raises a feature request, so named in companygraph/mental-model. Kept English, as the model's seat names are on a Processes page; masculine, `der Requestor`, like `der Owner`. |
+| contributor | Contributor | `Contributor` | The seat that proposes a contribution, so named in companygraph/mental-model. Kept English for the same reason; masculine, `der Contributor`. |
 | build | build | `Build` | What a repository runs to write a page or a built surface from the model. Kept English like `Connector`; masculine, `der Build`. |
 | pin | pin | `Pin` | The visible line in which one repository takes another's release or commit; the participle is `gepinnt`. Masculine, `der Pin`. |
 | commit | commit | `Commit` | A git commit, and the one a pin names. Masculine, `der Commit`; plural `die Commits`. |
@@ -64,7 +64,7 @@ The German cells are inline code because the prose check reads no language and a
 | standard | standard | `Massstab` | A yardstick. Not `Anspruch`, which is this table's claim. |
 | takeaway | takeaway | `Fazit` | The label that closes a talk's argument. |
 | Software Engineer & Architect | Software Engineer & Architect | `Software Engineer & Architect` | The owner's title, English in both views, as Swiss IT titles usually are; in a sentence, `Software Engineer und Architect`. |
-| seat (billed) | seat | `Nutzer` | What billing does not count: «Nicht pro Nutzer». Not `Sitzplatz`, a seat in a theater; a seat a person holds on a team page stays `Sitz`. |
+| seat (billed) | seat | `Nutzer` | What billing does not count: «Nicht pro Nutzer». Not `Sitzplatz`, a seat in a theater; a seat in a process stays `Sitz`. |
 | retainer | retainer | `Pauschalhonorar` | A flat fee paid ahead of the work. |
 | day rate | rate | `Tagessatz` | What is billed per day. Not the bare `Satz`, which is also a sentence. |
 | CLI | CLI | `CLI` | The command-line tool, `die CLI`, even where the English says command line. |
@@ -72,8 +72,10 @@ The German cells are inline code because the prose check reads no language and a
 | maker | maker | `Erzeuger` | What writes a surface, a person or a build. Not `Urheber`, which carries copyright. |
 | Direction | Direction | `Ausrichtung` | The group over vision, values and strategy. Not `Richtung`, a heading on a map. |
 | kind | kind | `Art` | The kind of an entity. `Typ` stays for what a schema declares, so the two words keep two meanings. |
+| seat | seat | `Sitz` | Core's type: a place in a process that a profile holds, a human or an agent: «Ein Sitz ist kein Mensch.» Not `Rolle`, the type's former name, which stays for a position held. A process provides for its seats, «die Sitze, die sie vorsehen». |
+| process | process | `Prozess` | Core's type, the work and its phases; the page `/processes/` is «Prozesse». Not `Ablauf`: the sites write `Prozess` throughout, on the page and in its rules. |
 | person (in a seat) | person | `Mensch` | The human who holds a seat, set against an agent: «ein Mensch wacht über jedes Gate». An ordinary person stays `Person`. |
-| board | board | `Übersicht` | A team page's grid of seats. Not `Tafel`, a blackboard. |
+| board | board | `Übersicht` | A Processes page's grid of seats, one per process. Not `Tafel`, a blackboard. |
 | projection | projection | `Projektion` | The model as a derived view of how a company runs. |
 | adoption | adoption | `Verbreitung` | A thing others take up: «wenn es sich durchsetzt … seine Verbreitung». |
 | process (data) | process | `bearbeiten` | The DSG's verb, for content as well as personal data, on a page that names the DSG. |
