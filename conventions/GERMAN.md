@@ -69,3 +69,4 @@ Each row is a sentence the editor flagged and the owner settled, kept where it g
 | «Nur würden keine zwei Leute am selben Ort nachschauen» | «Nur schaut jeder an einem anderen Ort nach» | On a slide the owner took the plain indicative. |
 | «Ein Graph.» | «Ein einziger Graph.» | *One* graph, not *a* graph, where the number is the point. |
 | «Nicht pro Sitzplatz» | «Nicht pro Nutzer» | A license seat is not a theater seat. |
+| «die Sitze, die sie nennen» | «die Sitze, die sie vorsehen» | A process does not *name* its seats in German; it provides for them. |

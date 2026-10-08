@@ -1,6 +1,6 @@
 {
   "repo": "robertblust/conventions",
-  "tag": "v1.45.0",
+  "tag": "v1.46.0",
   "files": {
     "conventions/WRITING.md": "sha256:51d9a902ec3038392160df07f86aba98d34db1d4dbfaa5f4a647590eaccfb390",
     "conventions/WORKING.md": "sha256:3a7a6b4ab1bd23f2407fc6ada2dd0512710a49d233fa7c3342951f6fc526ab23",
@@ -8,11 +8,11 @@
     "conventions/PINS.md": "sha256:68df67ae820a8673d3130582aa829d4283176d3c8ec0a69adda3132a1a755b93",
     "conventions/WRITER.md": "sha256:bc3b92683130b75993f824f0e34073d4344846c91be2009fd90c39099fd4fd48",
     "conventions/TRANSLATOR.md": "sha256:3a3d2d0916d7230cbc760bced1be249b11cc516956fb41ad010b3216f23024ba",
-    "conventions/GLOSSARY.md": "sha256:1d0fbdb8415f8a65ccee75b4a26617d7aa1a4b146988cc2a2a8155fe67c02623",
-    "conventions/GERMAN.md": "sha256:2f4651dd74e2970f0751621bf9264441b43ee619b8a6e1373d5f3c7809581f77",
+    "conventions/GLOSSARY.md": "sha256:429733de608d68142cc261dc48aa4fdf0dde3dd002902f0af413a63e6467f9b9",
+    "conventions/GERMAN.md": "sha256:e8b311ed4b48cc2ded964bbaa0cfcf70178cdbd8072cd467b586c2bfa0cb949b",
     "conventions/EDITOR.md": "sha256:e65d0b2893ac841faefede9b873f7e33c1fd7b02bedf97d37d5362c0e83c08ea",
     "conventions/BACKREADER.md": "sha256:36b12d4bee8e4fe190469e2f550d50d8a7f6dcab6bec573da17eb1c165c417cd",
-    "conventions/AGENTS.md": "sha256:cf77443379ef6a03519abd64b925708841721640046e591843eeccbbfb557cd0",
+    "conventions/AGENTS.md": "sha256:861c1ec80624afb6e87a993922a18ea101cc718ace94e4237c7da89bf6367f2b",
     "conventions/conventions-sync": "sha256:a190ff79c2d8d3f6f6d9a597e9f261654f2419d30e2ac43abf6c64ebe2c47ed9",
     "conventions/conventions-check": "sha256:fb55ca4b4cfc5caa0d346ad6c705d4402125155f95db6c974099a8112e275c69",
     "conventions/conventions-format": "sha256:2911a0d30dda1bc0f621522a9538b3e39704eee03458e65ba320eccbf39b5c7f",
