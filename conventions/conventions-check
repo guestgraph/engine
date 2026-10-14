@@ -1,6 +1,7 @@
 #!/bin/sh
 # conventions-check — hold a member's own Markdown to WRITING.md: American English and the
-# spaced em-dash. Fenced code and inline code are not prose and are dropped before the scan;
+# spaced em-dash. Fenced code and inline code are not prose and are dropped before the scan; the
+# stem scan also skips frontmatter, the first H1 of a page and quoted text (see below);
 # folders under "exclude" in conventions.json are someone else's prose and are not read, nor is
 # anything git ignores, which the shared job never sees either.
 #
@@ -31,6 +32,12 @@ PIN=$ROOT/conventions.json
 # way but on the letter that follows, since British and American diverge right there. Case is
 # folded by lowering the line before matching, not by the pattern, since IGNORECASE is a GNU
 # extension awk on macOS does not have.
+# What the stem scan does not read: text in backticks, text in guillemets «…», the page's H1 line
+# and the YAML frontmatter. A name is the company's and is quoted, not spelled, so a German name
+# that holds a stem, or a product's own feature name, is not a spelling. Only the stem scan skips
+# these spans; the closed-dash check below still reads them. A quote is cut within its line; a
+# pair spanning two lines is read. Curly double quotes “…” are cut like guillemets, since an
+# English name is quoted the en-US way.
 STEMS='organis(e|a|i)|colour|behaviour|centre|licence|recognis|modelling|catalogue|grey([^a-z]|$)|judgement|artefact|whilst|amongst|favour|honour|analys(e|ed|ing)([^a-z]|$)|optimis(e|a|i)|normalis|serialis|initialis(e|a|i)|visualis|minimis(e|a|i)|prioritis|customis|summaris|categoris|parameteris|rasteris|unrecognis|cancelled|travelled|labelled|aluminium|instalment|neighbour|totalled|defence|offence|programmes?([^a-z]|$)|fulfil([^a-z]|$)|enrol([^a-z]|$)|skilful|ageing|cosy([^a-z]|$)|focuss|cheque([^a-z]|$)|tyre([^a-z]|$)|kerb([^a-z]|$)|storey|mould|plough|draught|sceptic|generalis(e|ed|es|ing|ation|ations)|specialis(e|ed|es|ing|ation)|realis(e|ed|es|ing|ation)|materialis(e|ed|es|ing|ation)|penalis(e|ed|es|ing|ation)|singularis(e|ed|es|ing|ation)|authoris(e|ed|es|ing|ation)|emphasis(e|ed|es|ing)|criticis(e|ed|es|ing)|capitalis(e|ed|es|ing|ation)|formalis(e|ed|es|ing|ation)|finalis(e|ed|es|ing|ation)|stabilis(e|ed|es|ing|ation)|utilis(e|ed|es|ing|ation)|harmonis(e|ed|es|ing|ation)|standardis(e|ed|es|ing|ation)|synchronis(e|ed|es|ing|ation)|mobilis(e|ed|es|ing|ation)|memoris(e|ed|es|ing|ation)|apologis(e|ed|es|ing)|synthesis(e|ed|es|ing)|hypothesis(e|ed|es|ing)|paralys(e|ed|es|ing)|catalys(e|ed|es|ing)|modelled|modeller|flavour|harbour|labour|rumour|humour|vigour|rigour|armour|endeavour|savour|odour|valour|metre([^a-z]|$)|metres|litre|fibre|theatre|calibre|travelling|signalling|cancelling|fuelled|levelled|channelled|counsellor|marvellous|jewellery'
 DASH='[^ ]—|—[^ ]'
 
@@ -76,8 +83,12 @@ if [ -z "$files" ]; then
 fi
 
 hits=$(printf '%s\n' "$files" | while IFS= read -r f; do
-  # Drop fenced code and inline code, then scan what is left of each line for a stem or a
-  # closed dash; the match is against the line's own content, never the path awk read it from.
+  # Drop fenced code, inline code and URLs, then scan what is left of each line for a stem or a
+  # closed dash. The stem scan alone also skips frontmatter, the page's first H1 and quoted
+  # text; the dash check reads those as it did before, with backticks and URLs stripped. The match is against the line's own content, never
+  # the path awk read it from.
+  # An address is fixed by the site it points to, as a name is, so it ends at a space, a closing
+  # parenthesis or angle bracket, or a table pipe, and a Markdown link's text is still read.
   # A fence left open at end of file is a hit of its own, not a silent skip of the rest.
   awk -v stems="$STEMS" -v dash="$DASH" -v root="$ROOT" '
     function relpath(  p, prefix) {
@@ -86,19 +97,46 @@ hits=$(printf '%s\n' "$files" | while IFS= read -r f; do
       if (index(p, prefix) == 1) p = substr(p, length(prefix) + 1)
       return p
     }
-    /^```/ { fence = !fence; next }
-    fence  { next }
+    # Cut the text between o and c from s. The glyph lengths are taken with length(), so the
+    # cut is right in a byte awk and in a character awk alike.
+    function cut(s, o, c,   a, b, lo, lc) {
+      lo = length(o); lc = length(c)
+      while ((a = index(s, o)) > 0 && (b = index(substr(s, a + lo), c)) > 0)
+        s = substr(s, 1, a - 1) substr(s, a + lo + b - 1 + lc)
+      return s
+    }
+    # A byte order mark is dropped by its bytes in a string, which every awk reads alike.
+    FNR == 1 && index($0, "\357\273\277") == 1 { $0 = substr($0, length("\357\273\277") + 1) }
+    FNR == 1 && /^---[ \t\r]*$/ { fm = 1; next }
+    fm && /^---[ \t\r]*$/ { fm = 0; next }
+    # A frontmatter that is never closed ends at the first line that is none of these: blank,
+    # indented, a "- item" at column 0, a "#" comment or a key line. A stray opener cannot hide
+    # the whole page, though a malformed page whose --- is never closed may still hide a line
+    # that looks like a key.
+    fm && !/^[ \t\r]*$/ && !/^[ \t]/ && !/^- / && !/^#/ && !/^["\047]?[$@A-Za-z0-9_][A-Za-z0-9_ .-]*["\047]?:( |$)/ { fm = 0 }
+    !fm && /^```/ { fence = !fence; next }
+    fence { next }
     {
       line = $0
       sub(/\r$/, "", line)
+      raw = line
+      # Only the stem scan skips frontmatter, the first H1 of the page and quoted text; the
+      # dash check below reads the line as it did before.
+      skip = fm
+      if (!fm && !h1 && line ~ /^# /) { h1 = 1; skip = 1 }
       gsub(/`[^`]*`/, "", line)
+      line = cut(line, "«", "»")
+      line = cut(line, "“", "”")
+      gsub(/https?:\/\/[^ )>|]*/, "", line)
       low = tolower(line)
-      if (match(low, stems)) {
+      if (!skip && match(low, stems)) {
         w = substr(low, RSTART, RLENGTH)
         sub(/[^a-z]$/, "", w)
         printf "✗ %s:%d: %s\n", relpath(), FNR, w
       }
-      if (match(line, dash)) printf "✗ %s:%d: closed em-dash\n", relpath(), FNR
+      gsub(/`[^`]*`/, "", raw)
+      gsub(/https?:\/\/[^ )>|]*/, "", raw)
+      if (match(raw, dash)) printf "✗ %s:%d: closed em-dash\n", relpath(), FNR
     }
     END { if (fence) printf "✗ %s:%d: unclosed code fence\n", relpath(), FNR }
   ' "$f"
