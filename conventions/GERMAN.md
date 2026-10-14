@@ -45,7 +45,6 @@ selbstständig → selbständig
 Offener Kern → Open Core
 Open Source → quelloffen
 Takeaway → Fazit
-Requirements → Anforderungen
 ```
 
 A bare count of the years, «fünfundzwanzig Jahre» without «über», is refused by a rule of its own in the check, because a phrase list cannot say "unless preceded by".
@@ -60,6 +59,7 @@ Each row is a sentence the editor flagged and the owner settled, kept where it g
 | «eine einzige Quelle der Wahrheit» | «eine einzige verbindliche Quelle» | The English picture read as a calque. |
 | «Ein Konzept, erklärt» | «Ein Konzept im Überblick» | The label copied the English. |
 | «Der Haken» | «Der Aufhänger» | The hook of a talk; «Haken» is a catch. |
+| «das Anforderungs-Pack» | «das Requirements-Pack» | A pack keeps its English name, as «das Landscape-Pack» and «das Software-Pack» do; the generic noun stays «Anforderungen», and the type is `Anforderung`, the glossary's row. The refused form that turned every Requirements into Anforderungen was wrong in this sentence, so it left the fence. |
 | «wie Arbeit fliesst» | «wie die Arbeit abläuft» | The English picture of flow. |
 | «Menschen richten sich schneller aus» | «Menschen finden schneller eine gemeinsame Linie» | *Align* word for word. |
 | «Zusammenführen ist einfach. Falsch liegen ist teuer.» | «Treffer finden ist einfach. Danebenliegen ist teuer.» | *Matching* is finding a match, not merging. |
