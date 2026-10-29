@@ -8,12 +8,17 @@
 #
 #   sh service-conventions/regen-er
 #
+# The throwaway Postgres listens on host port 55432; where another database already holds it,
+# name a free one in PG_PORT:
+#
+#   PG_PORT=55499 sh service-conventions/regen-er
+#
 # Requires: docker, curl. mermerd is downloaded (pinned) on first use.
 set -eu
 
 MERMERD_VERSION="0.13.0"
 PG_IMAGE="postgres:18"
-PG_PORT="55432"
+PG_PORT="${PG_PORT:-55432}"
 OUT_FILE="docs/er-schema.mmd"
 mkdir -p "$(dirname "$OUT_FILE")"
 
