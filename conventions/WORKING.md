@@ -66,4 +66,4 @@ A review finding is an input to the person who merges, never a verdict. One find
 
 ## What is never written
 
-Closed-source predecessor projects are not mentioned — in code, documentation, commits, pull requests, issues or release notes. Secrets are never printed, not to check them and not in a debug line; a value that reaches a transcript has to be rotated.
+Closed-source predecessor projects are not mentioned — in code, documentation, commits, pull requests, issues or release notes. Secrets are never printed, not to check them and not in a debug line; a value that reaches a transcript has to be rotated. Nor is a secret written into a command: the command reads it from the environment or the keychain where it runs. A tool that may run a command unasked keeps that command in its local settings, secret and all, and a clone that does not ignore those settings commits them with the rest; `conventions-sync` keeps the line that ignores them in every member's own `.gitignore`, so the rule travels with every clone rather than living on one machine.

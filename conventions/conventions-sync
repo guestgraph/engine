@@ -43,6 +43,16 @@ ROOT_FILES=".markdownlint-cli2.jsonc CLAUDE.md"
 # holds a member's file to it — the settings key, the recommended ids — and to nothing else.
 SEEDS="conventions/vscode-settings.json:.vscode/settings.json conventions/vscode-extensions.json:.vscode/extensions.json"
 
+# Lines every member's own .gitignore carries, because an ignore kept on one machine protects
+# that machine only, and a clone made anywhere else commits what it never heard of. An agent
+# harness writes each command a person allowed it to run unasked into its local settings, and a
+# command allowed with a secret on its line keeps the secret there, so a clone that does not
+# ignore the file pushes the secret with the rest. sync appends a missing line and leaves the
+# rest of the file the member's; check names a missing line, and names the file wherever it is
+# tracked, which an ignore cannot undo once it is committed.
+IGNORES="**/.claude/settings.local.json"
+IGNORE_NOTE="# A tool's local settings can hold a secret; conventions-sync keeps the lines below."
+
 # What an earlier release vendored and this one does not. sync deletes them, so a member that
 # upgrades is left with one copy of a rule rather than two, and check names one still lying
 # around, which is a member that has not synced.
@@ -128,6 +138,19 @@ hooks_path() {
   echo "✓ conventions: core.hooksPath is now $DIR/hooks; it is local config and not cloned, so a fresh clone runs sync once, or git config core.hooksPath $DIR/hooks"
 }
 
+# ignores: append each line of IGNORES the member's .gitignore lacks, under one comment that
+# says who keeps it. set -f keeps the shell from expanding the patterns against the disk.
+ignores() {
+  set -f
+  for p in $IGNORES; do
+    [ -f .gitignore ] && grep -qxF "$p" .gitignore && continue
+    if [ -s .gitignore ] && [ "$(tail -c 1 .gitignore)" != "" ]; then printf '\n' >> .gitignore; fi
+    grep -qxF "$IGNORE_NOTE" .gitignore 2> /dev/null || printf '%s\n' "$IGNORE_NOTE" >> .gitignore
+    printf '%s\n' "$p" >> .gitignore
+  done
+  set +f
+}
+
 sync() {
   mkdir -p "$DIR"
   # A member running an older conventions-sync has an older FILES list, missing whatever file
@@ -169,6 +192,7 @@ sync() {
     fi
   done
   for f in $RETIRED; do rm -f "$f"; done
+  ignores
   chmod +x "$DIR/conventions-sync"
   chmod +x "$DIR/conventions-check"
   chmod +x "$DIR/conventions-format"
@@ -221,6 +245,18 @@ check() {
       echo "✗ conventions: $f is what an earlier release vendored and $TAG does not — run sync"; fail=1
     fi
   done
+  set -f
+  for p in $IGNORES; do
+    if ! { [ -f .gitignore ] && grep -qxF "$p" .gitignore; }; then
+      echo "✗ conventions: .gitignore does not carry $p — run sync"; fail=1
+    fi
+    if [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
+      for t in $(git ls-files -- ":(top,glob)$p"); do
+        echo "✗ conventions: $t is committed — remove it with git rm --cached, and rotate every secret it ever held, because the history keeps it"; fail=1
+      done
+    fi
+  done
+  set +f
   have=""
   [ -f AGENTS.md ] && have=$(block_of AGENTS.md)
   want=$(block_of "$DIR/AGENTS.md")
