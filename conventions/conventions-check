@@ -195,9 +195,10 @@ fi
 # past what its `after` writes. So where a member keeps .github/dependabot.yml, every family
 # repository a block of it would watch is ignored in that block. What a block watches is read
 # from the member's own files in the block's directory: `uses:` lines under .github/workflows for
-# github-actions, `github:owner/repo#` values in a package.json for npm, and `git::` module
-# sources in a .tf file for terraform. A dependency-name is a glob, so "*companygraph/mcp-server*"
-# covers every path of that repository. No file, no list, or no family pin is a quiet pass.
+# github-actions, `github:owner/repo#` values and `"@owner/repo": "<version>"` entries in a
+# package.json for npm, and `git::` module sources in a .tf file for terraform. A dependency-name
+# is a glob, so "*companygraph/mcp-server*" covers every path of that repository. No file, no
+# list, or no family pin is a quiet pass.
 # The tools a conventions release pins count as family pins too, wherever a package.json declares
 # them: their version is the family's, set in the vendored scripts, so a bump of one copy alone
 # leaves the others behind. TOOLS is that list, and test/run.sh holds it to conventions-format.
@@ -251,6 +252,14 @@ if [ -f "$BOT" ] && [ -f "$LIST" ]; then
             pair = substr(line, RSTART, RLENGTH); line = substr(line, RSTART + RLENGTH)
             name = pair; sub(/^"/, "", name); sub(/".*/, "", name)
             s = pair; sub(/.*"github:/, "", s); sub(/#$/, "", s)
+            if (s in R) print "npm\t" dir "\t" name "\t" file ":" NR "\t" name
+          }
+          # Every "@owner/repo": "<version>" pair, a family package taken from npm by its version.
+          line = $0
+          while (match(line, /"@[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+"[ \t]*:[ \t]*"[0-9]+\.[0-9]+\.[0-9]+"/)) {
+            pair = substr(line, RSTART, RLENGTH); line = substr(line, RSTART + RLENGTH)
+            name = pair; sub(/^"/, "", name); sub(/".*/, "", name)
+            s = name; sub(/^@/, "", s)
             if (s in R) print "npm\t" dir "\t" name "\t" file ":" NR "\t" name
           }
         }' "$f"

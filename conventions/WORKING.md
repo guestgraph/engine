@@ -40,7 +40,7 @@ Nothing on GitHub enforces an address, and nothing should. The ruleset rule that
 
 This holds for every repository in the family that another one takes from, whatever it provides: a design system, a model, a parser, a set of shared files.
 
-A release is a tag and a GitHub Release with notes in the prose register: what changed for the consumer, what breaks, how to take it. There is no publish step anywhere in the family; the tag is the release.
+A release is a tag and a GitHub Release with notes in the prose register: what changed for the consumer, what breaks, how to take it. The tag is the release. Where a consumer outside the family can take a package only from a registry, the release also publishes it there, by a job the tag runs, through trusted publishing and with no token held anywhere; a version reaches a registry from its tag and from nothing else.
 
 A release ends at its tag. The family resync moves the pins of the repositories that take it, and only the owner starts a resync: two runs started side by side open the same branches and write the same files, a resync after every release makes many small ones that overlap where one would carry them all, and the run computes from the pins which members move and in what order, so nobody works it out by hand. An agent that releases says in its report which members take it; it re-pins one by hand only on the owner's word, and never starts a resync.
 

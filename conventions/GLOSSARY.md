@@ -65,6 +65,8 @@ The German cells are inline code because the prose check reads no language and a
 | company of one | company of one | `Ein-Personen-Firma` | One compound, as German writes it, not the phrase `Firma aus einer Person`. |
 | decision | decision | `Entscheid` | A decision taken, the Swiss form. `Entscheidung` stays for the act of deciding, as in `Entscheidungshilfe`. |
 | release | release | `Release` | A tagged release. Kept English like `Build` and `Commit`, and neuter, `das Release`; `Freigabe` is a gate's approval and is not meant. |
+| package | package | `Paket` | What a registry holds and a package manager installs, such as `@companygraph/meta-model` on npm. Neuter, `das Paket`; `npm-Paket` only where npm is not already named. Not the pack, which is `Pack`, and not the skill pack. |
+| tag | tag | `Release-Tag` | The git tag a release is cut from. `Git-Tag` where the sentence is about git or is spoken, because a bare `Tag` reads and sounds as the day. Neuter, `das Tag`, as Duden gives it for the computing sense. |
 | deck | deck | `Präsentation` | The file a talk is given from. Feminine, `die Präsentation`; the talk itself is `Vortrag`. |
 | meter | meter | `Abrechnungsgrösse` | The one unit a bill is computed from. Not `Zähler`, which reads as a device. |
 | career break | career break | `Auszeit` | Alone, not `berufliche Auszeit`; the sentence around it says it is from work. |
