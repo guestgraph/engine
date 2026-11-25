@@ -34,7 +34,7 @@ What is listed here is the family; what is not listed is outside it. An agent wo
 
 ## What pins what
 
-The three sites pin `robertblust/design` by tag in `package.json`, and `npm run design` writes the fenced copies. blust.ch pins `robertblust/mental-model`, companygraph.io pins `companygraph/meta-model` and `companygraph/mental-model`, and guestgraph.io pins `guestgraph/mental-model`, each by commit in `source.json`, and each builds its model pages from that commit. All three sites also depend on `companygraph/meta-model` by tag in `package.json` for the instance parser, and take `companygraph/mcp-server` by tag there too. guestgraph.io pins `guestgraph/engine` and `guestgraph/connector-apaleo` by commit in `api-sources.json`, and builds its API pages from the OpenAPI specification each commit holds. The three instances, `robertblust/mental-model`, `companygraph/mental-model` and `guestgraph/mental-model`, each vendor meta-model's `core/` at the release that `core.version` names in their own `.companygraph/manifest.json`. The engine and the connector each vendor `guestgraph/service-conventions` at the tag in `service-conventions.json`, and the connector pins the contracts it implements, which live under the engine's `specs/`, by commit in `src/main/resources/api/sources.json`. The MCP server depends on `companygraph/meta-model` by tag in `package.json` for the same parser; each of its four deployments pins an instance by commit in `source.json`, mcp.blust.ch `robertblust/mental-model`, mcp.companygraph.io and mcp.azure.companygraph.io `companygraph/mental-model` and mcp.guestgraph.io `guestgraph/mental-model`, and the server and `robertblust/design` by tag in `package.json`, and builds and deploys with the parts the server ships under `deploy/`. The chat server takes `companygraph/mcp-server` by tag in `package.json` as a development dependency and is a client of whichever MCP host a deployment names, and each of the four deployments pins it and `robertblust/design` by tag in `chat/package.json` and deploys it beside the host from the parts it ships under `deploy/`, so a re-pin of the host is a change the chat sees without one of its own. The identity service, `robertblust/id-blust-ch`, pins no member: it takes ZITADEL by image tag in `infra/run.tf`, and the three deployments on Google name it in `chat/chat.json` as the issuer its chat verifies a signed-in reader against, a dependency at run time and not a pin. The Obsidian plugin depends on `companygraph/meta-model` by tag in `package.json` for the parser and the checks, and bundles them into what it releases. Every member pins this repository by tag in `conventions.json`.
+The three sites pin `robertblust/design` by tag in `package.json`, and `npm run design` writes the fenced copies. blust.ch pins `robertblust/mental-model`, companygraph.io pins `companygraph/meta-model` and `companygraph/mental-model`, and guestgraph.io pins `guestgraph/mental-model`, each by commit in `source.json`, and each builds its model pages from that commit. All three sites also depend on `companygraph/meta-model` for the instance parser, at a version from npm in `package.json`, and take `companygraph/mcp-server` the same way. guestgraph.io pins `guestgraph/engine` and `guestgraph/connector-apaleo` by commit in `api-sources.json`, and builds its API pages from the OpenAPI specification each commit holds. The three instances, `robertblust/mental-model`, `companygraph/mental-model` and `guestgraph/mental-model`, each vendor meta-model's `core/` at the release that `core.version` names in their own `.companygraph/manifest.json`. The engine and the connector each vendor `guestgraph/service-conventions` at the tag in `service-conventions.json`, and the connector pins the contracts it implements, which live under the engine's `specs/`, by commit in `src/main/resources/api/sources.json`. The MCP server depends on `companygraph/meta-model` at a version from npm in `package.json` for the same parser; each of its four deployments pins an instance by commit in `source.json`, mcp.blust.ch `robertblust/mental-model`, mcp.companygraph.io and mcp.azure.companygraph.io `companygraph/mental-model` and mcp.guestgraph.io `guestgraph/mental-model`, and the server at a version from npm and `robertblust/design` by tag in `package.json`, and builds and deploys with the parts the server ships under `deploy/`. The chat server takes `companygraph/mcp-server` at a version from npm in `package.json` as a development dependency and is a client of whichever MCP host a deployment names, and each of the four deployments pins it at a version from npm and `robertblust/design` by tag in `chat/package.json` and deploys it beside the host from the parts it ships under `deploy/`, so a re-pin of the host is a change the chat sees without one of its own. The identity service, `robertblust/id-blust-ch`, pins no member: it takes ZITADEL by image tag in `infra/run.tf`, and the three deployments on Google name it in `chat/chat.json` as the issuer its chat verifies a signed-in reader against, a dependency at run time and not a pin. The Obsidian plugin depends on `companygraph/meta-model` at a version from npm in `package.json` for the parser and the checks, and bundles them into what it releases. Every member pins this repository by tag in `conventions.json`.
 
 The same pins, drawn: an arrow runs from the member that pins to the repository it pins, and its label says how. Each node is named as its repository is, under its organization.
 
@@ -66,21 +66,21 @@ flowchart TB
     mcpgg[mcp-guestgraph-io]
   end
   blust & cgio & ggio -->|tag| design
-  blust & ggio -->|tag| meta
-  cgio -->|tag, commit| meta
+  blust & ggio -->|version| meta
+  cgio -->|version, commit| meta
   blust -->|commit| rbmm
   cgio -->|commit| cgmm
   ggio -->|commit| ggmm
   ggio -->|commit| engine & connector
   rbmm & cgmm & ggmm -->|release of core/| meta
-  mcpsrv & obsidian -->|tag| meta
-  blust & cgio & ggio -->|tag| mcpsrv
-  chat -->|tag| mcpsrv
+  mcpsrv & obsidian -->|version| meta
+  blust & cgio & ggio -->|version| mcpsrv
+  chat -->|version| mcpsrv
   mcpblust & mcpcg & mcpaz & mcpgg -->|tag| design
   engine & connector -->|tag| svc
   connector -->|commit| engine
-  mcpblust & mcpcg & mcpgg -->|tag| mcpsrv & chat
-  mcpaz -->|tag| mcpsrv & chat
+  mcpblust & mcpcg & mcpgg -->|version| mcpsrv & chat
+  mcpaz -->|version| mcpsrv & chat
   mcpblust -->|commit| rbmm
   mcpcg & mcpaz -->|commit| cgmm
   mcpgg -->|commit| ggmm

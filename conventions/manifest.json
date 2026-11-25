@@ -1,10 +1,10 @@
 {
   "repo": "robertblust/conventions",
-  "tag": "v1.60.0",
+  "tag": "v1.61.0",
   "files": {
     "conventions/WRITING.md": "sha256:51d9a902ec3038392160df07f86aba98d34db1d4dbfaa5f4a647590eaccfb390",
     "conventions/WORKING.md": "sha256:00590656306debe9aa63fdd16bdee5ffd8ed6942e8045f615642f45d4be58b88",
-    "conventions/REPOSITORIES.md": "sha256:75ffac1aaf2523ba7d8fcd1175d6a63b7a42516883ef4a7af5dde52c564bee85",
+    "conventions/REPOSITORIES.md": "sha256:bb32ea965373d3ae003e4108b0adccd36b623a158218e3b07cac71016a45eae0",
     "conventions/PINS.md": "sha256:0e789113c38226e8ce4fd5cd8be23bbdb3220399df45dbf206a82b4af144d54d",
     "conventions/WRITER.md": "sha256:bc3b92683130b75993f824f0e34073d4344846c91be2009fd90c39099fd4fd48",
     "conventions/TRANSLATOR.md": "sha256:3a3d2d0916d7230cbc760bced1be249b11cc516956fb41ad010b3216f23024ba",
@@ -12,14 +12,14 @@
     "conventions/GERMAN.md": "sha256:6a0ab79fd52f93d1361aceb83a1771ce6448124d5ea707af3d71baf9efe35e11",
     "conventions/EDITOR.md": "sha256:e65d0b2893ac841faefede9b873f7e33c1fd7b02bedf97d37d5362c0e83c08ea",
     "conventions/BACKREADER.md": "sha256:36b12d4bee8e4fe190469e2f550d50d8a7f6dcab6bec573da17eb1c165c417cd",
-    "conventions/AGENTS.md": "sha256:b00d614d22664de13b2932fef3791fdae5afa45e1b30b29166def9b213a49a02",
+    "conventions/AGENTS.md": "sha256:16657425db6687ee8005783f4234e299e037aee8168c2c0dee2c28b698b01085",
     "conventions/conventions-sync": "sha256:77ad68826a42bbd3b20e240175831baeb83bcde3dc7edab0e0222520f15c70af",
     "conventions/conventions-check": "sha256:6b596a10d635713057e63c6fe14a551e13ea54eb287871da46bc322fd1c0f22d",
     "conventions/conventions-format": "sha256:2911a0d30dda1bc0f621522a9538b3e39704eee03458e65ba320eccbf39b5c7f",
     "conventions/markdown-rules.cjs": "sha256:5cbf6120bf16e358b3a4e362015d054f0cd6e47ddfb0e5fe5ac17143b2bdef26",
     "conventions/vscode-settings.json": "sha256:86d3c951f7c06d86ee3bc828ad6e49fac3531be98117a7a590cc75da7ba3600a",
     "conventions/vscode-extensions.json": "sha256:bc61cd9278b6bd01f0b091efea96cc24c8a8c8f3ed884c7de7579abee384fce6",
-    "conventions/hooks/commit-msg": "sha256:4f46f55d8b918b65c7e1f48f67d63053bca658c9a0855c8ccc2b7410fdf0a95d",
+    "conventions/hooks/commit-msg": "sha256:c893ac4234455cb137fd02a51cabaa0b16f200b3f5a4eba1110dee78e1cb1a27",
     ".markdownlint-cli2.jsonc": "sha256:81cbb5431f8eaeeea01a4e0ec0e7ced6304fa5036c3915aca46d6960d96b4eb1",
     "CLAUDE.md": "sha256:ed4d8a69be583a788abab0585cea9c7d5d65a51dc3085fd4c38a727038fec9e8"
   }
