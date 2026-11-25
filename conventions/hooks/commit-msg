@@ -22,8 +22,8 @@ else
   instance=$path
 fi
 # Git hands the hook its own repository variables: GIT_INDEX_FILE always, and GIT_DIR in a
-# linked worktree. npx clones meta-model, and a clone that inherits them writes meta-model's
-# index over this repository's. Git runs the hook at the top of the working tree, so git var,
+# linked worktree, and a git another program starts under them writes its own index over this
+# repository's. Git runs the hook at the top of the working tree, so git var,
 # interpret-trailers and the checker find this repository from the working directory alone.
 unset GIT_INDEX_FILE GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
 tooling=$(sed -n 's/.*"tooling" *: *"\([^"]*\)".*/\1/p' "$instance/.companygraph/manifest.json" | head -1)
@@ -33,7 +33,10 @@ out=$(
   if [ -n "${COMPANYGRAPH_CLI:-}" ]; then
     node "$COMPANYGRAPH_CLI" commits "$instance" --message "$1"
   elif command -v npx > /dev/null 2>&1 && [ -n "$tooling" ]; then
-    npx --yes --prefer-offline --package "github:companygraph/meta-model#v$tooling" companygraph commits "$instance" --message "$1"
+    # Not --prefer-offline: npm would trust a cached package document older than the release
+    # named here and answer that the release does not exist; without it, npm asks the registry
+    # whether its copy is current.
+    npx --yes --package "@companygraph/meta-model@$tooling" companygraph commits "$instance" --message "$1"
   else
     false
   fi
